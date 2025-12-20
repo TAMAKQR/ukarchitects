@@ -55,8 +55,182 @@ const upload = multer({
 });
 
 // Подключение к БД
-const db = new Database(join(__dirname, 'database.db'));
+// В продакшене используем persistent disk от Render
+const dbPath = isDevelopment
+    ? join(__dirname, 'database.db')
+    : join(__dirname, 'data', 'database.db');
+
+// Создаём директорию data если её нет (для production)
+if (!isDevelopment) {
+    const dataDir = join(__dirname, 'data');
+    if (!existsSync(dataDir)) {
+        mkdirSync(dataDir, { recursive: true });
+    }
+}
+
+const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
+
+// Функция инициализации базы данных
+const initializeDatabase = () => {
+    try {
+        // Создание таблиц если их нет
+        db.exec(`
+            CREATE TABLE IF NOT EXISTS services (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                icon TEXT,
+                image_url TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS projects (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                title TEXT NOT NULL,
+                description TEXT,
+                category TEXT,
+                image_url TEXT,
+                gallery_images TEXT,
+                address TEXT,
+                year INTEGER,
+                total_area TEXT,
+                floors TEXT,
+                client TEXT,
+                stage TEXT,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                client_name TEXT NOT NULL,
+                company TEXT,
+                text TEXT NOT NULL,
+                rating INTEGER DEFAULT 5,
+                image_url TEXT,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS sections (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug TEXT UNIQUE NOT NULL,
+                title TEXT NOT NULL,
+                subtitle TEXT,
+                content TEXT,
+                background_image TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS team (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                position TEXT,
+                bio TEXT,
+                photo_url TEXT,
+                email TEXT,
+                phone TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS faq (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                question TEXT NOT NULL,
+                answer TEXT NOT NULL,
+                category TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS settings (
+                id INTEGER PRIMARY KEY CHECK (id = 1),
+                site_title TEXT DEFAULT 'UK Architects',
+                site_description TEXT,
+                site_keywords TEXT,
+                site_phone TEXT,
+                site_email TEXT,
+                address TEXT,
+                working_hours TEXT,
+                instagram_url TEXT,
+                facebook_url TEXT,
+                whatsapp_url TEXT,
+                telegram_url TEXT,
+                youtube_url TEXT,
+                vk_url TEXT,
+                linkedin_url TEXT,
+                google_analytics_id TEXT,
+                yandex_metrika_id TEXT,
+                privacy_policy TEXT,
+                terms_of_service TEXT,
+                about_company TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                email TEXT UNIQUE NOT NULL,
+                password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
+                reset_token TEXT,
+                reset_token_expires INTEGER,
+                last_login DATETIME,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+
+            CREATE TABLE IF NOT EXISTS slider_items (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                project_id INTEGER,
+                title TEXT,
+                description TEXT,
+                category TEXT,
+                image_url TEXT,
+                button_text TEXT DEFAULT 'Подробнее',
+                button_link TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE SET NULL
+            );
+
+            CREATE TABLE IF NOT EXISTS categories (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                description TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        `);
+
+        // Проверяем, есть ли настройки, если нет - создаём
+        const settingsExist = db.prepare('SELECT COUNT(*) as count FROM settings').get();
+        if (settingsExist.count === 0) {
+            db.prepare(`
+                INSERT INTO settings (id, site_title, site_description, site_phone, site_email, address, working_hours)
+                VALUES (1, 'UK Architects', 'Архитектурное бюро полного цикла', '+996 779 777 666', 'info@ukglobal.com', 'Ch.Aitmatova street 243', 'Пн–Пт: 9:00–19:00')
+            `).run();
+        }
+
+        console.log('✅ База данных инициализирована');
+    } catch (error) {
+        console.error('❌ Ошибка инициализации базы данных:', error);
+    }
+};
+
+// Инициализируем базу данных при старте
+initializeDatabase();
 
 // Middleware
 app.use(cors({
