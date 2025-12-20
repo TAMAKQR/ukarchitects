@@ -650,13 +650,27 @@ app.get('/api/team/:id', (req, res) => {
     }
 });
 
-app.post('/api/team', upload.single('photo'), (req, res) => {
+app.post('/api/team', upload.single('photo'), async (req, res) => {
     try {
         const { name, position, bio, email, phone, order_num, visible } = req.body;
         let photo_url = null;
 
         if (req.file) {
-            photo_url = `/uploads/${req.file.filename}`;
+            // Загрузка в Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'uk-architects/team',
+                        transformation: [{ width: 500, height: 500, crop: 'fill', quality: 'auto:good' }]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+            photo_url = result.secure_url;
         }
 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
@@ -669,13 +683,27 @@ app.post('/api/team', upload.single('photo'), (req, res) => {
     }
 });
 
-app.put('/api/team/:id', upload.single('photo'), (req, res) => {
+app.put('/api/team/:id', upload.single('photo'), async (req, res) => {
     try {
         const { name, position, bio, email, phone, order_num, visible } = req.body;
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
-            const photo_url = `/uploads/${req.file.filename}`;
+            // Загрузка в Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'uk-architects/team',
+                        transformation: [{ width: 500, height: 500, crop: 'fill', quality: 'auto:good' }]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+            const photo_url = result.secure_url;
             const stmt = db.prepare('UPDATE team SET name = ?, position = ?, bio = ?, photo_url = ?, email = ?, phone = ?, order_num = ?, visible = ? WHERE id = ?');
             stmt.run(name, position, bio, photo_url, email, phone, order_num || 0, visibleValue, req.params.id);
         } else {

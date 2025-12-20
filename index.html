@@ -770,7 +770,7 @@
     <section style="padding: 100px 0; background: #f5f5f5;">
         <div style="max-width: 1400px; margin: 0 auto; padding: 0 40px;">
             <div style="margin-bottom: 60px;">
-                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px;">
+                <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 40px;">
                     <img src="/project4923123/images/lib__icons__tilda__-__paint__c01530--1-0-100__bullet_four_filled_rhombus.svg"
                         style="width: 30px; height: 30px; animation: spin 15s linear infinite;">
                     <div
@@ -787,30 +787,30 @@
                 </h2>
             </div>
 
-            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 80px; margin-top: 80px;">
-                <div style="display: flex; gap: 90px;">
+            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 120px; margin-top: 80px;">
+                <div style="display: flex; gap: 120px;">
                     <div>
-                        <div
-                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;">
-                            500+</div>
+                        <div class="counter"
+                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;"
+                            data-target="500">0</div>
                         <div
                             style="font-family: 'Noto Sans', sans-serif; font-size: 15px; color: #1f1e22; margin-top: 20px; line-height: 1.25;">
                             Проектов спланировано и реализовано</div>
                     </div>
                     <div>
-                        <div
-                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;">
-                            10+</div>
+                        <div class="counter"
+                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;"
+                            data-target="10">0</div>
                         <div
                             style="font-family: 'Noto Sans', sans-serif; font-size: 15px; color: #1f1e22; margin-top: 20px; line-height: 1.25;">
                             Лет профессионального опыта в архитектуре</div>
                     </div>
                 </div>
-                <div style="display: flex; gap: 90px;">
+                <div style="display: flex; gap: 120px;">
                     <div>
-                        <div
-                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;">
-                            95%</div>
+                        <div class="counter"
+                            style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;"
+                            data-target="95">0</div>
                         <div
                             style="font-family: 'Noto Sans', sans-serif; font-size: 15px; color: #1f1e22; margin-top: 20px; line-height: 1.25;">
                             клиентов выбирают нас для долгосрочных проектов</div>
@@ -1518,6 +1518,54 @@
         let currentHeroSlide = 0;
         let heroSlides = [];
         let heroInterval;
+
+        // Анимация счетчика
+        function animateCounter(element) {
+            const target = parseInt(element.getAttribute('data-target'));
+            const duration = 2000; // 2 секунды
+            const increment = target / (duration / 16); // 60 FPS
+            let current = 0;
+
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+
+                // Форматирование в зависимости от числа
+                if (target === 500) {
+                    element.textContent = Math.floor(current) + '+';
+                } else if (target === 10) {
+                    element.textContent = Math.floor(current) + '+';
+                } else if (target === 95) {
+                    element.textContent = Math.floor(current) + '%';
+                } else {
+                    element.textContent = Math.floor(current);
+                }
+            }, 16);
+        }
+
+        // Intersection Observer для запуска анимации при появлении в viewport
+        const observerOptions = {
+            threshold: 0.5
+        };
+
+        const counterObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && !entry.target.classList.contains('animated')) {
+                    entry.target.classList.add('animated');
+                    animateCounter(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        // Запуск наблюдения за счетчиками после загрузки страницы
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('.counter').forEach(counter => {
+                counterObserver.observe(counter);
+            });
+        });
 
         // Mobile menu toggle function - MUST be global for onclick
         window.toggleMobileMenu = function () {
