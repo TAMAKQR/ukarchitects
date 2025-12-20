@@ -81,6 +81,24 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.static(join(__dirname, '..')));
 
+// Middleware для clean URLs (убирает .html из адресов)
+app.use((req, res, next) => {
+    if (req.path.endsWith('/')) {
+        // Если путь заканчивается на /, ищем index.html
+        const indexPath = join(__dirname, '..', req.path, 'index.html');
+        if (existsSync(indexPath)) {
+            return res.sendFile(indexPath);
+        }
+    } else if (!req.path.includes('.')) {
+        // Если нет расширения, пробуем добавить .html
+        const htmlPath = join(__dirname, '..', req.path + '.html');
+        if (existsSync(htmlPath)) {
+            return res.sendFile(htmlPath);
+        }
+    }
+    next();
+});
+
 // Middleware для проверки авторизации
 const requireAuth = (req, res, next) => {
     if (req.session && req.session.userId) {

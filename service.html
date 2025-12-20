@@ -356,7 +356,7 @@
         <div class="service-detail">
             <h1 id="service-title" class="service-title"></h1>
             <div id="service-description" class="service-description"></div>
-            <a href="/index.html" class="back-link">← Вернуться на главную</a>
+            <a href="/" class="back-link">← Вернуться на главную</a>
         </div>
     </div>
 
@@ -366,7 +366,7 @@
         const serviceId = urlParams.get('id');
 
         if (!serviceId) {
-            window.location.href = '/index.html';
+            window.location.href = '/';
         }
 
         async function loadService() {

@@ -223,7 +223,7 @@
                 if (response.ok) {
                     showAlert('Успешный вход! Перенаправление...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html';
+                        window.location.href = '/admin';
                     }, 1000);
                 } else {
                     showAlert(data.error || 'Ошибка входа');
