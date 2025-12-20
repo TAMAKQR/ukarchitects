@@ -4,5 +4,7 @@ node_modules/
 .DS_Store
 Thumbs.db
 server/database.db
+server/database.db-shm
+server/database.db-wal
 server/uploads/*
 !server/uploads/.gitkeep
