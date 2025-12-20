@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Проекты - UK Architects</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&family=Noto+Sans:wght@100..900&subset=latin,cyrillic&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            background: #f5f5f5;
+        }
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 600;
+        }
+
+        p,
+        span,
+        div,
+        a,
+        li {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 40px;
+            box-sizing: border-box;
+        }
+
+        .categories {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-menu {
+            display: flex;
+            gap: 15px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .category-menu::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .category-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .category-menu::-webkit-scrollbar-thumb {
+            background: #042164;
+            border-radius: 3px;
+        }
+
+        .category-btn {
+            padding: 8px 16px;
+            background: white;
+            border: none;
+            border-radius: 10px;
+            color: #042164;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #042164;
+            color: white;
+        }
+
+        .projects-section {
+            padding: 40px 0;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            object-position: top;
+            background: linear-gradient(135deg, #e0e0e0 25%, #f5f5f5 25%, #f5f5f5 50%, #e0e0e0 50%, #e0e0e0 75%, #f5f5f5 75%, #f5f5f5);
+            background-size: 40px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 14px;
+        }
+
+        .project-image::before {
+            content: 'Нет изображения';
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .project-image[src] {
+            background: none;
+        }
+
+        .project-image[src]::before {
+            content: '';
+        }
+
+        .project-content {
+            padding: 20px;
+        }
+
+        .project-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #c01530;
+            color: white;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .project-title {
+            font-size: 22px;
+            font-weight: 600;
+            font-family: 'Ubuntu', sans-serif;
+            color: #042164;
+            margin: 10px 0;
+        }
+
+        .project-description {
+            color: #666;
+            font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-info {
+            border-top: 1px solid #e0e0e0;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .project-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .project-info-label {
+            color: #999;
+            font-weight: 500;
+        }
+
+        .project-info-value {
+            color: #333;
+            font-weight: 600;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        .stage-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .stage-concept {
+            background: #ffeaa7;
+            color: #fdcb6e;
+        }
+
+        .stage-project {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .stage-working {
+            background: #a29bfe;
+            color: #6c5ce7;
+        }
+
+        .stage-construction {
+            background: #fd79a8;
+            color: #e84393;
+        }
+
+        .stage-completed {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .no-projects {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #042164;
+            font-size: 18px;
+        }
+
+        /* ========== RESPONSIVE STYLES ========== */
+
+        /* Tablets (1024px and below) */
+        @media screen and (max-width: 1024px) {
+            .container {
+                padding: 0 30px;
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+
+            .projects-section {
+                padding: 30px 0;
+            }
+
+            h1 {
+                font-size: 42px !important;
+            }
+        }
+
+        /* Mobile (768px and below) */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .category-menu {
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .projects-section {
+                padding: 25px 0;
+            }
+
+            h1 {
+                font-size: 32px !important;
+            }
+
+            .project-title {
+                font-size: 20px !important;
+            }
+
+            .project-description {
+                font-size: 13px !important;
+            }
+
+            .project-info-label,
+            .project-info-value {
+                font-size: 13px !important;
+            }
+        }
+
+        /* Small mobile (480px and below) */
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .categories {
+                padding: 15px 0;
+            }
+
+            .category-menu {
+                gap: 8px;
+                padding: 5px 0;
+            }
+
+            .category-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .projects-section {
+                padding: 20px 0;
+            }
+
+            h1 {
+                font-size: 28px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .project-card {
+                border-radius: 10px;
+            }
+
+            .project-card * {
+                text-align: left !important;
+            }
+
+            .project-image {
+                height: 200px !important;
+            }
+
+            .project-content {
+                padding: 15px !important;
+            }
+
+            .project-title {
+                font-size: 18px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .project-description {
+                font-size: 12px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .project-meta {
+                gap: 10px !important;
+            }
+
+            .project-info {
+                flex-direction: column;
+                gap: 8px !important;
+            }
+
+            .stage-badge {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+
+            .no-projects,
+            .loading {
+                padding: 40px 15px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="header-placeholder"></div>
+    <script>
+        // Mobile menu toggle function - MUST be global for onclick
+        window.toggleMobileMenu = function () {
+            const mobileNav = document.getElementById('mobile-nav');
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+
+            if (mobileNav && mobileMenuBtn) {
+                mobileNav.classList.toggle('active');
+                mobileMenuBtn.classList.toggle('active');
+
+                if (mobileNav.classList.contains('active')) {
+                    document.body.style.overflow = 'hidden';
+                } else {
+                    document.body.style.overflow = '';
+                }
+            }
+        };
+
+        fetch('/header.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('header-placeholder').innerHTML = data;
+
+                // Инициализация выпадающего меню услуг после загрузки шапки
+                setTimeout(() => {
+                    loadServicesDropdown();
+                    initServicesToggle();
+                    initMobileMenu();
+                }, 100);
+            });
+
+        function initMobileMenu() {
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    const mobileNav = document.getElementById('mobile-nav');
+                    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                    if (mobileNav && mobileMenuBtn) {
+                        mobileNav.classList.remove('active');
+                        mobileMenuBtn.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+
+            const mobileServicesToggle = document.getElementById('mobile-services-toggle');
+            const mobileServicesList = document.getElementById('mobile-services-list');
+            if (mobileServicesToggle && mobileServicesList) {
+                mobileServicesToggle.addEventListener('click', function () {
+                    if (mobileServicesList.style.maxHeight === '0px' || !mobileServicesList.style.maxHeight) {
+                        mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
+                    } else {
+                        mobileServicesList.style.maxHeight = '0px';
+                    }
+                });
+            }
+            loadMobileServices();
+        }
+
+        async function loadMobileServices() {
+            try {
+                const response = await fetch('/api/services');
+                const services = await response.json();
+                const mobileServicesList = document.getElementById('mobile-services-list');
+                if (mobileServicesList && services.length > 0) {
+                    mobileServicesList.innerHTML = services.filter(service => service.visible).map(service => `
+                        <a href="/service.html?id=${service.id}" class="mobile-service-item" style="display: block; text-decoration: none; cursor: pointer;">
+                            <h4>${service.title}</h4>
+                            <p>${service.description ? service.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...' : ''}</p>
+                        </a>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading mobile services:', error);
+            }
+        }
+
+        // Загрузка услуг для выпадающего меню
+        async function loadServicesDropdown() {
+            try {
+                const response = await fetch('/api/services');
+                const services = await response.json();
+                const dropdown = document.querySelector('.services-dropdown-inner');
+
+                if (dropdown) {
+                    dropdown.innerHTML = services.map(service => `
+                        <a href="/service.html?id=${service.id}" class="dropdown-item">
+                            <h4>${service.title}</h4>
+                        </a>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading services:', error);
+            }
+        }
+
+        // Инициализация переключателя услуг
+        function initServicesToggle() {
+            const toggle = document.getElementById('services-toggle');
+            const dropdown = document.getElementById('services-dropdown');
+
+            if (toggle && dropdown) {
+                toggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    dropdown.classList.toggle('active');
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!toggle.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.classList.remove('active');
+                    }
+                });
+            }
+        }
+    </script>
+
+    <div class="categories">
+        <div class="container">
+            <div class="category-menu" id="category-menu">
+                <button class="category-btn active" data-category="" onclick="filterByCategory('')">Все проекты</button>
+            </div>
+        </div>
+    </div>
+
+    <section class="projects-section">
+        <div class="container">
+            <div id="projects-container" class="loading">
+                Загрузка проектов...
+            </div>
+        </div>
+    </section>
+
+    <script>
+        const API_URL = 'http://localhost:3000/api';
+        let allProjects = [];
+        let currentCategory = '';
+
+        // Загрузка категорий
+        async function loadCategories() {
+            try {
+                const response = await fetch(`${API_URL}/project-categories`);
+                const categories = await response.json();
+
+                const menuContainer = document.getElementById('category-menu');
+                const allBtn = menuContainer.querySelector('.category-btn');
+
+                categories.forEach(category => {
+                    const btn = document.createElement('button');
+                    btn.className = 'category-btn';
+                    btn.textContent = category;
+                    btn.dataset.category = category;
+                    btn.onclick = () => filterByCategory(category);
+                    menuContainer.appendChild(btn);
+                });
+            } catch (error) {
+                console.error('Ошибка загрузки категорий:', error);
+            }
+        }
+
+        // Загрузка проектов
+        async function loadProjects() {
+            try {
+                const response = await fetch(`${API_URL}/projects`);
+                allProjects = await response.json();
+                displayProjects(allProjects);
+            } catch (error) {
+                console.error('Ошибка загрузки проектов:', error);
+                document.getElementById('projects-container').innerHTML = '<div class="no-projects">Ошибка загрузки проектов</div>';
+            }
+        }
+
+        // Фильтрация по категории
+        function filterByCategory(category) {
+            currentCategory = category;
+
+            // Обновление активной кнопки
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.category === category) {
+                    btn.classList.add('active');
+                }
+            });
+
+            const filtered = category === ''
+                ? allProjects
+                : allProjects.filter(p => p.category === category);
+
+            displayProjects(filtered);
+        }
+
+        // Отображение проектов
+        function displayProjects(projects) {
+            const container = document.getElementById('projects-container');
+
+            if (projects.length === 0) {
+                container.innerHTML = '<div class="no-projects">Проекты не найдены</div>';
+                container.className = 'no-projects';
+                return;
+            }
+
+            container.className = 'projects-grid';
+            container.innerHTML = projects.map(project => createProjectCard(project)).join('');
+        }
+
+        // Создание карточки проекта
+        function createProjectCard(project) {
+            console.log('Project image_url:', project.image_url, 'для проекта:', project.title);
+            return `
+                <div class="project-card" onclick="window.location.href='/project.html?id=${project.id}'">
+                    ${project.image_url ? `<img src="${project.image_url}" alt="${project.title}" class="project-image">` : '<div class="project-image" style="background: #e0e0e0;"></div>'}
+                    <div class="project-content">
+                        <span class="project-category">${project.category || 'Без категории'}</span>
+                        <h3 class="project-title">${project.title}</h3>
+                        ${project.description ? `<p class="project-description">${project.description.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>` : ''}
+                        
+                        <div class="project-info">
+                            ${project.address ? `
+                            <div class="project-info-row">
+                                <span class="project-info-label">Адрес</span>
+                                <span class="project-info-value">${project.address}</span>
+                            </div>` : ''}
+                            
+                            ${project.year ? `
+                            <div class="project-info-row">
+                                <span class="project-info-label">Год</span>
+                                <span class="project-info-value">${project.year}</span>
+                            </div>` : ''}
+                            
+                            ${project.total_area ? `
+                            <div class="project-info-row">
+                                <span class="project-info-label">Площадь</span>
+                                <span class="project-info-value">${project.total_area}</span>
+                            </div>` : ''}
+                            
+                            ${project.stage ? `
+                            <div class="project-info-row">
+                                <span class="project-info-label">Стадия</span>
+                                <span class="project-info-value">${project.stage.split(',')[0].trim()}</span>
+                            </div>` : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Инициализация
+        loadCategories();
+        loadProjects();
+    </script>
+</body>
+
+</html>
