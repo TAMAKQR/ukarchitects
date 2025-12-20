@@ -1507,7 +1507,7 @@
     </style>
 
     <script>
-        const API_URL = 'http://localhost:3000/api';
+        const API_URL = '/api';
         let currentHeroSlide = 0;
         let heroSlides = [];
         let heroInterval;
@@ -1845,7 +1845,7 @@
         // ========== REVIEWS ==========
         async function loadReviews() {
             try {
-                const response = await fetch('http://localhost:3000/api/reviews');
+                const response = await fetch('/api/reviews');
                 const reviews = await response.json();
 
                 const container = document.getElementById('reviews-slider');
