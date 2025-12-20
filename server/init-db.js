@@ -239,6 +239,8 @@ const seedData = () => {
   // Добавление стадий проектов
   const insertProjectStage = db.prepare(`
     INSERT OR IGNORE INTO settings (key, value, description) 
+    VALUES (?, ?, ?)
+  `);
 
   const projectStages = [
     ['project_stage_1', 'Концепция', 'Стадия проекта'],
