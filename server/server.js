@@ -705,9 +705,10 @@ app.get('/api/projects', (req, res) => {
 // Получить категории проектов
 app.get('/api/project-categories', (req, res) => {
     try {
-        const categories = db.prepare("SELECT value FROM settings WHERE key LIKE 'project_category_%' ORDER BY key").all();
-        res.json(categories.map(c => c.value));
+        const categories = db.prepare("SELECT name FROM categories WHERE visible = 1 ORDER BY order_num, name").all();
+        res.json(categories.map(c => c.name));
     } catch (error) {
+        console.error('Ошибка получения категорий:', error);
         res.status(500).json({ error: error.message });
     }
 });

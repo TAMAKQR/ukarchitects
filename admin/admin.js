@@ -367,7 +367,10 @@ async function loadProjects() {
         ]);
 
         const projects = await projectsResponse.json();
-        window.projectCategories = await categoriesResponse.json();
+        const categoriesData = await categoriesResponse.json();
+
+        // Проверяем, что категории - это массив
+        window.projectCategories = Array.isArray(categoriesData) ? categoriesData : [];
 
         const tbody = document.getElementById('projects-table');
         tbody.innerHTML = projects.map(project => `
@@ -383,20 +386,24 @@ async function loadProjects() {
             </tr>
         `).join('');
     } catch (error) {
+        console.error('Ошибка загрузки проектов:', error);
+        window.projectCategories = [];
         showAlert('Ошибка загрузки проектов', 'error');
     }
 }
 
 function openProjectModal(id = null) {
-    const categories = window.projectCategories || [
-        'Жилые здания',
-        'Общественные пространства',
-        'Коммерческие объекты',
-        'Спортивные объекты',
-        'Медицинские объекты',
-        'Образовательные объекты',
-        'Мастер-планы'
-    ];
+    const categories = Array.isArray(window.projectCategories) && window.projectCategories.length > 0
+        ? window.projectCategories
+        : [
+            'Жилые здания',
+            'Общественные пространства',
+            'Коммерческие объекты',
+            'Спортивные объекты',
+            'Медицинские объекты',
+            'Образовательные объекты',
+            'Мастер-планы'
+        ];
 
     const categoryOptions = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 
