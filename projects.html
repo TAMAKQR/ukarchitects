@@ -631,12 +631,36 @@
                             ${project.stage ? `
                             <div class="project-info-row">
                                 <span class="project-info-label">Стадия</span>
-                                <span class="project-info-value">${project.stage.split(',')[0].trim()}</span>
+                                <div class="project-info-value">${formatStages(project.stage)}</div>
                             </div>` : ''}
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        function formatStages(stageString) {
+            if (!stageString) return '';
+            const stages = stageString.split(',').map(s => s.trim());
+            const stageClasses = {
+                'Концепция': 'stage-concept',
+                'Эскизный проект': 'stage-concept',
+                'ПП': 'stage-project',
+                'Проектная документация': 'stage-project',
+                'РП': 'stage-working',
+                'РД': 'stage-working',
+                'Рабочий проект': 'stage-working',
+                'Рабочая документация': 'stage-working',
+                'Строительство': 'stage-construction',
+                'Реализация': 'stage-construction',
+                'Реализовано': 'stage-completed',
+                'Завершен': 'stage-completed'
+            };
+
+            return stages.map(stage => {
+                const className = stageClasses[stage] || 'stage-project';
+                return `<span class="stage-badge ${className}">${stage}</span>`;
+            }).join(' ');
         }
 
         // Инициализация

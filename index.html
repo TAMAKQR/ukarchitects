@@ -713,6 +713,41 @@
                 background: #c01530 !important;
             }
         }
+
+        /* Stage badges styles */
+        .stage-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+        }
+
+        .stage-concept {
+            background: #ffeaa7;
+            color: #fdcb6e;
+        }
+
+        .stage-project {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .stage-working {
+            background: #a29bfe;
+            color: #6c5ce7;
+        }
+
+        .stage-construction {
+            background: #fd79a8;
+            color: #e84393;
+        }
+
+        .stage-completed {
+            background: #55efc4;
+            color: #00b894;
+        }
     </style>
 </head>
 
@@ -1738,7 +1773,32 @@
             }
         }
 
+        function formatStages(stageString) {
+            if (!stageString) return '';
+            const stages = stageString.split(',').map(s => s.trim());
+            const stageClasses = {
+                'Концепция': 'stage-concept',
+                'Эскизный проект': 'stage-concept',
+                'ПП': 'stage-project',
+                'Проектная документация': 'stage-project',
+                'РП': 'stage-working',
+                'РД': 'stage-working',
+                'Рабочий проект': 'stage-working',
+                'Рабочая документация': 'stage-working',
+                'Строительство': 'stage-construction',
+                'Реализация': 'stage-construction',
+                'Реализовано': 'stage-completed',
+                'Завершен': 'stage-completed'
+            };
+
+            return stages.map(stage => {
+                const className = stageClasses[stage] || 'stage-project';
+                return `<span class="stage-badge ${className}">${stage}</span>`;
+            }).join(' ');
+        }
+
         // Hero Slider Functions
+        // Загрузка героя
         async function loadHeroProjects() {
             try {
                 const response = await fetch(`${API_URL}/projects?limit=5`);
@@ -1770,7 +1830,7 @@
                             <div class="hero-meta">
                                 ${project.year ? `<div class="hero-meta-item"><strong>Год</strong>${project.year}</div>` : ''}
                                 ${project.total_area ? `<div class="hero-meta-item"><strong>Площадь</strong>${project.total_area}</div>` : ''}
-                                ${project.stage ? `<div class="hero-meta-item"><strong>Стадия</strong>${project.stage}</div>` : ''}
+                                ${project.stage ? `<div class="hero-meta-item"><strong>Стадия</strong><span>${formatStages(project.stage)}</span></div>` : ''}
                             </div>
                             <div class="hero-bottom">
                                 <a href="/project.html?id=${project.id}" class="hero-button">Подробнее о проекте</a>
