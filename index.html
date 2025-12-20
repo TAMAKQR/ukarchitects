@@ -1504,6 +1504,13 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* Поднять блок "Мы гордимся тем" в мобильной версии */
+        @media (max-width: 768px) {
+            section[style*="padding: 100px 0"]>div>div:first-child>div:first-child {
+                margin-top: -40px;
+            }
+        }
     </style>
 
     <script>
