@@ -23,6 +23,9 @@ const PORT = process.env.PORT || 3000;
 // Определяем режим разработки или production
 const isDevelopment = process.env.NODE_ENV !== 'production';
 
+// Trust proxy - важно для работы secure cookies на Render
+app.set('trust proxy', 1);
+
 // Конфигурация Cloudinary
 cloudinary.config({
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -65,11 +68,13 @@ app.use(session({
     secret: process.env.SESSION_SECRET || 'uk-architects-secret-key-change-in-production',
     resave: false,
     saveUninitialized: false,
+    proxy: true, // Важно для работы за прокси
     cookie: {
         secure: !isDevelopment, // HTTPS в production
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 часа
-        sameSite: 'lax' // lax работает для same-site requests
+        sameSite: 'lax', // lax работает для same-site requests
+        path: '/' // Убедимся что cookie доступна на всех путях
     }
 }));
 app.use(express.json({ limit: '50mb' }));
