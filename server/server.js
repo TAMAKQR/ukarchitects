@@ -404,6 +404,43 @@ const initializeDatabase = async () => {
             console.log('✅ Созданы базовые FAQ');
         }
 
+        // Проверяем, есть ли команда, если нет - создаём базовую информацию о команде
+        const teamExist = db.prepare('SELECT COUNT(*) as count FROM team').get();
+        if (teamExist.count === 0) {
+            const defaultTeam = [
+                {
+                    name: 'Главный архитектор',
+                    position: 'Руководитель проектов',
+                    bio: 'Опытный архитектор с более чем 15-летним стажем в области проектирования жилых и коммерческих объектов.',
+                    photo_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&w=300',
+                    email: 'architect@ukarchitects.com'
+                },
+                {
+                    name: 'Ведущий дизайнер',
+                    position: 'Дизайнер интерьера',
+                    bio: 'Специалист по созданию современных и функциональных интерьеров с учетом последних трендов в дизайне.',
+                    photo_url: 'https://images.unsplash.com/photo-1494790108755-2616b612b77c?ixlib=rb-4.0.3&w=300',
+                    email: 'designer@ukarchitects.com'
+                },
+                {
+                    name: 'Инженер-проектировщик',
+                    position: 'Конструктор',
+                    bio: 'Ответственный за техническую часть проектов, обеспечивает надежность и безопасность всех конструктивных решений.',
+                    photo_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&w=300',
+                    email: 'engineer@ukarchitects.com'
+                }
+            ];
+
+            defaultTeam.forEach((member, index) => {
+                db.prepare(`
+                    INSERT INTO team (name, position, bio, photo_url, email, order_num, visible)
+                    VALUES (?, ?, ?, ?, ?, ?, 1)
+                `).run(member.name, member.position, member.bio, member.photo_url, member.email, index);
+            });
+
+            console.log('✅ Создана базовая информация о команде');
+        }
+
         console.log('✅ База данных инициализирована');
     } catch (error) {
         console.error('❌ Ошибка инициализации базы данных:', error);
