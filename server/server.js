@@ -72,7 +72,7 @@ const db = new Database(dbPath);
 db.pragma('journal_mode = WAL');
 
 // Функция инициализации базы данных
-const initializeDatabase = () => {
+const initializeDatabase = async () => {
     try {
         // Создание таблиц если их нет
         db.exec(`
@@ -221,6 +221,22 @@ const initializeDatabase = () => {
                 INSERT INTO settings (id, site_title, site_description, site_phone, site_email, address, working_hours)
                 VALUES (1, 'UK Architects', 'Архитектурное бюро полного цикла', '+996 779 777 666', 'info@ukglobal.com', 'Ch.Aitmatova street 243', 'Пн–Пт: 9:00–19:00')
             `).run();
+        }
+
+        // Проверяем, есть ли пользователи, если нет - создаём админа
+        const usersExist = db.prepare('SELECT COUNT(*) as count FROM users').get();
+        if (usersExist.count === 0) {
+            const defaultPassword = process.env.DEFAULT_ADMIN_PASSWORD || 'admin123';
+            const passwordHash = await bcrypt.hash(defaultPassword, 10);
+
+            db.prepare(`
+                INSERT INTO users (username, email, password_hash, role)
+                VALUES (?, ?, ?, ?)
+            `).run('admin', 'admin@ukarchitects.com', passwordHash, 'admin');
+
+            console.log('✅ Создан администратор по умолчанию');
+            console.log('   Логин: admin');
+            console.log('   Пароль:', defaultPassword);
         }
 
         console.log('✅ База данных инициализирована');
