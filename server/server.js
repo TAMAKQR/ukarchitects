@@ -277,6 +277,77 @@ const initializeDatabase = async () => {
             console.log('✅ Созданы базовые стадии проектов');
         }
 
+        // Проверяем, есть ли услуги, если нет - создаём базовые
+        const servicesExist = db.prepare('SELECT COUNT(*) as count FROM services').get();
+        if (servicesExist.count === 0) {
+            const defaultServices = [
+                {
+                    title: 'Архитектурное проектирование',
+                    description: '<p>Полный цикл архитектурного проектирования от концепции до рабочих чертежей. Создание функциональных и эстетически привлекательных зданий с учетом всех современных требований.</p><ul><li>Концептуальное проектирование</li><li>Эскизный проект</li><li>Проектная документация</li><li>Рабочая документация</li></ul>',
+                    image_url: 'https://images.unsplash.com/photo-1503387762-592deb58ef4e?ixlib=rb-4.0.3',
+                    icon: 'fas fa-drafting-compass'
+                },
+                {
+                    title: 'Дизайн интерьера',
+                    description: '<p>Создание уникального и комфортного пространства, отражающего ваш стиль и потребности. Работаем с жилыми и коммерческими объектами.</p><ul><li>Концепция интерьера</li><li>3D визуализация</li><li>Подбор материалов и мебели</li><li>Авторский надзор</li></ul>',
+                    image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?ixlib=rb-4.0.3',
+                    icon: 'fas fa-paint-brush'
+                },
+                {
+                    title: 'Градостроительное планирование',
+                    description: '<p>Комплексное планирование территорий с учетом социальных, экономических и экологических факторов. Создание устойчивой городской среды.</p><ul><li>Генеральные планы</li><li>Проекты планировки</li><li>Мастер-планы</li><li>Концепции развития территорий</li></ul>',
+                    image_url: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?ixlib=rb-4.0.3',
+                    icon: 'fas fa-city'
+                }
+            ];
+
+            defaultServices.forEach((service, index) => {
+                const slug = service.title.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[а-я]/g, char =>
+                        'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char) !== -1 ?
+                            'abvgdeejzijklmnoprstufhccssyeyuya'['абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char)] :
+                            char);
+
+                db.prepare(`
+                    INSERT INTO services (title, description, image_url, icon, slug, order_num, visible)
+                    VALUES (?, ?, ?, ?, ?, ?, 1)
+                `).run(service.title, service.description, service.image_url, service.icon, slug, index);
+            });
+
+            console.log('✅ Созданы базовые услуги');
+        }
+
+        // Проверяем, есть ли категории, если нет - создаём базовые
+        const categoriesExist = db.prepare('SELECT COUNT(*) as count FROM categories').get();
+        if (categoriesExist.count === 0) {
+            const defaultCategories = [
+                'Жилые здания',
+                'Общественные пространства',
+                'Коммерческие объекты',
+                'Спортивные объекты',
+                'Медицинские объекты',
+                'Образовательные объекты',
+                'Мастер-планы'
+            ];
+
+            defaultCategories.forEach((categoryName, index) => {
+                const slug = categoryName.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[а-я]/g, char =>
+                        'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char) !== -1 ?
+                            'abvgdeejzijklmnoprstufhccssyeyuya'['абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char)] :
+                            char);
+
+                db.prepare(`
+                    INSERT INTO categories (name, slug, order_num, visible)
+                    VALUES (?, ?, ?, 1)
+                `).run(categoryName, slug, index);
+            });
+
+            console.log('✅ Созданы базовые категории проектов');
+        }
+
         console.log('✅ База данных инициализирована');
     } catch (error) {
         console.error('❌ Ошибка инициализации базы данных:', error);
