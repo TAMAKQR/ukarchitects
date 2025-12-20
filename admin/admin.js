@@ -1687,3 +1687,49 @@ document.getElementById('change-password-form').addEventListener('submit', async
     }
 });
 
+// Обработчик формы изменения профиля
+document.getElementById('change-profile-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const username = document.getElementById('profile-username').value;
+    const email = document.getElementById('profile-email').value;
+
+    try {
+        const response = await authFetch(`${API_URL}/auth/change-profile`, {
+            method: 'POST',
+            body: JSON.stringify({ username, email })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showAlert(result.message || 'Профиль успешно обновлен', 'success');
+            // Обновляем отображение имени пользователя
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.innerHTML = `Пользователь: <strong>${result.user.username}</strong>`;
+            }
+        } else {
+            showAlert(result.error || 'Ошибка обновления профиля', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка обновления профиля:', error);
+        showAlert('Ошибка обновления профиля', 'error');
+    }
+});
+
+// Загрузка профиля при открытии раздела "Безопасность"
+document.querySelector('[data-section="security"]').addEventListener('click', async () => {
+    try {
+        const response = await authFetch(`${API_URL}/auth/check`);
+        const data = await response.json();
+
+        if (data.authenticated && data.user) {
+            document.getElementById('profile-username').value = data.user.username;
+            document.getElementById('profile-email').value = data.user.email;
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки профиля:', error);
+    }
+});
+

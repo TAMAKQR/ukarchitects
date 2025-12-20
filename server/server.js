@@ -408,6 +408,40 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
     }
 });
 
+// Изменение профиля
+app.post('/api/auth/change-profile', requireAuth, async (req, res) => {
+    try {
+        const { username, email } = req.body;
+
+        if (!username || !email) {
+            return res.status(400).json({ error: 'Все поля обязательны' });
+        }
+
+        // Проверяем, не занят ли username другим пользователем
+        const existingUser = db.prepare('SELECT id FROM users WHERE username = ? AND id != ?').get(username, req.session.userId);
+        if (existingUser) {
+            return res.status(400).json({ error: 'Это имя пользователя уже занято' });
+        }
+
+        // Проверяем, не занят ли email другим пользователем
+        const existingEmail = db.prepare('SELECT id FROM users WHERE email = ? AND id != ?').get(email, req.session.userId);
+        if (existingEmail) {
+            return res.status(400).json({ error: 'Этот email уже используется' });
+        }
+
+        // Обновляем профиль
+        db.prepare('UPDATE users SET username = ?, email = ? WHERE id = ?').run(username, email, req.session.userId);
+
+        // Обновляем данные в сессии
+        req.session.username = username;
+
+        res.json({ success: true, message: 'Профиль успешно обновлен', user: { username, email } });
+    } catch (error) {
+        console.error('Ошибка изменения профиля:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Запрос на сброс пароля
 app.post('/api/auth/forgot-password', async (req, res) => {
     try {
