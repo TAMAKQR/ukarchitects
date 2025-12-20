@@ -178,7 +178,10 @@
     }
 
     .mobile-nav-inner {
-        padding: 40px 40px 0 40px;
+        padding: 60px 40px 0 40px;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 70px - 60px);
     }
 
     .mobile-nav a {
@@ -195,7 +198,7 @@
     }
 
     .mobile-nav a:first-child {
-        padding-top: 0;
+        padding-top: 20px;
     }
 
     .mobile-nav a:hover,
@@ -360,13 +363,13 @@
 
         <!-- Desktop Navigation -->
         <nav style="display: flex; gap: 15px; align-items: center;">
-            <div class="services-toggle-wrapper" style="position: relative;">
+            <div class="services-toggle-wrapper" style="position: relative; margin-right: 20px;">
                 <a href="#" id="services-toggle"
                     style="color: #1f1e22; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
                     onmouseover="this.style.color='#042164'" onmouseout="this.style.color='#1f1e22'">услуги</a>
             </div>
             <a href="/projects"
-                style="color: #1f1e22; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
+                style="color: #1f1e22; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s; margin-right: 20px;"
                 onmouseover="this.style.color='#042164'" onmouseout="this.style.color='#1f1e22'">проекты</a>
             <a href="/#about"
                 style="color: #1f1e22; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
@@ -397,7 +400,30 @@
                 <!-- Services will be loaded here -->
             </div>
         </div>
+
+        <!-- Контактная информация внизу меню -->
+        <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+            <div style="margin-bottom: 20px;">
+                <div
+                    style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                    Телефон</div>
+                <a href="tel:+78005057728"
+                    style="display: block; font-size: 16px; color: #1f1e22; text-decoration: none; font-weight: 500;"
+                    id="mobile-phone">+7 (800) 505-77-28</a>
+            </div>
+
+            <div style="margin-bottom: 20px;">
+                <div
+                    style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                    Адрес</div>
+                <div style="font-size: 16px; color: #1f1e22;" id="mobile-address">Москва</div>
+            </div>
+
+
+        </div>
     </div>
+</div>
+</div>
 </div>
 
 <div id="services-dropdown" class="services-dropdown">
@@ -521,4 +547,52 @@
     }
 
     loadServices();
+
+    // Загрузка контактов в мобильное меню
+    async function loadMobileContacts() {
+        try {
+            const response = await fetch('/api/settings');
+            const settings = await response.json();
+
+            if (settings.site_phone) {
+                const phoneEl = document.getElementById('mobile-phone');
+                if (phoneEl) {
+                    phoneEl.textContent = settings.site_phone;
+                    phoneEl.href = 'tel:' + settings.site_phone.replace(/[^0-9+]/g, '');
+                }
+            }
+
+            if (settings.address) {
+                const addressEl = document.getElementById('mobile-address');
+                if (addressEl) {
+                    addressEl.textContent = settings.address;
+                }
+            }
+
+            if (settings.instagram_url) {
+                const instagramEl = document.getElementById('mobile-instagram');
+                if (instagramEl) {
+                    instagramEl.href = settings.instagram_url;
+                }
+            }
+
+            if (settings.whatsapp_url) {
+                const whatsappEl = document.getElementById('mobile-whatsapp');
+                if (whatsappEl) {
+                    whatsappEl.href = settings.whatsapp_url;
+                }
+            }
+
+            if (settings.facebook_url) {
+                const facebookEl = document.getElementById('mobile-facebook');
+                if (facebookEl) {
+                    facebookEl.href = settings.facebook_url;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading mobile contacts:', error);
+        }
+    }
+
+    loadMobileContacts();
 </script>

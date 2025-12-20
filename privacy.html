@@ -182,6 +182,16 @@
 
         loadPrivacyPolicy();
     </script>
+
+    <script>
+        // Load and insert footer
+        fetch('/footer.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('beforeend', html);
+            })
+            .catch(error => console.error('Error loading footer:', error));
+    </script>
 </body>
 
 </html>

@@ -816,7 +816,7 @@
                             клиентов выбирают нас для долгосрочных проектов</div>
                     </div>
                     <div>
-                        <div
+                        <div class="stat-number"
                             style="font-family: 'Ubuntu', sans-serif; font-weight: 600; font-size: 70px; color: #1f1e22; line-height: 0.9; letter-spacing: -3px;">
                             24/7</div>
                         <div
@@ -1509,6 +1509,25 @@
         @media (max-width: 768px) {
             section[style*="padding: 100px 0"]>div>div:first-child>div:first-child {
                 margin-top: -40px;
+            }
+
+            /* Статистика в одну колонку на мобильных */
+            section[style*="padding: 100px 0"] div[style*="grid-template-columns: repeat(2, 1fr)"] {
+                grid-template-columns: 1fr !important;
+                gap: 40px !important;
+            }
+
+            section[style*="padding: 100px 0"] div[style*="display: flex; gap: 120px"] {
+                flex-direction: column !important;
+                gap: 30px !important;
+            }
+
+            /* Разрядка для цифр */
+            .counter,
+            .stat-number {
+                letter-spacing: 1px !important;
+                font-size: 48px !important;
+                font-weight: 400 !important;
             }
         }
     </style>
