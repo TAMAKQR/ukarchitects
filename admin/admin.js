@@ -806,87 +806,70 @@ function addCategory() {
 // ========== СТАДИИ ПРОЕКТОВ ==========
 async function loadStages() {
     try {
-        const response = await authFetch(`${API_URL}/settings`);
-        const settings = await response.json();
+        const response = await authFetch(`${API_URL}/stages`);
+        const stages = await response.json();
 
-        // Фильтруем только ключи стадий
-        const stageKeys = Object.keys(settings)
-            .filter(key => key.startsWith('project_stage_'))
-            .sort();
-
-        window.projectStages = stageKeys.map(key => settings[key]);
+        window.projectStages = stages.map(stage => stage.name);
 
         const container = document.getElementById('stages-list');
-        container.innerHTML = stageKeys.map(key => `
+        container.innerHTML = stages.map(stage => `
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
-                <input type="text" value="${settings[key]}" 
-                       onblur="updateStage('${key}', this.value)" 
+                <input type="text" value="${stage.name}" 
+                       onblur="updateStage(${stage.id}, this.value)" 
                        style="flex: 1; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
-                <button class="btn btn-danger" onclick="deleteStage('${key}')" style="padding: 8px 15px;">Удалить</button>
+                <button class="btn btn-danger" onclick="deleteStage(${stage.id})" style="padding: 8px 15px;">Удалить</button>
             </div>
         `).join('');
     } catch (error) {
+        console.error('Ошибка загрузки стадий:', error);
         showAlert('Ошибка загрузки стадий', 'error');
     }
 }
 
-async function updateStage(key, value) {
+async function updateStage(id, name) {
     try {
-        await authFetch(`${API_URL}/settings/${key}`, {
+        await authFetch(`${API_URL}/stages/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ value })
+            body: JSON.stringify({ name })
         });
         showAlert('Стадия обновлена');
         loadStages();
     } catch (error) {
+        console.error('Ошибка обновления стадии:', error);
         showAlert('Ошибка обновления', 'error');
     }
 }
 
-async function deleteStage(key) {
+async function deleteStage(id) {
     if (!confirm('Удалить стадию?')) return;
 
     try {
-        await authFetch(`${API_URL}/settings/${key}`, { method: 'DELETE' });
+        await authFetch(`${API_URL}/stages/${id}`, { method: 'DELETE' });
         showAlert('Стадия удалена');
         loadStages();
     } catch (error) {
+        console.error('Ошибка удаления стадии:', error);
         showAlert('Ошибка удаления', 'error');
     }
 }
 
-function addStage() {
+async function addStage() {
     const stageName = prompt('Введите название новой стадии:');
-    if (!stageName) return;
+    if (!stageName?.trim()) return;
 
-    // Найти максимальный номер стадии
-    authFetch(`${API_URL}/settings`)
-        .then(r => r.json())
-        .then(settings => {
-            const stageKeys = Object.keys(settings).filter(k => k.startsWith('project_stage_'));
-            const maxNum = stageKeys.length > 0
-                ? Math.max(...stageKeys.map(k => parseInt(k.replace('project_stage_', ''))))
-                : 0;
-            const newKey = `project_stage_${maxNum + 1}`;
-
-            return authFetch(`${API_URL}/settings/${newKey}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ value: stageName })
-            });
-        })
-        .then(() => {
-            showAlert('Стадия добавлена');
-            loadStages();
-        })
-        .catch(error => {
-            showAlert('Ошибка добавления', 'error');
+    try {
+        await authFetch(`${API_URL}/stages`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: stageName.trim() })
         });
-}
-
-function closeModal(modalId) {
-    document.getElementById(modalId).remove();
+        showAlert('Стадия добавлена');
+        loadStages();
+    } catch (error) {
+        console.error('Ошибка добавления стадии:', error);
+        showAlert('Ошибка добавления', 'error');
+    }
 }
 
 // ========== ОТЗЫВЫ ==========
@@ -1743,4 +1726,12 @@ document.querySelector('[data-section="security"]').addEventListener('click', as
         console.error('Ошибка загрузки профиля:', error);
     }
 });
+
+// Utility function for closing modals
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.remove();
+    }
+}
 

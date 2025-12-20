@@ -212,6 +212,16 @@ const initializeDatabase = async () => {
                 visible INTEGER DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS stages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT UNIQUE NOT NULL,
+                slug TEXT UNIQUE NOT NULL,
+                description TEXT,
+                order_num INTEGER DEFAULT 0,
+                visible INTEGER DEFAULT 1,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
         `);
 
         // Проверяем, есть ли настройки, если нет - создаём
@@ -237,6 +247,34 @@ const initializeDatabase = async () => {
             console.log('✅ Создан администратор по умолчанию');
             console.log('   Логин: admin');
             console.log('   Пароль:', defaultPassword);
+        }
+
+        // Проверяем, есть ли стадии, если нет - создаём базовые
+        const stagesExist = db.prepare('SELECT COUNT(*) as count FROM stages').get();
+        if (stagesExist.count === 0) {
+            const defaultStages = [
+                'Эскизный проект',
+                'Проектная документация',
+                'Рабочий проект',
+                'Реализация',
+                'Завершен'
+            ];
+
+            defaultStages.forEach((stageName, index) => {
+                const slug = stageName.toLowerCase()
+                    .replace(/\s+/g, '-')
+                    .replace(/[а-я]/g, char =>
+                        'абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char) !== -1 ?
+                            'abvgdeejzijklmnoprstufhccssyeyuya'['абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char)] :
+                            char);
+
+                db.prepare(`
+                    INSERT INTO stages (name, slug, order_num, visible)
+                    VALUES (?, ?, ?, 1)
+                `).run(stageName, slug, index);
+            });
+
+            console.log('✅ Созданы базовые стадии проектов');
         }
 
         console.log('✅ База данных инициализирована');
@@ -996,8 +1034,73 @@ app.delete('/api/team/:id', (req, res) => {
 
 app.get('/api/stages', (req, res) => {
     try {
-        const stages = db.prepare('SELECT * FROM (VALUES ("concept", "Концепция", 1), ("project", "Проект", 2), ("working", "Рабочая документация", 3), ("construction", "Строительство", 4), ("completed", "Завершено", 5)) AS stages(slug, name, order_num) ORDER BY order_num').all();
-        res.json(stages);
+        // Сначала пытаемся получить стадии из таблицы stages
+        const stages = db.prepare('SELECT * FROM stages WHERE visible = 1 ORDER BY order_num').all();
+
+        // Если таблица пуста, возвращаем базовые стадии
+        if (stages.length === 0) {
+            const defaultStages = [
+                { id: 1, name: 'Концепция', slug: 'concept', order_num: 1 },
+                { id: 2, name: 'Проект', slug: 'project', order_num: 2 },
+                { id: 3, name: 'Рабочая документация', slug: 'working', order_num: 3 },
+                { id: 4, name: 'Строительство', slug: 'construction', order_num: 4 },
+                { id: 5, name: 'Завершено', slug: 'completed', order_num: 5 }
+            ];
+            res.json(defaultStages);
+        } else {
+            res.json(stages);
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/stages', requireAuth, (req, res) => {
+    try {
+        const { name, slug } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Название стадии обязательно' });
+        }
+
+        const generatedSlug = slug || name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const maxOrder = db.prepare('SELECT MAX(order_num) as max FROM stages').get();
+        const orderNum = (maxOrder?.max || 0) + 1;
+
+        const result = db.prepare(`
+            INSERT INTO stages (name, slug, order_num, visible)
+            VALUES (?, ?, ?, 1)
+        `).run(name, generatedSlug, orderNum);
+
+        const newStage = db.prepare('SELECT * FROM stages WHERE id = ?').get(result.lastInsertRowid);
+        res.json(newStage);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/stages/:id', requireAuth, (req, res) => {
+    try {
+        const { name, order_num } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Название стадии обязательно' });
+        }
+
+        db.prepare('UPDATE stages SET name = ?, order_num = ? WHERE id = ?')
+            .run(name, order_num || 0, req.params.id);
+
+        const updatedStage = db.prepare('SELECT * FROM stages WHERE id = ?').get(req.params.id);
+        res.json(updatedStage);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/stages/:id', requireAuth, (req, res) => {
+    try {
+        db.prepare('DELETE FROM stages WHERE id = ?').run(req.params.id);
+        res.json({ message: 'Стадия удалена' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
