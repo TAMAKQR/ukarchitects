@@ -384,6 +384,161 @@
             font-weight: bold;
             color: #042164;
         }
+
+        /* Мобильные стили */
+        @media screen and (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 15px;
+                order: 2;
+            }
+
+            .sidebar nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+
+            .sidebar nav a {
+                flex: 1;
+                min-width: 120px;
+                text-align: center;
+                padding: 8px;
+                font-size: 12px;
+                margin-bottom: 0;
+            }
+
+            .main-content {
+                padding: 20px 15px;
+                order: 1;
+            }
+
+            .header {
+                padding: 15px;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .stats {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 15px;
+            }
+
+            .stat-card .number {
+                font-size: 24px;
+            }
+
+            /* Модальные окна */
+            .modal-content {
+                margin: 20px;
+                width: calc(100vw - 40px);
+                max-height: calc(100vh - 40px);
+                overflow-y: auto;
+            }
+
+            /* Таблицы */
+            table {
+                font-size: 12px;
+            }
+
+            table th,
+            table td {
+                padding: 8px 4px;
+            }
+
+            .actions {
+                white-space: nowrap;
+            }
+
+            .actions .btn {
+                padding: 6px 12px;
+                font-size: 12px;
+                margin: 2px;
+            }
+
+            /* Формы */
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group input,
+            .form-group textarea,
+            .form-group select {
+                padding: 8px;
+                font-size: 16px;
+                /* Предотвращает зум на iOS */
+            }
+
+            .btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            /* Quill редактор */
+            .ql-container {
+                font-size: 14px;
+            }
+
+            .ql-toolbar {
+                border-top: 1px solid #ccc;
+                position: sticky;
+                top: 0;
+                background: white;
+                z-index: 1000;
+            }
+        }
+
+        @media screen and (max-width: 480px) {
+            .sidebar nav a {
+                min-width: 100px;
+                font-size: 10px;
+                padding: 6px 4px;
+            }
+
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .modal-content {
+                margin: 10px;
+                width: calc(100vw - 20px);
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            table {
+                font-size: 10px;
+            }
+
+            .actions .btn {
+                padding: 4px 8px;
+                font-size: 10px;
+            }
+
+            /* Скрываем некоторые колонки на очень маленьких экранах */
+            table th:nth-child(n+4),
+            table td:nth-child(n+4) {
+                display: none;
+            }
+
+            table th:last-child,
+            table td:last-child {
+                display: table-cell;
+            }
+        }
     </style>
 </head>
 

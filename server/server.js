@@ -992,6 +992,17 @@ app.delete('/api/team/:id', (req, res) => {
     }
 });
 
+// ============= STAGES =============
+
+app.get('/api/stages', (req, res) => {
+    try {
+        const stages = db.prepare('SELECT * FROM (VALUES ("concept", "Концепция", 1), ("project", "Проект", 2), ("working", "Рабочая документация", 3), ("construction", "Строительство", 4), ("completed", "Завершено", 5)) AS stages(slug, name, order_num) ORDER BY order_num').all();
+        res.json(stages);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============= FAQ =============
 
 app.get('/api/faq', (req, res) => {

@@ -492,21 +492,25 @@ function openProjectModal(id = null) {
 
     document.getElementById('modal-container').innerHTML = modalHtml;
 
-    // Загрузка стадий из настроек
-    authFetch(`${API_URL}/settings`)
+    // Загрузка стадий из API
+    authFetch(`${API_URL}/stages`)
         .then(r => r.json())
-        .then(settings => {
-            const stageKeys = Object.keys(settings)
-                .filter(key => key.startsWith('project_stage_'))
-                .sort();
+        .then(stages => {
+            if (Array.isArray(stages) && stages.length > 0) {
+                const stagesHtml = stages.map(stage => `
+                    <label style="display: block; margin: 5px 0;">
+                        <input type="checkbox" name="stage" value="${stage.name}"> ${stage.name}
+                    </label>
+                `).join('');
 
-            const stagesHtml = stageKeys.map(key => `
-                <label style="display: block; margin: 5px 0;">
-                    <input type="checkbox" name="stage" value="${settings[key]}"> ${settings[key]}
-                </label>
-            `).join('');
-
-            document.getElementById('stages-checkboxes').innerHTML = stagesHtml || '<p style="color: #999;">Стадии не настроены. Добавьте их в разделе "Стадии проектов"</p>';
+                document.getElementById('stages-checkboxes').innerHTML = stagesHtml;
+            } else {
+                document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Стадии не настроены. Добавьте их в разделе "Стадии проектов"</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка загрузки стадий:', error);
+            document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Ошибка загрузки стадий</p>';
         });
 
     // Инициализируем Quill редактор для проекта
