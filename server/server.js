@@ -82,6 +82,7 @@ const initializeDatabase = async () => {
                 description TEXT,
                 icon TEXT,
                 image_url TEXT,
+                slug TEXT,
                 order_num INTEGER DEFAULT 0,
                 visible INTEGER DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -224,6 +225,19 @@ const initializeDatabase = async () => {
             );
         `);
 
+        // Миграция: добавляем отсутствующие столбцы в существующие таблицы
+        try {
+            // Проверяем и добавляем slug в services если отсутствует
+            const servicesColumns = db.prepare("PRAGMA table_info(services)").all();
+            const hasSlugInServices = servicesColumns.some(col => col.name === 'slug');
+            if (!hasSlugInServices) {
+                db.prepare("ALTER TABLE services ADD COLUMN slug TEXT").run();
+                console.log('✅ Добавлен столбец slug в таблицу services');
+            }
+        } catch (error) {
+            console.log('ℹ️ Миграция столбцов: пропущено (возможно, уже выполнено)');
+        }
+
         // Проверяем, есть ли настройки, если нет - создаём
         const settingsExist = db.prepare('SELECT COUNT(*) as count FROM settings').get();
         if (settingsExist.count === 0) {
@@ -324,10 +338,19 @@ const initializeDatabase = async () => {
                             'abvgdeejzijklmnoprstufhccssyeyuya'['абвгдеёжзийклмнопрстуфхцчшщъыьэюя'.indexOf(char)] :
                             char);
 
-                db.prepare(`
-                    INSERT INTO services (title, description, image_url, icon, slug, order_num, visible)
-                    VALUES (?, ?, ?, ?, ?, ?, 1)
-                `).run(service.title, service.description, service.image_url, service.icon, slug, index);
+                // Проверяем, есть ли столбец slug в таблице
+                try {
+                    db.prepare(`
+                        INSERT INTO services (title, description, image_url, icon, slug, order_num, visible)
+                        VALUES (?, ?, ?, ?, ?, ?, 1)
+                    `).run(service.title, service.description, service.image_url, service.icon, slug, index);
+                } catch (error) {
+                    // Если slug столбца нет, вставляем без него
+                    db.prepare(`
+                        INSERT INTO services (title, description, image_url, icon, order_num, visible)
+                        VALUES (?, ?, ?, ?, ?, 1)
+                    `).run(service.title, service.description, service.image_url, service.icon, index);
+                }
             });
 
             console.log('✅ Созданы базовые услуги');
