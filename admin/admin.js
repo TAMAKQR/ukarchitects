@@ -775,32 +775,35 @@ async function deleteCategory(key) {
 }
 
 function addCategory() {
-    const categoryName = prompt('Введите название новой категории:');
-    if (!categoryName) return;
+    showInputModal(
+        'Добавить категорию проекта',
+        'Введите название новой категории...',
+        (categoryName) => {
+            // Найти максимальный номер категории
+            authFetch(`${API_URL}/settings`)
+                .then(r => r.json())
+                .then(settings => {
+                    const categoryKeys = Object.keys(settings).filter(k => k.startsWith('project_category_'));
+                    const maxNum = categoryKeys.length > 0
+                        ? Math.max(...categoryKeys.map(k => parseInt(k.replace('project_category_', ''))))
+                        : 0;
+                    const newKey = `project_category_${maxNum + 1}`;
 
-    // Найти максимальный номер категории
-    authFetch(`${API_URL}/settings`)
-        .then(r => r.json())
-        .then(settings => {
-            const categoryKeys = Object.keys(settings).filter(k => k.startsWith('project_category_'));
-            const maxNum = categoryKeys.length > 0
-                ? Math.max(...categoryKeys.map(k => parseInt(k.replace('project_category_', ''))))
-                : 0;
-            const newKey = `project_category_${maxNum + 1}`;
-
-            return authFetch(`${API_URL}/settings/${newKey}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ value: categoryName })
-            });
-        })
-        .then(() => {
-            showAlert('Категория добавлена');
-            loadCategories();
-        })
-        .catch(error => {
-            showAlert('Ошибка добавления', 'error');
-        });
+                    return authFetch(`${API_URL}/settings/${newKey}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ value: categoryName })
+                    });
+                })
+                .then(() => {
+                    showAlert('Категория добавлена');
+                    loadCategories();
+                })
+                .catch(error => {
+                    showAlert('Ошибка добавления', 'error');
+                });
+        }
+    );
 }
 
 // ========== СТАДИИ ПРОЕКТОВ ==========
@@ -855,31 +858,33 @@ async function deleteStage(id) {
 }
 
 async function addStage() {
-    const stageName = prompt('Введите название новой стадии:');
-    if (!stageName?.trim()) return;
+    showInputModal(
+        'Добавить стадию проекта',
+        'Введите название новой стадии...',
+        async (stageName) => {
+            try {
+                await authFetch(`${API_URL}/stages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: stageName })
+                });
+                showAlert('Стадия добавлена');
+                loadStages();
+            } catch (error) {
+                console.error('Ошибка добавления стадии:', error);
+                showAlert('Ошибка добавления', 'error');
+            }
+        }
+    );
 
-    try {
-        await authFetch(`${API_URL}/stages`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name: stageName.trim() })
-        });
-        showAlert('Стадия добавлена');
-        loadStages();
-    } catch (error) {
-        console.error('Ошибка добавления стадии:', error);
-        showAlert('Ошибка добавления', 'error');
-    }
-}
+    // ========== ОТЗЫВЫ ==========
+    async function loadReviews() {
+        try {
+            const response = await authFetch(`${API_URL}/reviews`);
+            const reviews = await response.json();
 
-// ========== ОТЗЫВЫ ==========
-async function loadReviews() {
-    try {
-        const response = await authFetch(`${API_URL}/reviews`);
-        const reviews = await response.json();
-
-        const tbody = document.querySelector('#reviews tbody');
-        tbody.innerHTML = reviews.map(review => `
+            const tbody = document.querySelector('#reviews tbody');
+            tbody.innerHTML = reviews.map(review => `
             <tr>
                 <td>${review.id}</td>
                 <td>${review.client_name}</td>
@@ -891,14 +896,14 @@ async function loadReviews() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки отзывов:', error);
-        showAlert('Ошибка загрузки отзывов', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки отзывов:', error);
+            showAlert('Ошибка загрузки отзывов', 'error');
+        }
     }
-}
 
-function openReviewModal(id = null) {
-    const modalHtml = `
+    function openReviewModal(id = null) {
+        const modalHtml = `
         <div class="modal active" id="review-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -946,82 +951,82 @@ function openReviewModal(id = null) {
         </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    if (id) {
-        authFetch(`${API_URL}/reviews/${id}`)
-            .then(r => r.json())
-            .then(review => {
-                document.getElementById('review-client-name').value = review.client_name;
-                document.getElementById('review-company').value = review.company || '';
-                document.getElementById('review-text').value = review.text;
-                document.getElementById('review-rating').value = review.rating;
-                document.getElementById('review-visible').checked = review.visible === 1;
+        if (id) {
+            authFetch(`${API_URL}/reviews/${id}`)
+                .then(r => r.json())
+                .then(review => {
+                    document.getElementById('review-client-name').value = review.client_name;
+                    document.getElementById('review-company').value = review.company || '';
+                    document.getElementById('review-text').value = review.text;
+                    document.getElementById('review-rating').value = review.rating;
+                    document.getElementById('review-visible').checked = review.visible === 1;
 
-                if (review.image_url) {
-                    document.getElementById('current-review-image-preview').innerHTML = `
+                    if (review.image_url) {
+                        document.getElementById('current-review-image-preview').innerHTML = `
                         <img src="${review.image_url}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover; margin-top: 5px;">
                         <p style="font-size: 12px; color: #666; margin-top: 5px;">Текущее фото</p>
                     `;
-                }
-            });
-    }
-}
-
-async function saveReview(event, id) {
-    event.preventDefault();
-
-    const formData = new FormData(event.target);
-
-    const imageFile = formData.get('image');
-    if (!imageFile || imageFile.size === 0) {
-        formData.delete('image');
-    }
-
-    try {
-        const response = await authFetch(`${API_URL}/reviews${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            showAlert(id ? 'Отзыв обновлен' : 'Отзыв добавлен');
-            closeModal('review-modal');
-            loadReviews();
-        } else {
-            const error = await response.json();
-            showAlert(error.error || 'Ошибка сохранения', 'error');
+                    }
+                });
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showAlert('Ошибка сохранения: ' + error.message, 'error');
     }
-}
 
-async function deleteReview(id) {
-    if (!confirm('Удалить отзыв?')) return;
+    async function saveReview(event, id) {
+        event.preventDefault();
 
-    try {
-        await authFetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
-        showAlert('Отзыв удален');
-        loadReviews();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+        const formData = new FormData(event.target);
+
+        const imageFile = formData.get('image');
+        if (!imageFile || imageFile.size === 0) {
+            formData.delete('image');
+        }
+
+        try {
+            const response = await authFetch(`${API_URL}/reviews${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Отзыв обновлен' : 'Отзыв добавлен');
+                closeModal('review-modal');
+                loadReviews();
+            } else {
+                const error = await response.json();
+                showAlert(error.error || 'Ошибка сохранения', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка сохранения: ' + error.message, 'error');
+        }
     }
-}
 
-function editReview(id) {
-    openReviewModal(id);
-}
+    async function deleteReview(id) {
+        if (!confirm('Удалить отзыв?')) return;
 
-// ========== РАЗДЕЛЫ ==========
-async function loadSections() {
-    try {
-        const response = await authFetch(`${API_URL}/sections`);
-        const sections = await response.json();
+        try {
+            await authFetch(`${API_URL}/reviews/${id}`, { method: 'DELETE' });
+            showAlert('Отзыв удален');
+            loadReviews();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-        const tbody = document.querySelector('#sections tbody');
-        tbody.innerHTML = sections.map(section => `
+    function editReview(id) {
+        openReviewModal(id);
+    }
+
+    // ========== РАЗДЕЛЫ ==========
+    async function loadSections() {
+        try {
+            const response = await authFetch(`${API_URL}/sections`);
+            const sections = await response.json();
+
+            const tbody = document.querySelector('#sections tbody');
+            tbody.innerHTML = sections.map(section => `
             <tr>
                 <td>${section.id}</td>
                 <td>${section.title}</td>
@@ -1033,14 +1038,14 @@ async function loadSections() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки разделов:', error);
-        showAlert('Ошибка загрузки разделов', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки разделов:', error);
+            showAlert('Ошибка загрузки разделов', 'error');
+        }
     }
-}
 
-function openSectionModal(id = null) {
-    const modalHtml = `
+    function openSectionModal(id = null) {
+        const modalHtml = `
         <div class="modal active" id="section-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1085,76 +1090,76 @@ function openSectionModal(id = null) {
         </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    if (id) {
-        authFetch(`${API_URL}/sections/${id}`)
-            .then(r => r.json())
-            .then(section => {
-                document.getElementById('section-title').value = section.title;
-                document.getElementById('section-slug').value = section.slug;
-                document.getElementById('section-subtitle').value = section.subtitle || '';
-                document.getElementById('section-content').value = section.content || '';
-                document.getElementById('section-background').value = section.background_image || '';
-                document.getElementById('section-order').value = section.order_num;
-                document.getElementById('section-visible').checked = section.visible === 1;
-            });
-    }
-}
-
-async function saveSection(event, id) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const data = {
-        title: formData.get('title'),
-        slug: formData.get('slug'),
-        subtitle: formData.get('subtitle'),
-        content: formData.get('content'),
-        background_image: formData.get('background_image'),
-        order_num: parseInt(formData.get('order_num')),
-        visible: formData.get('visible') ? 1 : 0
-    };
-
-    try {
-        const response = await authFetch(`${API_URL}/sections${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            showAlert(id ? 'Раздел обновлен' : 'Раздел добавлен');
-            closeModal('section-modal');
-            loadSections();
+        if (id) {
+            authFetch(`${API_URL}/sections/${id}`)
+                .then(r => r.json())
+                .then(section => {
+                    document.getElementById('section-title').value = section.title;
+                    document.getElementById('section-slug').value = section.slug;
+                    document.getElementById('section-subtitle').value = section.subtitle || '';
+                    document.getElementById('section-content').value = section.content || '';
+                    document.getElementById('section-background').value = section.background_image || '';
+                    document.getElementById('section-order').value = section.order_num;
+                    document.getElementById('section-visible').checked = section.visible === 1;
+                });
         }
-    } catch (error) {
-        showAlert('Ошибка сохранения', 'error');
     }
-}
 
-async function deleteSection(id) {
-    if (!confirm('Удалить раздел?')) return;
-    try {
-        await authFetch(`${API_URL}/sections/${id}`, { method: 'DELETE' });
-        showAlert('Раздел удален');
-        loadSections();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+    async function saveSection(event, id) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = {
+            title: formData.get('title'),
+            slug: formData.get('slug'),
+            subtitle: formData.get('subtitle'),
+            content: formData.get('content'),
+            background_image: formData.get('background_image'),
+            order_num: parseInt(formData.get('order_num')),
+            visible: formData.get('visible') ? 1 : 0
+        };
+
+        try {
+            const response = await authFetch(`${API_URL}/sections${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Раздел обновлен' : 'Раздел добавлен');
+                closeModal('section-modal');
+                loadSections();
+            }
+        } catch (error) {
+            showAlert('Ошибка сохранения', 'error');
+        }
     }
-}
 
-function editSection(id) {
-    openSectionModal(id);
-}
+    async function deleteSection(id) {
+        if (!confirm('Удалить раздел?')) return;
+        try {
+            await authFetch(`${API_URL}/sections/${id}`, { method: 'DELETE' });
+            showAlert('Раздел удален');
+            loadSections();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-// ========== КОМАНДА ==========
-async function loadTeam() {
-    try {
-        const response = await authFetch(`${API_URL}/team`);
-        const team = await response.json();
+    function editSection(id) {
+        openSectionModal(id);
+    }
 
-        const tbody = document.querySelector('#team tbody');
-        tbody.innerHTML = team.map(member => `
+    // ========== КОМАНДА ==========
+    async function loadTeam() {
+        try {
+            const response = await authFetch(`${API_URL}/team`);
+            const team = await response.json();
+
+            const tbody = document.querySelector('#team tbody');
+            tbody.innerHTML = team.map(member => `
             <tr>
                 <td>${member.id}</td>
                 <td>${member.name}</td>
@@ -1165,14 +1170,14 @@ async function loadTeam() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки команды:', error);
-        showAlert('Ошибка загрузки команды', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки команды:', error);
+            showAlert('Ошибка загрузки команды', 'error');
+        }
     }
-}
 
-function openTeamModal(id = null) {
-    const modalHtml = `
+    function openTeamModal(id = null) {
+        const modalHtml = `
         <div class="modal active" id="team-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1221,82 +1226,82 @@ function openTeamModal(id = null) {
         </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    if (id) {
-        authFetch(`${API_URL}/team/${id}`)
-            .then(r => r.json())
-            .then(member => {
-                document.getElementById('team-name').value = member.name;
-                document.getElementById('team-position').value = member.position || '';
-                document.getElementById('team-bio').value = member.bio || '';
-                document.getElementById('team-email').value = member.email || '';
-                document.getElementById('team-phone').value = member.phone || '';
-                document.getElementById('team-order').value = member.order_num;
-                document.getElementById('team-visible').checked = member.visible === 1;
+        if (id) {
+            authFetch(`${API_URL}/team/${id}`)
+                .then(r => r.json())
+                .then(member => {
+                    document.getElementById('team-name').value = member.name;
+                    document.getElementById('team-position').value = member.position || '';
+                    document.getElementById('team-bio').value = member.bio || '';
+                    document.getElementById('team-email').value = member.email || '';
+                    document.getElementById('team-phone').value = member.phone || '';
+                    document.getElementById('team-order').value = member.order_num;
+                    document.getElementById('team-visible').checked = member.visible === 1;
 
-                if (member.photo_url) {
-                    document.getElementById('current-team-photo-preview').innerHTML = `
+                    if (member.photo_url) {
+                        document.getElementById('current-team-photo-preview').innerHTML = `
                         <img src="${member.photo_url}" style="max-width: 150px; max-height: 150px; border-radius: 8px;">
                         <p style="font-size: 12px; color: #666; margin-top: 5px;">Текущее фото</p>
                     `;
-                }
-            });
-    }
-}
-
-async function saveTeamMember(event, id) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-
-    const photoFile = formData.get('photo');
-    if (!photoFile || photoFile.size === 0) {
-        formData.delete('photo');
-    }
-
-    try {
-        const response = await authFetch(`${API_URL}/team${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            body: formData
-        });
-
-        if (response.ok) {
-            showAlert(id ? 'Сотрудник обновлен' : 'Сотрудник добавлен');
-            closeModal('team-modal');
-            loadTeam();
-        } else {
-            const error = await response.json();
-            showAlert(error.error || 'Ошибка сохранения', 'error');
+                    }
+                });
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showAlert('Ошибка сохранения: ' + error.message, 'error');
     }
-}
 
-async function deleteTeamMember(id) {
-    if (!confirm('Удалить сотрудника?')) return;
-    try {
-        await authFetch(`${API_URL}/team/${id}`, { method: 'DELETE' });
-        showAlert('Сотрудник удален');
-        loadTeam();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+    async function saveTeamMember(event, id) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+
+        const photoFile = formData.get('photo');
+        if (!photoFile || photoFile.size === 0) {
+            formData.delete('photo');
+        }
+
+        try {
+            const response = await authFetch(`${API_URL}/team${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                body: formData
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Сотрудник обновлен' : 'Сотрудник добавлен');
+                closeModal('team-modal');
+                loadTeam();
+            } else {
+                const error = await response.json();
+                showAlert(error.error || 'Ошибка сохранения', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка сохранения: ' + error.message, 'error');
+        }
     }
-}
 
-function editTeamMember(id) {
-    openTeamModal(id);
-}
+    async function deleteTeamMember(id) {
+        if (!confirm('Удалить сотрудника?')) return;
+        try {
+            await authFetch(`${API_URL}/team/${id}`, { method: 'DELETE' });
+            showAlert('Сотрудник удален');
+            loadTeam();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-// ========== FAQ ==========
-async function loadFaq() {
-    try {
-        const response = await authFetch(`${API_URL}/faq`);
-        const faq = await response.json();
+    function editTeamMember(id) {
+        openTeamModal(id);
+    }
 
-        const tbody = document.querySelector('#faq tbody');
-        tbody.innerHTML = faq.map(item => `
+    // ========== FAQ ==========
+    async function loadFaq() {
+        try {
+            const response = await authFetch(`${API_URL}/faq`);
+            const faq = await response.json();
+
+            const tbody = document.querySelector('#faq tbody');
+            tbody.innerHTML = faq.map(item => `
             <tr>
                 <td>${item.id}</td>
                 <td>${item.question}</td>
@@ -1307,14 +1312,14 @@ async function loadFaq() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки FAQ:', error);
-        showAlert('Ошибка загрузки FAQ', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки FAQ:', error);
+            showAlert('Ошибка загрузки FAQ', 'error');
+        }
     }
-}
 
-function openFaqModal(id = null) {
-    const modalHtml = `
+    function openFaqModal(id = null) {
+        const modalHtml = `
         <div class="modal active" id="faq-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1350,72 +1355,72 @@ function openFaqModal(id = null) {
         </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    if (id) {
-        authFetch(`${API_URL}/faq/${id}`)
-            .then(r => r.json())
-            .then(item => {
-                document.getElementById('faq-question').value = item.question;
-                document.getElementById('faq-answer').value = item.answer;
-                document.getElementById('faq-category').value = item.category || '';
-                document.getElementById('faq-order').value = item.order_num;
-                document.getElementById('faq-visible').checked = item.visible === 1;
-            });
-    }
-}
-
-async function saveFaq(event, id) {
-    event.preventDefault();
-    const formData = new FormData(event.target);
-    const data = {
-        question: formData.get('question'),
-        answer: formData.get('answer'),
-        category: formData.get('category'),
-        order_num: parseInt(formData.get('order_num')),
-        visible: formData.get('visible') ? 1 : 0
-    };
-
-    try {
-        const response = await authFetch(`${API_URL}/faq${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
-        });
-
-        if (response.ok) {
-            showAlert(id ? 'Вопрос обновлен' : 'Вопрос добавлен');
-            closeModal('faq-modal');
-            loadFaq();
+        if (id) {
+            authFetch(`${API_URL}/faq/${id}`)
+                .then(r => r.json())
+                .then(item => {
+                    document.getElementById('faq-question').value = item.question;
+                    document.getElementById('faq-answer').value = item.answer;
+                    document.getElementById('faq-category').value = item.category || '';
+                    document.getElementById('faq-order').value = item.order_num;
+                    document.getElementById('faq-visible').checked = item.visible === 1;
+                });
         }
-    } catch (error) {
-        showAlert('Ошибка сохранения', 'error');
     }
-}
 
-async function deleteFaq(id) {
-    if (!confirm('Удалить вопрос?')) return;
-    try {
-        await authFetch(`${API_URL}/faq/${id}`, { method: 'DELETE' });
-        showAlert('Вопрос удален');
-        loadFaq();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+    async function saveFaq(event, id) {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const data = {
+            question: formData.get('question'),
+            answer: formData.get('answer'),
+            category: formData.get('category'),
+            order_num: parseInt(formData.get('order_num')),
+            visible: formData.get('visible') ? 1 : 0
+        };
+
+        try {
+            const response = await authFetch(`${API_URL}/faq${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Вопрос обновлен' : 'Вопрос добавлен');
+                closeModal('faq-modal');
+                loadFaq();
+            }
+        } catch (error) {
+            showAlert('Ошибка сохранения', 'error');
+        }
     }
-}
 
-function editFaq(id) {
-    openFaqModal(id);
-}
+    async function deleteFaq(id) {
+        if (!confirm('Удалить вопрос?')) return;
+        try {
+            await authFetch(`${API_URL}/faq/${id}`, { method: 'DELETE' });
+            showAlert('Вопрос удален');
+            loadFaq();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-// ========== ЗАЯВКИ ==========
-async function loadContactRequests() {
-    try {
-        const response = await authFetch(`${API_URL}/contact`);
-        const requests = await response.json();
+    function editFaq(id) {
+        openFaqModal(id);
+    }
 
-        const tbody = document.getElementById('contact-requests-table');
-        tbody.innerHTML = requests.map(request => `
+    // ========== ЗАЯВКИ ==========
+    async function loadContactRequests() {
+        try {
+            const response = await authFetch(`${API_URL}/contact`);
+            const requests = await response.json();
+
+            const tbody = document.getElementById('contact-requests-table');
+            tbody.innerHTML = requests.map(request => `
             <tr>
                 <td>${request.id}</td>
                 <td>${request.name}</td>
@@ -1433,20 +1438,20 @@ async function loadContactRequests() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки заявок:', error);
-        showAlert('Ошибка загрузки заявок', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки заявок:', error);
+            showAlert('Ошибка загрузки заявок', 'error');
+        }
     }
-}
 
-function viewContactRequest(id) {
-    authFetch(`${API_URL}/contact`)
-        .then(r => r.json())
-        .then(requests => {
-            const request = requests.find(r => r.id === id);
-            if (!request) return;
+    function viewContactRequest(id) {
+        authFetch(`${API_URL}/contact`)
+            .then(r => r.json())
+            .then(requests => {
+                const request = requests.find(r => r.id === id);
+                if (!request) return;
 
-            const modalHtml = `
+                const modalHtml = `
                 <div class="modal active" id="view-request-modal">
                     <div class="modal-content" style="max-width: 600px;">
                         <span class="modal-close" onclick="closeModal('view-request-modal')">&times;</span>
@@ -1467,96 +1472,96 @@ function viewContactRequest(id) {
                 </div>
             `;
 
-            document.getElementById('modal-container').innerHTML = modalHtml;
-        });
-}
-
-async function markAsProcessed(id) {
-    try {
-        await authFetch(`${API_URL}/contact/${id}/status`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ status: 'processed' })
-        });
-        showAlert('Заявка обработана');
-        closeModal('view-request-modal');
-        loadContactRequests();
-    } catch (error) {
-        showAlert('Ошибка обновления', 'error');
+                document.getElementById('modal-container').innerHTML = modalHtml;
+            });
     }
-}
 
-async function deleteContactRequest(id) {
-    if (!confirm('Удалить заявку?')) return;
-
-    try {
-        await authFetch(`${API_URL}/contact/${id}`, { method: 'DELETE' });
-        showAlert('Заявка удалена');
-        loadContactRequests();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+    async function markAsProcessed(id) {
+        try {
+            await authFetch(`${API_URL}/contact/${id}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: 'processed' })
+            });
+            showAlert('Заявка обработана');
+            closeModal('view-request-modal');
+            loadContactRequests();
+        } catch (error) {
+            showAlert('Ошибка обновления', 'error');
+        }
     }
-}
 
-// ========== НАСТРОЙКИ ==========
-async function loadSettings() {
-    try {
-        const response = await authFetch(`${API_URL}/settings`);
-        const settings = await response.json();
+    async function deleteContactRequest(id) {
+        if (!confirm('Удалить заявку?')) return;
 
-        const container = document.querySelector('#settings .card');
-        const settingsSections = [
-            {
-                title: 'Основные настройки',
-                fields: [
-                    { key: 'site_title', label: 'Название сайта', type: 'text', description: 'Отображается в заголовке и футере' },
-                    { key: 'site_description', label: 'Описание сайта', type: 'textarea', description: 'Мета-описание для SEO' },
-                    { key: 'site_keywords', label: 'Ключевые слова', type: 'textarea', description: 'SEO ключевые слова через запятую' },
-                ]
-            },
-            {
-                title: 'Контактная информация',
-                fields: [
-                    { key: 'site_email', label: 'Email для связи', type: 'email', description: 'Основной email компании' },
-                    { key: 'site_phone', label: 'Телефон', type: 'tel', description: 'Контактный телефон' },
-                    { key: 'whatsapp_phone', label: 'WhatsApp', type: 'tel', description: 'Номер WhatsApp (с кодом страны, например: +79001234567)' },
-                    { key: 'address', label: 'Адрес', type: 'text', description: 'Физический адрес офиса' },
-                    { key: 'working_hours', label: 'Часы работы', type: 'text', description: 'Например: 9:00 - 18:00' },
-                ]
-            },
-            {
-                title: 'Социальные сети',
-                fields: [
-                    { key: 'instagram_url', label: 'Instagram', type: 'url', description: 'Полная ссылка на профиль Instagram' },
-                    { key: 'facebook_url', label: 'Facebook', type: 'url', description: 'Полная ссылка на страницу Facebook' },
-                    { key: 'linkedin_url', label: 'LinkedIn', type: 'url', description: 'Полная ссылка на профиль LinkedIn' },
-                    { key: 'youtube_url', label: 'YouTube', type: 'url', description: 'Полная ссылка на канал YouTube' },
-                    { key: 'telegram_url', label: 'Telegram', type: 'url', description: 'Полная ссылка на Telegram' },
-                    { key: 'vk_url', label: 'VK', type: 'url', description: 'Полная ссылка на группу VK' },
-                ]
-            },
-            {
-                title: 'Пиксели и аналитика',
-                fields: [
-                    { key: 'google_analytics_id', label: 'Google Analytics ID', type: 'text', description: 'Например: G-XXXXXXXXXX или UA-XXXXXXXXX-X' },
-                    { key: 'google_tag_manager_id', label: 'Google Tag Manager ID', type: 'text', description: 'Например: GTM-XXXXXXX' },
-                    { key: 'yandex_metrika_id', label: 'Яндекс.Метрика ID', type: 'text', description: 'Номер счетчика Яндекс.Метрики' },
-                    { key: 'facebook_pixel_id', label: 'Facebook Pixel ID', type: 'text', description: 'ID пикселя Facebook' },
-                    { key: 'vk_pixel_id', label: 'VK Pixel ID', type: 'text', description: 'ID пикселя ВКонтакте' },
-                ]
-            },
-            {
-                title: 'Дополнительно',
-                fields: [
-                    { key: 'custom_head_code', label: 'Код в &lt;head&gt;', type: 'textarea', description: 'Дополнительный код для вставки в <head> (скрипты, стили)' },
-                    { key: 'custom_body_code', label: 'Код в &lt;body&gt;', type: 'textarea', description: 'Дополнительный код для вставки перед закрывающим </body>' },
-                    { key: 'favicon_url', label: 'Фавикон', type: 'file', description: 'Загрузите favicon.ico или изображение для фавикона' },
-                    { key: 'logo_url', label: 'Логотип сайта', type: 'file', description: 'Загрузите логотип сайта' },
-                ]
-            }
-        ];
+        try {
+            await authFetch(`${API_URL}/contact/${id}`, { method: 'DELETE' });
+            showAlert('Заявка удалена');
+            loadContactRequests();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-        container.innerHTML = `
+    // ========== НАСТРОЙКИ ==========
+    async function loadSettings() {
+        try {
+            const response = await authFetch(`${API_URL}/settings`);
+            const settings = await response.json();
+
+            const container = document.querySelector('#settings .card');
+            const settingsSections = [
+                {
+                    title: 'Основные настройки',
+                    fields: [
+                        { key: 'site_title', label: 'Название сайта', type: 'text', description: 'Отображается в заголовке и футере' },
+                        { key: 'site_description', label: 'Описание сайта', type: 'textarea', description: 'Мета-описание для SEO' },
+                        { key: 'site_keywords', label: 'Ключевые слова', type: 'textarea', description: 'SEO ключевые слова через запятую' },
+                    ]
+                },
+                {
+                    title: 'Контактная информация',
+                    fields: [
+                        { key: 'site_email', label: 'Email для связи', type: 'email', description: 'Основной email компании' },
+                        { key: 'site_phone', label: 'Телефон', type: 'tel', description: 'Контактный телефон' },
+                        { key: 'whatsapp_phone', label: 'WhatsApp', type: 'tel', description: 'Номер WhatsApp (с кодом страны, например: +79001234567)' },
+                        { key: 'address', label: 'Адрес', type: 'text', description: 'Физический адрес офиса' },
+                        { key: 'working_hours', label: 'Часы работы', type: 'text', description: 'Например: 9:00 - 18:00' },
+                    ]
+                },
+                {
+                    title: 'Социальные сети',
+                    fields: [
+                        { key: 'instagram_url', label: 'Instagram', type: 'url', description: 'Полная ссылка на профиль Instagram' },
+                        { key: 'facebook_url', label: 'Facebook', type: 'url', description: 'Полная ссылка на страницу Facebook' },
+                        { key: 'linkedin_url', label: 'LinkedIn', type: 'url', description: 'Полная ссылка на профиль LinkedIn' },
+                        { key: 'youtube_url', label: 'YouTube', type: 'url', description: 'Полная ссылка на канал YouTube' },
+                        { key: 'telegram_url', label: 'Telegram', type: 'url', description: 'Полная ссылка на Telegram' },
+                        { key: 'vk_url', label: 'VK', type: 'url', description: 'Полная ссылка на группу VK' },
+                    ]
+                },
+                {
+                    title: 'Пиксели и аналитика',
+                    fields: [
+                        { key: 'google_analytics_id', label: 'Google Analytics ID', type: 'text', description: 'Например: G-XXXXXXXXXX или UA-XXXXXXXXX-X' },
+                        { key: 'google_tag_manager_id', label: 'Google Tag Manager ID', type: 'text', description: 'Например: GTM-XXXXXXX' },
+                        { key: 'yandex_metrika_id', label: 'Яндекс.Метрика ID', type: 'text', description: 'Номер счетчика Яндекс.Метрики' },
+                        { key: 'facebook_pixel_id', label: 'Facebook Pixel ID', type: 'text', description: 'ID пикселя Facebook' },
+                        { key: 'vk_pixel_id', label: 'VK Pixel ID', type: 'text', description: 'ID пикселя ВКонтакте' },
+                    ]
+                },
+                {
+                    title: 'Дополнительно',
+                    fields: [
+                        { key: 'custom_head_code', label: 'Код в &lt;head&gt;', type: 'textarea', description: 'Дополнительный код для вставки в <head> (скрипты, стили)' },
+                        { key: 'custom_body_code', label: 'Код в &lt;body&gt;', type: 'textarea', description: 'Дополнительный код для вставки перед закрывающим </body>' },
+                        { key: 'favicon_url', label: 'Фавикон', type: 'file', description: 'Загрузите favicon.ico или изображение для фавикона' },
+                        { key: 'logo_url', label: 'Логотип сайта', type: 'file', description: 'Загрузите логотип сайта' },
+                    ]
+                }
+            ];
+
+            container.innerHTML = `
             <h3>Настройки сайта</h3>
             <form id="settings-form">
                 ${settingsSections.map(section => `
@@ -1566,9 +1571,9 @@ async function loadSettings() {
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label style="display: block; margin-bottom: 8px; font-weight: 500; color: #333;">${field.label}</label>
                                 ${field.type === 'textarea'
-                ? `<textarea name="${field.key}" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;">${settings[field.key] || ''}</textarea>`
-                : field.type === 'file'
-                    ? `
+                    ? `<textarea name="${field.key}" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;">${settings[field.key] || ''}</textarea>`
+                    : field.type === 'file'
+                        ? `
                                         ${settings[field.key] ? `<div style="margin-bottom: 10px;">
                                             <img src="${settings[field.key]}" alt="Current ${field.label}" style="max-width: 150px; max-height: 150px; display: block; margin-bottom: 10px; border: 1px solid #ddd; padding: 5px; border-radius: 4px;">
                                             <input type="hidden" name="${field.key}_current" value="${settings[field.key]}">
@@ -1576,8 +1581,8 @@ async function loadSettings() {
                                         <input type="file" id="${field.key}_file" accept="image/*" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
                                         <input type="hidden" name="${field.key}" value="${settings[field.key] || ''}">
                                       `
-                    : `<input type="${field.type}" name="${field.key}" value="${settings[field.key] || ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">`
-            }
+                        : `<input type="${field.type}" name="${field.key}" value="${settings[field.key] || ''}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">`
+                }
                                 ${field.description ? `<small style="color: #666; display: block; margin-top: 5px;">${field.description}</small>` : ''}
                             </div>
                         `).join('')}
@@ -1587,151 +1592,191 @@ async function loadSettings() {
             </form>
         `;
 
-        document.getElementById('settings-form').addEventListener('submit', saveSettings);
-    } catch (error) {
-        console.error('Ошибка загрузки настроек:', error);
-        showAlert('Ошибка загрузки настроек', 'error');
+            document.getElementById('settings-form').addEventListener('submit', saveSettings);
+        } catch (error) {
+            console.error('Ошибка загрузки настроек:', error);
+            showAlert('Ошибка загрузки настроек', 'error');
+        }
     }
-}
 
-async function saveSettings(event) {
-    event.preventDefault();
-    const form = event.target;
-    const formData = new FormData(form);
+    async function saveSettings(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
 
-    try {
-        // Сначала загружаем файлы, если есть
-        const fileFields = ['favicon_url', 'logo_url'];
+        try {
+            // Сначала загружаем файлы, если есть
+            const fileFields = ['favicon_url', 'logo_url'];
 
-        for (const fieldKey of fileFields) {
-            const fileInput = document.getElementById(`${fieldKey}_file`);
-            if (fileInput && fileInput.files.length > 0) {
-                const file = fileInput.files[0];
-                const uploadFormData = new FormData();
-                uploadFormData.append('image', file);
+            for (const fieldKey of fileFields) {
+                const fileInput = document.getElementById(`${fieldKey}_file`);
+                if (fileInput && fileInput.files.length > 0) {
+                    const file = fileInput.files[0];
+                    const uploadFormData = new FormData();
+                    uploadFormData.append('image', file);
 
-                const uploadResponse = await authFetch(`${API_URL}/upload-image`, {
-                    method: 'POST',
-                    body: uploadFormData
-                });
+                    const uploadResponse = await authFetch(`${API_URL}/upload-image`, {
+                        method: 'POST',
+                        body: uploadFormData
+                    });
 
-                const uploadResult = await uploadResponse.json();
-                if (uploadResult.url) {
-                    // Обновляем значение в formData
-                    formData.set(fieldKey, uploadResult.url);
+                    const uploadResult = await uploadResponse.json();
+                    if (uploadResult.url) {
+                        // Обновляем значение в formData
+                        formData.set(fieldKey, uploadResult.url);
+                    }
                 }
             }
-        }
 
-        // Сохраняем все настройки
-        const promises = [];
-        for (let [key, value] of formData.entries()) {
-            if (!key.endsWith('_current') && !key.endsWith('_file')) {
-                promises.push(
-                    authFetch(`${API_URL}/settings/${key}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ value })
-                    })
-                );
+            // Сохраняем все настройки
+            const promises = [];
+            for (let [key, value] of formData.entries()) {
+                if (!key.endsWith('_current') && !key.endsWith('_file')) {
+                    promises.push(
+                        authFetch(`${API_URL}/settings/${key}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ value })
+                        })
+                    );
+                }
             }
+
+            await Promise.all(promises);
+            showAlert('Настройки сохранены');
+
+            // Перезагружаем настройки для отображения новых изображений
+            setTimeout(() => loadSettings(), 1000);
+        } catch (error) {
+            console.error('Ошибка сохранения настроек:', error);
+            showAlert('Ошибка сохранения настроек', 'error');
+        }
+    }
+
+    // Обработчик формы смены пароля
+    document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const currentPassword = document.getElementById('current-password').value;
+        const newPassword = document.getElementById('new-password').value;
+        const confirmPassword = document.getElementById('confirm-password').value;
+
+        if (newPassword !== confirmPassword) {
+            showAlert('Пароли не совпадают', 'error');
+            return;
         }
 
-        await Promise.all(promises);
-        showAlert('Настройки сохранены');
+        try {
+            const response = await authFetch(`${API_URL}/auth/change-password`, {
+                method: 'POST',
+                body: JSON.stringify({ currentPassword, newPassword })
+            });
 
-        // Перезагружаем настройки для отображения новых изображений
-        setTimeout(() => loadSettings(), 1000);
-    } catch (error) {
-        console.error('Ошибка сохранения настроек:', error);
-        showAlert('Ошибка сохранения настроек', 'error');
-    }
-}
+            const result = await response.json();
 
-// Обработчик формы смены пароля
-document.getElementById('change-password-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const currentPassword = document.getElementById('current-password').value;
-    const newPassword = document.getElementById('new-password').value;
-    const confirmPassword = document.getElementById('confirm-password').value;
-
-    if (newPassword !== confirmPassword) {
-        showAlert('Пароли не совпадают', 'error');
-        return;
-    }
-
-    try {
-        const response = await authFetch(`${API_URL}/auth/change-password`, {
-            method: 'POST',
-            body: JSON.stringify({ currentPassword, newPassword })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showAlert(result.message || 'Пароль успешно изменен', 'success');
-            document.getElementById('change-password-form').reset();
-        } else {
-            showAlert(result.error || 'Ошибка смены пароля', 'error');
-        }
-    } catch (error) {
-        console.error('Ошибка смены пароля:', error);
-        showAlert('Ошибка смены пароля', 'error');
-    }
-});
-
-// Обработчик формы изменения профиля
-document.getElementById('change-profile-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
-
-    const username = document.getElementById('profile-username').value;
-    const email = document.getElementById('profile-email').value;
-
-    try {
-        const response = await authFetch(`${API_URL}/auth/change-profile`, {
-            method: 'POST',
-            body: JSON.stringify({ username, email })
-        });
-
-        const result = await response.json();
-
-        if (response.ok) {
-            showAlert(result.message || 'Профиль успешно обновлен', 'success');
-            // Обновляем отображение имени пользователя
-            const userInfo = document.getElementById('user-info');
-            if (userInfo) {
-                userInfo.innerHTML = `Пользователь: <strong>${result.user.username}</strong>`;
+            if (response.ok) {
+                showAlert(result.message || 'Пароль успешно изменен', 'success');
+                document.getElementById('change-password-form').reset();
+            } else {
+                showAlert(result.error || 'Ошибка смены пароля', 'error');
             }
-        } else {
-            showAlert(result.error || 'Ошибка обновления профиля', 'error');
+        } catch (error) {
+            console.error('Ошибка смены пароля:', error);
+            showAlert('Ошибка смены пароля', 'error');
         }
-    } catch (error) {
-        console.error('Ошибка обновления профиля:', error);
-        showAlert('Ошибка обновления профиля', 'error');
-    }
-});
+    });
 
-// Загрузка профиля при открытии раздела "Безопасность"
-document.querySelector('[data-section="security"]').addEventListener('click', async () => {
-    try {
-        const response = await authFetch(`${API_URL}/auth/check`);
-        const data = await response.json();
+    // Обработчик формы изменения профиля
+    document.getElementById('change-profile-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-        if (data.authenticated && data.user) {
-            document.getElementById('profile-username').value = data.user.username;
-            document.getElementById('profile-email').value = data.user.email;
+        const username = document.getElementById('profile-username').value;
+        const email = document.getElementById('profile-email').value;
+
+        try {
+            const response = await authFetch(`${API_URL}/auth/change-profile`, {
+                method: 'POST',
+                body: JSON.stringify({ username, email })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                showAlert(result.message || 'Профиль успешно обновлен', 'success');
+                // Обновляем отображение имени пользователя
+                const userInfo = document.getElementById('user-info');
+                if (userInfo) {
+                    userInfo.innerHTML = `Пользователь: <strong>${result.user.username}</strong>`;
+                }
+            } else {
+                showAlert(result.error || 'Ошибка обновления профиля', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка обновления профиля:', error);
+            showAlert('Ошибка обновления профиля', 'error');
         }
-    } catch (error) {
-        console.error('Ошибка загрузки профиля:', error);
-    }
-});
+    });
 
-// Utility function for closing modals
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.remove();
+    // Загрузка профиля при открытии раздела "Безопасность"
+    document.querySelector('[data-section="security"]').addEventListener('click', async () => {
+        try {
+            const response = await authFetch(`${API_URL}/auth/check`);
+            const data = await response.json();
+
+            if (data.authenticated && data.user) {
+                document.getElementById('profile-username').value = data.user.username;
+                document.getElementById('profile-email').value = data.user.email;
+            }
+        } catch (error) {
+            console.error('Ошибка загрузки профиля:', error);
+        }
+    });
+
+    // Utility function for closing modals
+    function closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.remove();
+        }
     }
-}
+
+    // Utility function for input modal
+    function showInputModal(title, placeholder, callback) {
+        const modalId = 'input-modal';
+        const modalHtml = `
+        <div class="modal active" id="${modalId}">
+            <div class="modal-content" style="max-width: 400px;">
+                <div class="modal-header">
+                    <h3>${title}</h3>
+                    <span class="close" onclick="closeModal('${modalId}')">&times;</span>
+                </div>
+                <form onsubmit="handleInputModalSubmit(event, '${modalId}')">
+                    <div class="form-group">
+                        <input type="text" id="input-modal-text" placeholder="${placeholder}" required 
+                               style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                    </div>
+                    <div style="margin-top: 20px; display: flex; gap: 10px;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">Создать</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('${modalId}')" style="flex: 1;">Отмена</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+
+        document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('input-modal-text').focus();
+
+        // Store callback for later use
+        window.inputModalCallback = callback;
+    }
+
+    function handleInputModalSubmit(event, modalId) {
+        event.preventDefault();
+        const value = document.getElementById('input-modal-text').value.trim();
+        if (value && window.inputModalCallback) {
+            window.inputModalCallback(value);
+        }
+        closeModal(modalId);
+    }
 
