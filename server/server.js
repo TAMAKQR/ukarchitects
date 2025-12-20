@@ -69,7 +69,7 @@ app.use(session({
         secure: !isDevelopment, // HTTPS в production
         httpOnly: true,
         maxAge: 24 * 60 * 60 * 1000, // 24 часа
-        sameSite: isDevelopment ? 'lax' : 'none'
+        sameSite: 'lax' // lax работает для same-site requests
     }
 }));
 app.use(express.json({ limit: '50mb' }));
