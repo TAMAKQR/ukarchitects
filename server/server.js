@@ -228,8 +228,23 @@ const initializeDatabase = async () => {
         const settingsExist = db.prepare('SELECT COUNT(*) as count FROM settings').get();
         if (settingsExist.count === 0) {
             db.prepare(`
-                INSERT INTO settings (id, site_title, site_description, site_phone, site_email, address, working_hours)
-                VALUES (1, 'UK Architects', 'Архитектурное бюро полного цикла', '+996 779 777 666', 'info@ukglobal.com', 'Ch.Aitmatova street 243', 'Пн–Пт: 9:00–19:00')
+                INSERT INTO settings (
+                    id, site_title, site_description, site_phone, site_email, address, working_hours,
+                    site_keywords, about_company, privacy_policy, terms_of_service
+                )
+                VALUES (
+                    1, 
+                    'UK Architects', 
+                    'Архитектурное бюро полного цикла', 
+                    '+996 779 777 666', 
+                    'info@ukarchitects.com', 
+                    'Ch.Aitmatova street 243', 
+                    'Пн–Пт: 9:00–19:00',
+                    'архитектура, проектирование, дизайн, строительство',
+                    'UK Architects — ведущее архитектурное бюро, специализирующееся на создании современных и функциональных пространств.',
+                    '<h2>Политика конфиденциальности</h2><p>Мы обязуемся защищать конфиденциальность ваших личных данных.</p>',
+                    '<h2>Условия предоставления услуг</h2><p>Настоящие условия регулируют использование наших услуг.</p>'
+                )
             `).run();
         }
 
