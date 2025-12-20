@@ -368,6 +368,46 @@ app.get('/api/auth/check', (req, res) => {
     res.json({ authenticated: false });
 });
 
+// Смена пароля
+app.post('/api/auth/change-password', requireAuth, async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+
+        if (!currentPassword || !newPassword) {
+            return res.status(400).json({ error: 'Все поля обязательны' });
+        }
+
+        if (newPassword.length < 6) {
+            return res.status(400).json({ error: 'Новый пароль должен содержать минимум 6 символов' });
+        }
+
+        // Получаем текущего пользователя
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.session.userId);
+
+        if (!user) {
+            return res.status(404).json({ error: 'Пользователь не найден' });
+        }
+
+        // Проверяем текущий пароль
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash);
+
+        if (!isValidPassword) {
+            return res.status(401).json({ error: 'Неверный текущий пароль' });
+        }
+
+        // Хешируем новый пароль
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+
+        // Обновляем пароль
+        db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(newPasswordHash, user.id);
+
+        res.json({ success: true, message: 'Пароль успешно изменен' });
+    } catch (error) {
+        console.error('Ошибка смены пароля:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Запрос на сброс пароля
 app.post('/api/auth/forgot-password', async (req, res) => {
     try {

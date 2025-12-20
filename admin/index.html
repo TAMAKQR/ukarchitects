@@ -403,6 +403,7 @@
                 <a href="#" data-section="faq">❓ FAQ</a>
                 <a href="#" data-section="contact-requests">📬 Заявки</a>
                 <a href="#" data-section="settings">⚙️ Настройки</a>
+                <a href="#" data-section="security">🔒 Безопасность</a>
                 <a href="#" id="logout-btn" style="margin-top: 30px; background: rgba(255,255,255,0.1);">🚪 Выход</a>
             </nav>
             <div id="user-info"
@@ -602,6 +603,29 @@
                 <div class="card">
                     <h3>Настройки сайта</h3>
                     <div id="settings-form"></div>
+                </div>
+            </section>
+
+            <!-- Безопасность -->
+            <section id="security" class="section">
+                <div class="card">
+                    <h3>Смена пароля</h3>
+                    <form id="change-password-form">
+                        <div class="form-group">
+                            <label>Текущий пароль</label>
+                            <input type="password" id="current-password" class="form-control" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Новый пароль</label>
+                            <input type="password" id="new-password" class="form-control" required minlength="6">
+                            <small style="color: #666;">Минимум 6 символов</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Подтвердите новый пароль</label>
+                            <input type="password" id="confirm-password" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Изменить пароль</button>
+                    </form>
                 </div>
             </section>
         </main>

@@ -1654,5 +1654,36 @@ async function saveSettings(event) {
     }
 }
 
-// Загрузка данных при старте
-loadDashboard();
+// Обработчик формы смены пароля
+document.getElementById('change-password-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const currentPassword = document.getElementById('current-password').value;
+    const newPassword = document.getElementById('new-password').value;
+    const confirmPassword = document.getElementById('confirm-password').value;
+
+    if (newPassword !== confirmPassword) {
+        showAlert('Пароли не совпадают', 'error');
+        return;
+    }
+
+    try {
+        const response = await authFetch(`${API_URL}/auth/change-password`, {
+            method: 'POST',
+            body: JSON.stringify({ currentPassword, newPassword })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            showAlert(result.message || 'Пароль успешно изменен', 'success');
+            document.getElementById('change-password-form').reset();
+        } else {
+            showAlert(result.error || 'Ошибка смены пароля', 'error');
+        }
+    } catch (error) {
+        console.error('Ошибка смены пароля:', error);
+        showAlert('Ошибка смены пароля', 'error');
+    }
+});
+
