@@ -74,7 +74,67 @@ db.pragma('journal_mode = WAL');
 // Функция инициализации базы данных
 const initializeDatabase = async () => {
     try {
-        // Создание таблиц если их нет
+        // Проверяем, существует ли таблица settings с правильной структурой
+        const tableInfo = db.prepare("PRAGMA table_info(settings)").all();
+        const hasIdColumn = tableInfo.some(column => column.name === 'id');
+
+        if (!hasIdColumn) {
+            console.log('⚠️ Пересоздаём таблицу settings с правильной структурой...');
+
+            // Бэкап данных если они есть
+            let existingData = null;
+            try {
+                existingData = db.prepare('SELECT * FROM settings LIMIT 1').get();
+            } catch (e) {
+                // Таблица может не существовать
+            }
+
+            // Удаляем старую таблицу
+            db.exec('DROP TABLE IF EXISTS settings');
+
+            // Создаём новую таблицу с правильной структурой
+            db.exec(`
+                CREATE TABLE settings (
+                    id INTEGER PRIMARY KEY CHECK (id = 1),
+                    site_title TEXT DEFAULT 'UK Architects',
+                    site_description TEXT,
+                    site_keywords TEXT,
+                    site_phone TEXT,
+                    site_email TEXT,
+                    address TEXT,
+                    working_hours TEXT,
+                    whatsapp_phone TEXT,
+                    instagram_url TEXT,
+                    facebook_url TEXT,
+                    whatsapp_url TEXT,
+                    telegram_url TEXT,
+                    youtube_url TEXT,
+                    vk_url TEXT,
+                    linkedin_url TEXT,
+                    google_analytics_id TEXT,
+                    google_tag_manager_id TEXT,
+                    yandex_metrika_id TEXT,
+                    facebook_pixel_id TEXT,
+                    vk_pixel_id TEXT,
+                    custom_head_code TEXT,
+                    custom_body_code TEXT,
+                    favicon_url TEXT,
+                    logo_url TEXT,
+                    privacy_policy TEXT,
+                    terms_of_service TEXT,
+                    about_company TEXT,
+                    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+
+            // Вставляем начальную строку настроек
+            db.prepare(`INSERT INTO settings (id) VALUES (1)`).run();
+
+            console.log('✅ Таблица settings пересоздана с правильной структурой');
+        }
+
+        // Создание остальных таблиц если их нет
         db.exec(`
             CREATE TABLE IF NOT EXISTS services (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -150,39 +210,6 @@ const initializeDatabase = async () => {
                 order_num INTEGER DEFAULT 0,
                 visible INTEGER DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-            );
-
-            CREATE TABLE IF NOT EXISTS settings (
-                id INTEGER PRIMARY KEY CHECK (id = 1),
-                site_title TEXT DEFAULT 'UK Architects',
-                site_description TEXT,
-                site_keywords TEXT,
-                site_phone TEXT,
-                site_email TEXT,
-                address TEXT,
-                working_hours TEXT,
-                whatsapp_phone TEXT,
-                instagram_url TEXT,
-                facebook_url TEXT,
-                whatsapp_url TEXT,
-                telegram_url TEXT,
-                youtube_url TEXT,
-                vk_url TEXT,
-                linkedin_url TEXT,
-                google_analytics_id TEXT,
-                google_tag_manager_id TEXT,
-                yandex_metrika_id TEXT,
-                facebook_pixel_id TEXT,
-                vk_pixel_id TEXT,
-                custom_head_code TEXT,
-                custom_body_code TEXT,
-                favicon_url TEXT,
-                logo_url TEXT,
-                privacy_policy TEXT,
-                terms_of_service TEXT,
-                about_company TEXT,
-                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
 
             CREATE TABLE IF NOT EXISTS users (
