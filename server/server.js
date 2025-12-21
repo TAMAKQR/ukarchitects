@@ -161,6 +161,7 @@ const initializeDatabase = async () => {
                 site_email TEXT,
                 address TEXT,
                 working_hours TEXT,
+                whatsapp_phone TEXT,
                 instagram_url TEXT,
                 facebook_url TEXT,
                 whatsapp_url TEXT,
@@ -169,7 +170,14 @@ const initializeDatabase = async () => {
                 vk_url TEXT,
                 linkedin_url TEXT,
                 google_analytics_id TEXT,
+                google_tag_manager_id TEXT,
                 yandex_metrika_id TEXT,
+                facebook_pixel_id TEXT,
+                vk_pixel_id TEXT,
+                custom_head_code TEXT,
+                custom_body_code TEXT,
+                favicon_url TEXT,
+                logo_url TEXT,
                 privacy_policy TEXT,
                 terms_of_service TEXT,
                 about_company TEXT,
@@ -223,6 +231,16 @@ const initializeDatabase = async () => {
                 visible INTEGER DEFAULT 1,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP
             );
+
+            CREATE TABLE IF NOT EXISTS contact_requests (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                phone TEXT NOT NULL,
+                email TEXT,
+                message TEXT,
+                status TEXT DEFAULT 'new',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
         `);
 
         // Миграция: добавляем отсутствующие столбцы в существующие таблицы
@@ -234,6 +252,27 @@ const initializeDatabase = async () => {
                 db.prepare("ALTER TABLE services ADD COLUMN slug TEXT").run();
                 console.log('✅ Добавлен столбец slug в таблицу services');
             }
+
+            // Проверяем и добавляем новые поля в settings
+            const settingsColumns = db.prepare("PRAGMA table_info(settings)").all();
+            const newSettingsFields = [
+                'whatsapp_phone',
+                'google_tag_manager_id',
+                'facebook_pixel_id',
+                'vk_pixel_id',
+                'custom_head_code',
+                'custom_body_code',
+                'favicon_url',
+                'logo_url'
+            ];
+
+            newSettingsFields.forEach(field => {
+                const hasField = settingsColumns.some(col => col.name === field);
+                if (!hasField) {
+                    db.prepare(`ALTER TABLE settings ADD COLUMN ${field} TEXT`).run();
+                    console.log(`✅ Добавлен столбец ${field} в таблицу settings`);
+                }
+            });
         } catch (error) {
             console.log('ℹ️ Миграция столбцов: пропущено (возможно, уже выполнено)');
         }
@@ -462,6 +501,121 @@ const initializeDatabase = async () => {
             });
 
             console.log('✅ Создана базовая информация о команде');
+        }
+
+        // Проверяем, есть ли разделы, если нет - создаём базовые
+        const sectionsExist = db.prepare('SELECT COUNT(*) as count FROM sections').get();
+        if (sectionsExist.count === 0) {
+            const defaultSections = [
+                {
+                    slug: 'user-agreement',
+                    title: 'Пользовательское соглашение',
+                    subtitle: 'Условия использования сайта',
+                    content: `<h2>1. Общие положения</h2>
+<p>Настоящее Пользовательское соглашение определяет условия использования сайта UK Architects и регулирует отношения между администрацией сайта и его пользователями.</p>
+
+<h2>2. Использование материалов сайта</h2>
+<p>Все материалы, размещенные на сайте, включая изображения проектов, текстовые описания и дизайнерские решения, являются интеллектуальной собственностью UK Architects.</p>
+<ul>
+<li>Использование материалов без письменного согласия запрещено</li>
+<li>Цитирование возможно с обязательной ссылкой на источник</li>
+<li>Коммерческое использование требует отдельного согласования</li>
+</ul>
+
+<h2>3. Конфиденциальность</h2>
+<p>Мы обязуемся защищать конфиденциальность предоставленной вами информации в соответствии с нашей Политикой конфиденциальности.</p>
+
+<h2>4. Ответственность</h2>
+<p>Администрация сайта не несет ответственности за:</p>
+<ul>
+<li>Технические сбои и перерывы в работе сайта</li>
+<li>Действия третьих лиц</li>
+<li>Ущерб, причиненный использованием или невозможностью использования сайта</li>
+</ul>
+
+<h2>5. Изменения в соглашении</h2>
+<p>Администрация оставляет за собой право вносить изменения в настоящее соглашение. Продолжение использования сайта после внесения изменений означает ваше согласие с новыми условиями.</p>
+
+<h2>6. Контакты</h2>
+<p>По всем вопросам, связанным с настоящим соглашением, вы можете обращаться по адресу: info@ukarchitects.com</p>`,
+                    order_num: 0
+                },
+                {
+                    slug: 'privacy-policy',
+                    title: 'Политика конфиденциальности',
+                    subtitle: 'Защита ваших данных',
+                    content: `<h2>1. Общие положения</h2>
+<p>UK Architects уважает вашу конфиденциальность и обязуется защищать ваши персональные данные.</p>
+
+<h2>2. Какие данные мы собираем</h2>
+<ul>
+<li>Имя и контактная информация (телефон, email)</li>
+<li>Информация о проекте при оформлении заявки</li>
+<li>Данные о посещении сайта (cookies, IP-адрес)</li>
+</ul>
+
+<h2>3. Как мы используем данные</h2>
+<p>Ваши данные используются для:</p>
+<ul>
+<li>Обработки заявок и предоставления услуг</li>
+<li>Связи с вами по вопросам проектирования</li>
+<li>Улучшения качества обслуживания</li>
+<li>Отправки информационных рассылок (с вашего согласия)</li>
+</ul>
+
+<h2>4. Защита данных</h2>
+<p>Мы применяем современные технологии для защиты ваших данных от несанкционированного доступа, изменения или уничтожения.</p>
+
+<h2>5. Передача данных третьим лицам</h2>
+<p>Мы не передаем ваши персональные данные третьим лицам без вашего согласия, за исключением случаев, предусмотренных законодательством.</p>
+
+<h2>6. Ваши права</h2>
+<p>Вы имеете право:</p>
+<ul>
+<li>Запросить доступ к своим данным</li>
+<li>Исправить неточные данные</li>
+<li>Удалить свои данные</li>
+<li>Отозвать согласие на обработку данных</li>
+</ul>`,
+                    order_num: 1
+                },
+                {
+                    slug: 'about',
+                    title: 'О компании',
+                    subtitle: 'UK Architects — ваш надежный партнер в архитектуре',
+                    content: `<h2>Наша история</h2>
+<p>UK Architects — ведущее архитектурное бюро с многолетним опытом в создании современных и функциональных пространств. Мы специализируемся на комплексном подходе к проектированию, охватывающем все этапы от концепции до реализации.</p>
+
+<h2>Наша миссия</h2>
+<p>Создавать архитектурные решения, которые улучшают качество жизни людей, гармонично сочетая эстетику, функциональность и устойчивое развитие.</p>
+
+<h2>Наши ценности</h2>
+<ul>
+<li><strong>Инновации:</strong> Используем передовые технологии и современные подходы</li>
+<li><strong>Качество:</strong> Внимание к деталям на каждом этапе проекта</li>
+<li><strong>Индивидуальность:</strong> Уникальное решение для каждого клиента</li>
+<li><strong>Устойчивость:</strong> Экологичные и энергоэффективные решения</li>
+</ul>
+
+<h2>Наши достижения</h2>
+<ul>
+<li>Более 100 реализованных проектов</li>
+<li>Международные архитектурные награды</li>
+<li>Команда профессионалов с опытом 15+ лет</li>
+<li>Партнерство с ведущими строительными компаниями</li>
+</ul>`,
+                    order_num: 2
+                }
+            ];
+
+            defaultSections.forEach(section => {
+                db.prepare(`
+                    INSERT INTO sections (slug, title, subtitle, content, order_num, visible)
+                    VALUES (?, ?, ?, ?, ?, 1)
+                `).run(section.slug, section.title, section.subtitle, section.content, section.order_num);
+            });
+
+            console.log('✅ Созданы базовые разделы (пользовательское соглашение, политика конфиденциальности, о компании)');
         }
 
         console.log('✅ База данных инициализирована');
