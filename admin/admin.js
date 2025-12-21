@@ -74,108 +74,107 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Проверяем авторизацию
     checkAuth();
-});
 
-// Переключение разделов
-document.querySelectorAll('.sidebar nav a').forEach(link => {
-    link.addEventListener('click', (e) => {
-        e.preventDefault();
-        const sectionId = link.getAttribute('data-section');
+    // Переключение разделов
+    document.querySelectorAll('.sidebar nav a').forEach(link => {
+        link.addEventListener('click', (e) => {
+            e.preventDefault();
+            const sectionId = link.getAttribute('data-section');
 
-        if (!sectionId) return; // Пропускаем кнопку выхода
+            if (!sectionId) return; // Пропускаем кнопку выхода
 
-        // Обновление активного пункта меню
-        document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
-        link.classList.add('active');
+            // Обновление активного пункта меню
+            document.querySelectorAll('.sidebar nav a').forEach(a => a.classList.remove('active'));
+            link.classList.add('active');
 
-        // Показ нужной секции
-        document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
-        document.getElementById(sectionId).classList.add('active');
+            // Показ нужной секции
+            document.querySelectorAll('.section').forEach(section => section.classList.remove('active'));
+            document.getElementById(sectionId).classList.add('active');
 
-        // Загрузка данных для секции
-        loadSectionData(sectionId);
+            // Загрузка данных для секции
+            loadSectionData(sectionId);
+        });
     });
-});
 
-// Загрузка данных при открытии секции
-function loadSectionData(sectionId) {
-    switch (sectionId) {
-        case 'dashboard':
-            loadDashboard();
-            break;
-        case 'services':
-            loadServices();
-            break;
-        case 'projects':
-            loadProjects();
-            break;
-        case 'categories':
-            loadCategories();
-            break;
-        case 'stages':
-            loadStages();
-            break;
-        case 'reviews':
-            loadReviews();
-            break;
-        case 'sections':
-            loadSections();
-            break;
-        case 'team':
-            loadTeam();
-            break;
-        case 'faq':
-            loadFaq();
-            break;
-        case 'contact-requests':
-            loadContactRequests();
-            break;
-        case 'settings':
-            loadSettings();
-            break;
+    // Загрузка данных при открытии секции
+    function loadSectionData(sectionId) {
+        switch (sectionId) {
+            case 'dashboard':
+                loadDashboard();
+                break;
+            case 'services':
+                loadServices();
+                break;
+            case 'projects':
+                loadProjects();
+                break;
+            case 'categories':
+                loadCategories();
+                break;
+            case 'stages':
+                loadStages();
+                break;
+            case 'reviews':
+                loadReviews();
+                break;
+            case 'sections':
+                loadSections();
+                break;
+            case 'team':
+                loadTeam();
+                break;
+            case 'faq':
+                loadFaq();
+                break;
+            case 'contact-requests':
+                loadContactRequests();
+                break;
+            case 'settings':
+                loadSettings();
+                break;
+        }
     }
-}
 
-// Показ уведомлений
-function showAlert(message, type = 'success') {
-    const alertContainer = document.getElementById('alert-container');
-    const alert = document.createElement('div');
-    alert.className = `alert alert-${type}`;
-    alert.textContent = message;
-    alertContainer.appendChild(alert);
+    // Показ уведомлений
+    function showAlert(message, type = 'success') {
+        const alertContainer = document.getElementById('alert-container');
+        const alert = document.createElement('div');
+        alert.className = `alert alert-${type}`;
+        alert.textContent = message;
+        alertContainer.appendChild(alert);
 
-    setTimeout(() => {
-        alert.remove();
-    }, 3000);
-}
-
-// ========== DASHBOARD ==========
-async function loadDashboard() {
-    try {
-        const [services, projects, reviews, sections] = await Promise.all([
-            authFetch(`${API_URL}/services`).then(r => r.json()),
-            authFetch(`${API_URL}/projects`).then(r => r.json()),
-            authFetch(`${API_URL}/reviews`).then(r => r.json()),
-            authFetch(`${API_URL}/sections`).then(r => r.json())
-        ]);
-
-        document.getElementById('stat-services').textContent = services.length;
-        document.getElementById('stat-projects').textContent = projects.length;
-        document.getElementById('stat-reviews').textContent = reviews.length;
-        document.getElementById('stat-sections').textContent = sections.length;
-    } catch (error) {
-        console.error('Ошибка загрузки статистики:', error);
+        setTimeout(() => {
+            alert.remove();
+        }, 3000);
     }
-}
 
-// ========== УСЛУГИ ==========
-async function loadServices() {
-    try {
-        const response = await authFetch(`${API_URL}/services`);
-        const services = await response.json();
+    // ========== DASHBOARD ==========
+    async function loadDashboard() {
+        try {
+            const [services, projects, reviews, sections] = await Promise.all([
+                authFetch(`${API_URL}/services`).then(r => r.json()),
+                authFetch(`${API_URL}/projects`).then(r => r.json()),
+                authFetch(`${API_URL}/reviews`).then(r => r.json()),
+                authFetch(`${API_URL}/sections`).then(r => r.json())
+            ]);
 
-        const tbody = document.getElementById('services-table');
-        tbody.innerHTML = services.map(service => `
+            document.getElementById('stat-services').textContent = services.length;
+            document.getElementById('stat-projects').textContent = projects.length;
+            document.getElementById('stat-reviews').textContent = reviews.length;
+            document.getElementById('stat-sections').textContent = sections.length;
+        } catch (error) {
+            console.error('Ошибка загрузки статистики:', error);
+        }
+    }
+
+    // ========== УСЛУГИ ==========
+    async function loadServices() {
+        try {
+            const response = await authFetch(`${API_URL}/services`);
+            const services = await response.json();
+
+            const tbody = document.getElementById('services-table');
+            tbody.innerHTML = services.map(service => `
             <tr>
                 <td>${service.id}</td>
                 <td>${service.title}</td>
@@ -186,14 +185,14 @@ async function loadServices() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки услуг:', error);
-        showAlert('Ошибка загрузки услуг', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки услуг:', error);
+            showAlert('Ошибка загрузки услуг', 'error');
+        }
     }
-}
 
-function openServiceModal(id = null) {
-    const modalHtml = `
+    function openServiceModal(id = null) {
+        const modalHtml = `
         <div class="modal active" id="service-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -236,144 +235,144 @@ function openServiceModal(id = null) {
             </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    // Инициализируем Quill редактор
-    const serviceEditor = new Quill('#service-description-editor', {
-        theme: 'snow',
-        modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'align': [] }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                ['link', 'image'],
-                ['clean']
-            ]
-        }
-    });
-    window.serviceEditor = serviceEditor;
+        // Инициализируем Quill редактор
+        const serviceEditor = new Quill('#service-description-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+        window.serviceEditor = serviceEditor;
 
-    if (id) {
-        authFetch(`${API_URL}/services/${id}`)
-            .then(r => r.json())
-            .then(service => {
-                document.getElementById('service-title').value = service.title;
-                if (window.serviceEditor) {
-                    window.serviceEditor.root.innerHTML = service.description || '';
-                }
-                document.getElementById('service-icon').value = service.icon || '';
-                document.getElementById('service-order').value = service.order_num;
-                document.getElementById('service-visible').checked = service.visible === 1;
+        if (id) {
+            authFetch(`${API_URL}/services/${id}`)
+                .then(r => r.json())
+                .then(service => {
+                    document.getElementById('service-title').value = service.title;
+                    if (window.serviceEditor) {
+                        window.serviceEditor.root.innerHTML = service.description || '';
+                    }
+                    document.getElementById('service-icon').value = service.icon || '';
+                    document.getElementById('service-order').value = service.order_num;
+                    document.getElementById('service-visible').checked = service.visible === 1;
 
-                // Показываем текущее изображение, если есть
-                if (service.image_url) {
-                    document.getElementById('current-image-preview').innerHTML = `
+                    // Показываем текущее изображение, если есть
+                    if (service.image_url) {
+                        document.getElementById('current-image-preview').innerHTML = `
                         <img src="${service.image_url}" style="max-width: 200px; max-height: 150px; border-radius: 8px; margin-top: 5px;">
                         <p style="font-size: 12px; color: #666; margin-top: 5px;">Текущее изображение</p>
                     `;
-                }
-            });
-    }
-}
-
-async function saveService(event, id) {
-    event.preventDefault();
-
-    // Сохраняем содержимое Quill в скрытое поле ПЕРЕД созданием FormData
-    if (window.serviceEditor) {
-        const hiddenField = document.getElementById('service-description-hidden');
-        if (hiddenField) {
-            hiddenField.value = window.serviceEditor.root.innerHTML;
+                    }
+                });
         }
     }
 
-    const formData = new FormData(event.target);
+    async function saveService(event, id) {
+        event.preventDefault();
 
-    console.log('Отправка данных:', {
-        title: formData.get('title'),
-        description: formData.get('description'),
-        icon: formData.get('icon'),
-        order_num: formData.get('order_num'),
-        visible: formData.get('visible')
-    });
+        // Сохраняем содержимое Quill в скрытое поле ПЕРЕД созданием FormData
+        if (window.serviceEditor) {
+            const hiddenField = document.getElementById('service-description-hidden');
+            if (hiddenField) {
+                hiddenField.value = window.serviceEditor.root.innerHTML;
+            }
+        }
 
-    // Если файл не выбран, удаляем его из FormData
-    const imageFile = formData.get('image');
-    if (!imageFile || imageFile.size === 0) {
-        formData.delete('image');
-    }
+        const formData = new FormData(event.target);
 
-    try {
-        const response = await authFetch(`${API_URL}/services${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            body: formData  // Отправляем FormData напрямую для поддержки файлов
+        console.log('Отправка данных:', {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            icon: formData.get('icon'),
+            order_num: formData.get('order_num'),
+            visible: formData.get('visible')
         });
 
-        if (response.ok) {
-            showAlert(id ? 'Услуга обновлена' : 'Услуга добавлена');
-            closeModal('service-modal');
-            loadServices();
-        } else {
-            const errorText = await response.text();
-            console.error('Ошибка сервера:', errorText);
-            showAlert('Ошибка сохранения', 'error');
+        // Если файл не выбран, удаляем его из FormData
+        const imageFile = formData.get('image');
+        if (!imageFile || imageFile.size === 0) {
+            formData.delete('image');
         }
-    } catch (error) {
-        console.error('Ошибка:', error);
-        showAlert('Ошибка сохранения: ' + error.message, 'error');
+
+        try {
+            const response = await authFetch(`${API_URL}/services${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                body: formData  // Отправляем FormData напрямую для поддержки файлов
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Услуга обновлена' : 'Услуга добавлена');
+                closeModal('service-modal');
+                loadServices();
+            } else {
+                const errorText = await response.text();
+                console.error('Ошибка сервера:', errorText);
+                showAlert('Ошибка сохранения', 'error');
+            }
+        } catch (error) {
+            console.error('Ошибка:', error);
+            showAlert('Ошибка сохранения: ' + error.message, 'error');
+        }
     }
-}
 
-async function deleteService(id) {
-    if (!confirm('Удалить услугу?')) return;
+    async function deleteService(id) {
+        if (!confirm('Удалить услугу?')) return;
 
-    try {
-        await authFetch(`${API_URL}/services/${id}`, { method: 'DELETE' });
-        showAlert('Услуга удалена');
-        loadServices();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+        try {
+            await authFetch(`${API_URL}/services/${id}`, { method: 'DELETE' });
+            showAlert('Услуга удалена');
+            loadServices();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
     }
-}
 
-function deleteServiceImage() {
-    document.getElementById('service-image').value = '';
-    document.getElementById('current-image-preview').innerHTML = '';
-    // Добавляем скрытое поле для отметки удаления
-    let deleteFlag = document.getElementById('delete-service-image-flag');
-    if (!deleteFlag) {
-        deleteFlag = document.createElement('input');
-        deleteFlag.type = 'hidden';
-        deleteFlag.name = 'delete_image';
-        deleteFlag.id = 'delete-service-image-flag';
-        deleteFlag.value = '1';
-        document.querySelector('#service-modal form').appendChild(deleteFlag);
+    function deleteServiceImage() {
+        document.getElementById('service-image').value = '';
+        document.getElementById('current-image-preview').innerHTML = '';
+        // Добавляем скрытое поле для отметки удаления
+        let deleteFlag = document.getElementById('delete-service-image-flag');
+        if (!deleteFlag) {
+            deleteFlag = document.createElement('input');
+            deleteFlag.type = 'hidden';
+            deleteFlag.name = 'delete_image';
+            deleteFlag.id = 'delete-service-image-flag';
+            deleteFlag.value = '1';
+            document.querySelector('#service-modal form').appendChild(deleteFlag);
+        }
+        showAlert('Изображение будет удалено при сохранении', 'info');
     }
-    showAlert('Изображение будет удалено при сохранении', 'info');
-}
 
-function editService(id) {
-    openServiceModal(id);
-}
+    function editService(id) {
+        openServiceModal(id);
+    }
 
-// ========== ПРОЕКТЫ ==========
-async function loadProjects() {
-    try {
-        const [projectsResponse, categoriesResponse] = await Promise.all([
-            authFetch(`${API_URL}/projects`),
-            authFetch(`${API_URL}/project-categories`)
-        ]);
+    // ========== ПРОЕКТЫ ==========
+    async function loadProjects() {
+        try {
+            const [projectsResponse, categoriesResponse] = await Promise.all([
+                authFetch(`${API_URL}/projects`),
+                authFetch(`${API_URL}/project-categories`)
+            ]);
 
-        const projects = await projectsResponse.json();
-        const categoriesData = await categoriesResponse.json();
+            const projects = await projectsResponse.json();
+            const categoriesData = await categoriesResponse.json();
 
-        // Проверяем, что категории - это массив
-        window.projectCategories = Array.isArray(categoriesData) ? categoriesData : [];
+            // Проверяем, что категории - это массив
+            window.projectCategories = Array.isArray(categoriesData) ? categoriesData : [];
 
-        const tbody = document.getElementById('projects-table');
-        tbody.innerHTML = projects.map(project => `
+            const tbody = document.getElementById('projects-table');
+            tbody.innerHTML = projects.map(project => `
             <tr>
                 <td>${project.id}</td>
                 <td>${project.title}</td>
@@ -385,29 +384,29 @@ async function loadProjects() {
                 </td>
             </tr>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки проектов:', error);
-        window.projectCategories = [];
-        showAlert('Ошибка загрузки проектов', 'error');
+        } catch (error) {
+            console.error('Ошибка загрузки проектов:', error);
+            window.projectCategories = [];
+            showAlert('Ошибка загрузки проектов', 'error');
+        }
     }
-}
 
-function openProjectModal(id = null) {
-    const categories = Array.isArray(window.projectCategories) && window.projectCategories.length > 0
-        ? window.projectCategories
-        : [
-            'Жилые здания',
-            'Общественные пространства',
-            'Коммерческие объекты',
-            'Спортивные объекты',
-            'Медицинские объекты',
-            'Образовательные объекты',
-            'Мастер-планы'
-        ];
+    function openProjectModal(id = null) {
+        const categories = Array.isArray(window.projectCategories) && window.projectCategories.length > 0
+            ? window.projectCategories
+            : [
+                'Жилые здания',
+                'Общественные пространства',
+                'Коммерческие объекты',
+                'Спортивные объекты',
+                'Медицинские объекты',
+                'Образовательные объекты',
+                'Мастер-планы'
+            ];
 
-    const categoryOptions = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        const categoryOptions = categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
 
-    const modalHtml = `
+        const modalHtml = `
         <div class="modal active" id="project-modal">
             <div class="modal-content">
                 <div class="modal-header">
@@ -490,247 +489,247 @@ function openProjectModal(id = null) {
         </div>
     `;
 
-    document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('modal-container').innerHTML = modalHtml;
 
-    // Загрузка стадий из API
-    authFetch(`${API_URL}/stages`)
-        .then(r => r.json())
-        .then(stages => {
-            if (Array.isArray(stages) && stages.length > 0) {
-                const stagesHtml = stages.map(stage => `
+        // Загрузка стадий из API
+        authFetch(`${API_URL}/stages`)
+            .then(r => r.json())
+            .then(stages => {
+                if (Array.isArray(stages) && stages.length > 0) {
+                    const stagesHtml = stages.map(stage => `
                     <label style="display: block; margin: 5px 0;">
                         <input type="checkbox" name="stage" value="${stage.name}"> ${stage.name}
                     </label>
                 `).join('');
 
-                document.getElementById('stages-checkboxes').innerHTML = stagesHtml;
-            } else {
-                document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Стадии не настроены. Добавьте их в разделе "Стадии проектов"</p>';
+                    document.getElementById('stages-checkboxes').innerHTML = stagesHtml;
+                } else {
+                    document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Стадии не настроены. Добавьте их в разделе "Стадии проектов"</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка загрузки стадий:', error);
+                document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Ошибка загрузки стадий</p>';
+            });
+
+        // Инициализируем Quill редактор для проекта
+        const projectEditor = new Quill('#project-description-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
             }
-        })
-        .catch(error => {
-            console.error('Ошибка загрузки стадий:', error);
-            document.getElementById('stages-checkboxes').innerHTML = '<p style="color: #999;">Ошибка загрузки стадий</p>';
         });
+        window.projectEditor = projectEditor;
 
-    // Инициализируем Quill редактор для проекта
-    const projectEditor = new Quill('#project-description-editor', {
-        theme: 'snow',
-        modules: {
-            toolbar: [
-                [{ 'header': [1, 2, 3, false] }],
-                ['bold', 'italic', 'underline', 'strike'],
-                [{ 'color': [] }, { 'background': [] }],
-                [{ 'align': [] }],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }],
-                ['link', 'image'],
-                ['clean']
-            ]
-        }
-    });
-    window.projectEditor = projectEditor;
+        // Обработчик загрузки главного изображения
+        document.getElementById('project-image-file').addEventListener('change', async function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
 
-    // Обработчик загрузки главного изображения
-    document.getElementById('project-image-file').addEventListener('change', async function (e) {
-        const file = e.target.files[0];
-        if (file) {
-            const formData = new FormData();
-            formData.append('image', file);
+                try {
+                    const response = await authFetch(`${API_URL}/upload-image`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
 
-            try {
-                const response = await authFetch(`${API_URL}/upload-image`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-
-                document.getElementById('project-image').value = data.url;
-                document.getElementById('project-image-preview').innerHTML = `
+                    document.getElementById('project-image').value = data.url;
+                    document.getElementById('project-image-preview').innerHTML = `
                     <img src="${data.url}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                 `;
-            } catch (error) {
-                console.error('Ошибка загрузки изображения:', error);
-                alert('Ошибка при загрузке изображения');
+                } catch (error) {
+                    console.error('Ошибка загрузки изображения:', error);
+                    alert('Ошибка при загрузке изображения');
+                }
             }
-        }
-    });
-
-    // Обработчик загрузки галереи изображений
-    document.getElementById('project-gallery-files').addEventListener('change', async function (e) {
-        const files = Array.from(e.target.files);
-        if (files.length === 0) return;
-
-        const uploadedUrls = [];
-        const previewContainer = document.getElementById('project-gallery-preview');
-        previewContainer.innerHTML = '<p>Загрузка...</p>';
-
-        for (const file of files) {
-            const formData = new FormData();
-            formData.append('image', file);
-
-            try {
-                const response = await authFetch(`${API_URL}/upload-image`, {
-                    method: 'POST',
-                    body: formData
-                });
-                const data = await response.json();
-                uploadedUrls.push(data.url);
-            } catch (error) {
-                console.error('Ошибка загрузки изображения:', error);
-            }
-        }
-
-        // Обновляем текстовое поле и превью
-        const currentGallery = document.getElementById('project-gallery').value;
-        const existingUrls = currentGallery ? currentGallery.split('\n').filter(url => url.trim()) : [];
-        const allUrls = [...existingUrls, ...uploadedUrls];
-
-        document.getElementById('project-gallery').value = allUrls.join('\n');
-
-        previewContainer.innerHTML = allUrls.map(url => `
-            <img src="${url}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-        `).join('');
-    });
-
-    if (id) {
-        authFetch(`${API_URL}/projects/${id}`)
-            .then(r => r.json())
-            .then(project => {
-                document.getElementById('project-title').value = project.title;
-                if (window.projectEditor) {
-                    window.projectEditor.root.innerHTML = project.description || '';
-                }
-                document.getElementById('project-category').value = project.category || '';
-                document.getElementById('project-image').value = project.image_url || '';
-
-                // Показываем превью главного изображения
-                if (project.image_url) {
-                    document.getElementById('project-image-preview').innerHTML = `
-                        <img src="${project.image_url}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    `;
-                }
-
-                document.getElementById('project-gallery').value = project.gallery_images || '';
-
-                // Показываем превью галереи
-                if (project.gallery_images) {
-                    const urls = project.gallery_images.split('\n').filter(url => url.trim());
-                    document.getElementById('project-gallery-preview').innerHTML = urls.map(url => `
-                        <img src="${url}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    `).join('');
-                }
-
-                document.getElementById('project-address').value = project.address || '';
-                document.getElementById('project-year').value = project.year || '';
-                document.getElementById('project-total-area').value = project.total_area || '';
-                document.getElementById('project-floors').value = project.floors || '';
-                document.getElementById('project-client').value = project.client || '';
-
-                // Установка множественных значений для стадий
-                const stages = project.stage ? project.stage.split(',').map(s => s.trim()) : [];
-                document.querySelectorAll('input[name="stage"]').forEach(checkbox => {
-                    checkbox.checked = stages.includes(checkbox.value);
-                });
-
-                document.getElementById('project-visible').checked = project.visible === 1;
-            });
-    }
-}
-
-async function saveProject(event, id) {
-    event.preventDefault();
-
-    // Сохраняем содержимое Quill в скрытое поле ПЕРЕД созданием FormData
-    if (window.projectEditor) {
-        const hiddenField = document.getElementById('project-description-hidden');
-        if (hiddenField) {
-            hiddenField.value = window.projectEditor.root.innerHTML;
-        }
-    }
-
-    const formData = new FormData(event.target);
-
-    // Сбор всех выбранных стадий
-    const stages = [];
-    document.querySelectorAll('input[name="stage"]:checked').forEach(checkbox => {
-        stages.push(checkbox.value);
-    });
-
-    const data = {
-        title: formData.get('title'),
-        description: formData.get('description'),
-        category: formData.get('category'),
-        image_url: formData.get('image_url'),
-        gallery_images: formData.get('gallery_images'),
-        address: formData.get('address'),
-        year: formData.get('year') ? parseInt(formData.get('year')) : null,
-        total_area: formData.get('total_area'),
-        floors: formData.get('floors'),
-        client: formData.get('client'),
-        stage: stages.join(', '),
-        visible: document.getElementById('project-visible').checked ? 1 : 0
-    };
-
-    console.log('Сохранение проекта:', data);
-
-    try {
-        const response = await authFetch(`${API_URL}/projects${id ? `/${id}` : ''}`, {
-            method: id ? 'PUT' : 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
         });
 
-        if (response.ok) {
-            showAlert(id ? 'Проект обновлен' : 'Проект добавлен');
-            closeModal('project-modal');
-            loadProjects();
+        // Обработчик загрузки галереи изображений
+        document.getElementById('project-gallery-files').addEventListener('change', async function (e) {
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+
+            const uploadedUrls = [];
+            const previewContainer = document.getElementById('project-gallery-preview');
+            previewContainer.innerHTML = '<p>Загрузка...</p>';
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                try {
+                    const response = await authFetch(`${API_URL}/upload-image`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await response.json();
+                    uploadedUrls.push(data.url);
+                } catch (error) {
+                    console.error('Ошибка загрузки изображения:', error);
+                }
+            }
+
+            // Обновляем текстовое поле и превью
+            const currentGallery = document.getElementById('project-gallery').value;
+            const existingUrls = currentGallery ? currentGallery.split('\n').filter(url => url.trim()) : [];
+            const allUrls = [...existingUrls, ...uploadedUrls];
+
+            document.getElementById('project-gallery').value = allUrls.join('\n');
+
+            previewContainer.innerHTML = allUrls.map(url => `
+            <img src="${url}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+        `).join('');
+        });
+
+        if (id) {
+            authFetch(`${API_URL}/projects/${id}`)
+                .then(r => r.json())
+                .then(project => {
+                    document.getElementById('project-title').value = project.title;
+                    if (window.projectEditor) {
+                        window.projectEditor.root.innerHTML = project.description || '';
+                    }
+                    document.getElementById('project-category').value = project.category || '';
+                    document.getElementById('project-image').value = project.image_url || '';
+
+                    // Показываем превью главного изображения
+                    if (project.image_url) {
+                        document.getElementById('project-image-preview').innerHTML = `
+                        <img src="${project.image_url}" style="max-width: 200px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    `;
+                    }
+
+                    document.getElementById('project-gallery').value = project.gallery_images || '';
+
+                    // Показываем превью галереи
+                    if (project.gallery_images) {
+                        const urls = project.gallery_images.split('\n').filter(url => url.trim());
+                        document.getElementById('project-gallery-preview').innerHTML = urls.map(url => `
+                        <img src="${url}" style="width: 100%; height: 100px; object-fit: cover; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    `).join('');
+                    }
+
+                    document.getElementById('project-address').value = project.address || '';
+                    document.getElementById('project-year').value = project.year || '';
+                    document.getElementById('project-total-area').value = project.total_area || '';
+                    document.getElementById('project-floors').value = project.floors || '';
+                    document.getElementById('project-client').value = project.client || '';
+
+                    // Установка множественных значений для стадий
+                    const stages = project.stage ? project.stage.split(',').map(s => s.trim()) : [];
+                    document.querySelectorAll('input[name="stage"]').forEach(checkbox => {
+                        checkbox.checked = stages.includes(checkbox.value);
+                    });
+
+                    document.getElementById('project-visible').checked = project.visible === 1;
+                });
         }
-    } catch (error) {
-        showAlert('Ошибка сохранения', 'error');
     }
-}
 
-async function deleteProject(id) {
-    if (!confirm('Удалить проект?')) return;
+    async function saveProject(event, id) {
+        event.preventDefault();
 
-    try {
-        await authFetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
-        showAlert('Проект удален');
-        loadProjects();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
+        // Сохраняем содержимое Quill в скрытое поле ПЕРЕД созданием FormData
+        if (window.projectEditor) {
+            const hiddenField = document.getElementById('project-description-hidden');
+            if (hiddenField) {
+                hiddenField.value = window.projectEditor.root.innerHTML;
+            }
+        }
+
+        const formData = new FormData(event.target);
+
+        // Сбор всех выбранных стадий
+        const stages = [];
+        document.querySelectorAll('input[name="stage"]:checked').forEach(checkbox => {
+            stages.push(checkbox.value);
+        });
+
+        const data = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            category: formData.get('category'),
+            image_url: formData.get('image_url'),
+            gallery_images: formData.get('gallery_images'),
+            address: formData.get('address'),
+            year: formData.get('year') ? parseInt(formData.get('year')) : null,
+            total_area: formData.get('total_area'),
+            floors: formData.get('floors'),
+            client: formData.get('client'),
+            stage: stages.join(', '),
+            visible: document.getElementById('project-visible').checked ? 1 : 0
+        };
+
+        console.log('Сохранение проекта:', data);
+
+        try {
+            const response = await authFetch(`${API_URL}/projects${id ? `/${id}` : ''}`, {
+                method: id ? 'PUT' : 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            });
+
+            if (response.ok) {
+                showAlert(id ? 'Проект обновлен' : 'Проект добавлен');
+                closeModal('project-modal');
+                loadProjects();
+            }
+        } catch (error) {
+            showAlert('Ошибка сохранения', 'error');
+        }
     }
-}
 
-function deleteProjectMainImage() {
-    document.getElementById('project-image').value = '';
-    document.getElementById('project-image-preview').innerHTML = '';
-    document.getElementById('project-image-file').value = '';
-    showAlert('Изображение будет удалено при сохранении', 'info');
-}
+    async function deleteProject(id) {
+        if (!confirm('Удалить проект?')) return;
 
-function deleteProjectGallery() {
-    document.getElementById('project-gallery').value = '';
-    document.getElementById('project-gallery-preview').innerHTML = '';
-    document.getElementById('project-gallery-files').value = '';
-    showAlert('Галерея будет очищена при сохранении', 'info');
-}
+        try {
+            await authFetch(`${API_URL}/projects/${id}`, { method: 'DELETE' });
+            showAlert('Проект удален');
+            loadProjects();
+        } catch (error) {
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
 
-function editProject(id) {
-    openProjectModal(id);
-}
+    function deleteProjectMainImage() {
+        document.getElementById('project-image').value = '';
+        document.getElementById('project-image-preview').innerHTML = '';
+        document.getElementById('project-image-file').value = '';
+        showAlert('Изображение будет удалено при сохранении', 'info');
+    }
 
-// Остальные функции для reviews, sections, team, faq аналогично...
-// Для краткости не буду дублировать весь код
+    function deleteProjectGallery() {
+        document.getElementById('project-gallery').value = '';
+        document.getElementById('project-gallery-preview').innerHTML = '';
+        document.getElementById('project-gallery-files').value = '';
+        showAlert('Галерея будет очищена при сохранении', 'info');
+    }
 
-// ========== КАТЕГОРИИ ПРОЕКТОВ ==========
-async function loadCategories() {
-    try {
-        const response = await authFetch(`${API_URL}/categories`);
-        const categories = await response.json();
+    function editProject(id) {
+        openProjectModal(id);
+    }
 
-        const container = document.getElementById('categories-list');
-        container.innerHTML = categories.map(category => `
+    // Остальные функции для reviews, sections, team, faq аналогично...
+    // Для краткости не буду дублировать весь код
+
+    // ========== КАТЕГОРИИ ПРОЕКТОВ ==========
+    async function loadCategories() {
+        try {
+            const response = await authFetch(`${API_URL}/categories`);
+            const categories = await response.json();
+
+            const container = document.getElementById('categories-list');
+            container.innerHTML = categories.map(category => `
             <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 5px;">
                 <input type="text" value="${category.name}" 
                     style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
@@ -738,71 +737,71 @@ async function loadCategories() {
                 <button class="btn btn-danger" onclick="deleteCategory(${category.id})">Удалить</button>
             </div>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки категорий:', error);
-        showAlert('Ошибка загрузки категорий', 'error');
-    }
-}
-
-async function addCategory() {
-    showInputModal(
-        'Добавить категорию проекта',
-        'Введите название новой категории...',
-        async (categoryName) => {
-            try {
-                await authFetch(`${API_URL}/categories`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: categoryName })
-                });
-                showAlert('Категория добавлена');
-                loadCategories();
-            } catch (error) {
-                console.error('Ошибка добавления категории:', error);
-                showAlert('Ошибка добавления', 'error');
-            }
+        } catch (error) {
+            console.error('Ошибка загрузки категорий:', error);
+            showAlert('Ошибка загрузки категорий', 'error');
         }
-    );
-}
-
-async function updateCategory(id, name) {
-    try {
-        await authFetch(`${API_URL}/categories/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
-        });
-        showAlert('Категория обновлена');
-    } catch (error) {
-        console.error('Ошибка обновления категории:', error);
-        showAlert('Ошибка обновления', 'error');
-        loadCategories(); // Перезагружаем чтобы откатить изменения
     }
-}
 
-async function deleteCategory(id) {
-    if (!confirm('Удалить категорию? Это действие нельзя отменить.')) return;
-
-    try {
-        await authFetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
-        showAlert('Категория удалена');
-        loadCategories();
-    } catch (error) {
-        console.error('Ошибка удаления категории:', error);
-        showAlert('Ошибка удаления', 'error');
+    async function addCategory() {
+        showInputModal(
+            'Добавить категорию проекта',
+            'Введите название новой категории...',
+            async (categoryName) => {
+                try {
+                    await authFetch(`${API_URL}/categories`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: categoryName })
+                    });
+                    showAlert('Категория добавлена');
+                    loadCategories();
+                } catch (error) {
+                    console.error('Ошибка добавления категории:', error);
+                    showAlert('Ошибка добавления', 'error');
+                }
+            }
+        );
     }
-}
 
-// ========== СТАДИИ ПРОЕКТОВ ==========
-async function loadStages() {
-    try {
-        const response = await authFetch(`${API_URL}/stages`);
-        const stages = await response.json();
+    async function updateCategory(id, name) {
+        try {
+            await authFetch(`${API_URL}/categories/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            showAlert('Категория обновлена');
+        } catch (error) {
+            console.error('Ошибка обновления категории:', error);
+            showAlert('Ошибка обновления', 'error');
+            loadCategories(); // Перезагружаем чтобы откатить изменения
+        }
+    }
 
-        window.projectStages = stages.map(stage => stage.name);
+    async function deleteCategory(id) {
+        if (!confirm('Удалить категорию? Это действие нельзя отменить.')) return;
 
-        const container = document.getElementById('stages-list');
-        container.innerHTML = stages.map(stage => `
+        try {
+            await authFetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
+            showAlert('Категория удалена');
+            loadCategories();
+        } catch (error) {
+            console.error('Ошибка удаления категории:', error);
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
+
+    // ========== СТАДИИ ПРОЕКТОВ ==========
+    async function loadStages() {
+        try {
+            const response = await authFetch(`${API_URL}/stages`);
+            const stages = await response.json();
+
+            window.projectStages = stages.map(stage => stage.name);
+
+            const container = document.getElementById('stages-list');
+            container.innerHTML = stages.map(stage => `
             <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px; padding: 10px; background: #f5f5f5; border-radius: 5px;">
                 <input type="text" value="${stage.name}" 
                        onblur="updateStage(${stage.id}, this.value)" 
@@ -810,59 +809,60 @@ async function loadStages() {
                 <button class="btn btn-danger" onclick="deleteStage(${stage.id})" style="padding: 8px 15px;">Удалить</button>
             </div>
         `).join('');
-    } catch (error) {
-        console.error('Ошибка загрузки стадий:', error);
-        showAlert('Ошибка загрузки стадий', 'error');
-    }
-}
-
-async function updateStage(id, name) {
-    try {
-        await authFetch(`${API_URL}/stages/${id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name })
-        });
-        showAlert('Стадия обновлена');
-        loadStages();
-    } catch (error) {
-        console.error('Ошибка обновления стадии:', error);
-        showAlert('Ошибка обновления', 'error');
-    }
-}
-
-async function deleteStage(id) {
-    if (!confirm('Удалить стадию?')) return;
-
-    try {
-        await authFetch(`${API_URL}/stages/${id}`, { method: 'DELETE' });
-        showAlert('Стадия удалена');
-        loadStages();
-    } catch (error) {
-        console.error('Ошибка удаления стадии:', error);
-        showAlert('Ошибка удаления', 'error');
-    }
-}
-
-async function addStage() {
-    showInputModal(
-        'Добавить стадию проекта',
-        'Введите название новой стадии...',
-        async (stageName) => {
-            try {
-                await authFetch(`${API_URL}/stages`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ name: stageName })
-                });
-                showAlert('Стадия добавлена');
-                loadStages();
-            } catch (error) {
-                console.error('Ошибка добавления стадии:', error);
-                showAlert('Ошибка добавления', 'error');
-            }
+        } catch (error) {
+            console.error('Ошибка загрузки стадий:', error);
+            showAlert('Ошибка загрузки стадий', 'error');
         }
-    );
+    }
+
+    async function updateStage(id, name) {
+        try {
+            await authFetch(`${API_URL}/stages/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name })
+            });
+            showAlert('Стадия обновлена');
+            loadStages();
+        } catch (error) {
+            console.error('Ошибка обновления стадии:', error);
+            showAlert('Ошибка обновления', 'error');
+        }
+    }
+
+    async function deleteStage(id) {
+        if (!confirm('Удалить стадию?')) return;
+
+        try {
+            await authFetch(`${API_URL}/stages/${id}`, { method: 'DELETE' });
+            showAlert('Стадия удалена');
+            loadStages();
+        } catch (error) {
+            console.error('Ошибка удаления стадии:', error);
+            showAlert('Ошибка удаления', 'error');
+        }
+    }
+
+    async function addStage() {
+        showInputModal(
+            'Добавить стадию проекта',
+            'Введите название новой стадии...',
+            async (stageName) => {
+                try {
+                    await authFetch(`${API_URL}/stages`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name: stageName })
+                    });
+                    showAlert('Стадия добавлена');
+                    loadStages();
+                } catch (error) {
+                    console.error('Ошибка добавления стадии:', error);
+                    showAlert('Ошибка добавления', 'error');
+                }
+            }
+        );
+    }
 
     // ========== ОТЗЫВЫ ==========
     async function loadReviews() {
@@ -1718,19 +1718,19 @@ async function addStage() {
             console.error('Ошибка загрузки профиля:', error);
         }
     });
+});
 
-    // Utility function for closing modals
-    function closeModal(modalId) {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            modal.remove();
-        }
+// Utility functions (outside DOMContentLoaded for global access)
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.remove();
     }
+}
 
-    // Utility function for input modal
-    function showInputModal(title, placeholder, callback) {
-        const modalId = 'input-modal';
-        const modalHtml = `
+function showInputModal(title, placeholder, callback) {
+    const modalId = 'input-modal';
+    const modalHtml = `
         <div class="modal active" id="${modalId}">
             <div class="modal-content" style="max-width: 400px;">
                 <div class="modal-header">
@@ -1751,20 +1751,19 @@ async function addStage() {
         </div>
     `;
 
-        document.getElementById('modal-container').innerHTML = modalHtml;
-        document.getElementById('input-modal-text').focus();
+    document.getElementById('modal-container').innerHTML = modalHtml;
+    document.getElementById('input-modal-text').focus();
 
-        // Store callback for later use
-        window.inputModalCallback = callback;
-    }
+    // Store callback for later use
+    window.inputModalCallback = callback;
+}
 
-    function handleInputModalSubmit(event, modalId) {
-        event.preventDefault();
-        const value = document.getElementById('input-modal-text').value.trim();
-        if (value && window.inputModalCallback) {
-            window.inputModalCallback(value);
-        }
-        closeModal(modalId);
+function handleInputModalSubmit(event, modalId) {
+    event.preventDefault();
+    const value = document.getElementById('input-modal-text').value.trim();
+    if (value && window.inputModalCallback) {
+        window.inputModalCallback(value);
     }
-});
+    closeModal(modalId);
+}
 
