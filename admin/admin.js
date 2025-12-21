@@ -1718,6 +1718,38 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Ошибка загрузки профиля:', error);
         }
     });
+
+    // Make functions globally available for onclick handlers
+    window.openServiceModal = openServiceModal;
+    window.openProjectModal = openProjectModal;
+    window.openReviewModal = openReviewModal;
+    window.openSectionModal = openSectionModal;
+    window.openTeamModal = openTeamModal;
+    window.openFaqModal = openFaqModal;
+    window.saveServiceFunction = saveService;
+    window.saveProjectFunction = saveProject;
+    window.saveReviewFunction = saveReview;
+    window.saveSectionFunction = saveSection;
+    window.saveTeamMemberFunction = saveTeamMember;
+    window.saveFaqFunction = saveFaq;
+    window.deleteServiceFunction = deleteService;
+    window.deleteProjectFunction = deleteProject;
+    window.deleteReviewFunction = deleteReview;
+    window.deleteSectionFunction = deleteSection;
+    window.deleteTeamMemberFunction = deleteTeamMember;
+    window.deleteFaqFunction = deleteFaq;
+    window.viewContactRequestFunction = viewContactRequest;
+    window.deleteContactRequestFunction = deleteContactRequest;
+    window.markAsProcessedFunction = markAsProcessed;
+    window.deleteServiceImageFunction = deleteServiceImage;
+    window.deleteProjectMainImageFunction = deleteProjectMainImage;
+    window.deleteProjectGalleryFunction = deleteProjectGallery;
+    window.updateCategory = updateCategory;
+    window.deleteCategory = deleteCategory;
+    window.addCategory = addCategory;
+    window.updateStage = updateStage;
+    window.deleteStage = deleteStage;
+    window.addStage = addStage;
 });
 
 // Utility functions (outside DOMContentLoaded for global access)
@@ -1765,5 +1797,102 @@ function handleInputModalSubmit(event, modalId) {
         window.inputModalCallback(value);
     }
     closeModal(modalId);
+}
+
+// Global functions for onclick handlers
+function editService(id) {
+    if (window.openServiceModal) window.openServiceModal(id);
+}
+
+function deleteService(id) {
+    if (window.deleteServiceFunction) window.deleteServiceFunction(id);
+}
+
+function editProject(id) {
+    if (window.openProjectModal) window.openProjectModal(id);
+}
+
+function deleteProject(id) {
+    if (window.deleteProjectFunction) window.deleteProjectFunction(id);
+}
+
+function editReview(id) {
+    if (window.openReviewModal) window.openReviewModal(id);
+}
+
+function deleteReview(id) {
+    if (window.deleteReviewFunction) window.deleteReviewFunction(id);
+}
+
+function editSection(id) {
+    if (window.openSectionModal) window.openSectionModal(id);
+}
+
+function deleteSection(id) {
+    if (window.deleteSectionFunction) window.deleteSectionFunction(id);
+}
+
+function editTeamMember(id) {
+    if (window.openTeamModal) window.openTeamModal(id);
+}
+
+function deleteTeamMember(id) {
+    if (window.deleteTeamMemberFunction) window.deleteTeamMemberFunction(id);
+}
+
+function editFaq(id) {
+    if (window.openFaqModal) window.openFaqModal(id);
+}
+
+function deleteFaq(id) {
+    if (window.deleteFaqFunction) window.deleteFaqFunction(id);
+}
+
+function viewContactRequest(id) {
+    if (window.viewContactRequestFunction) window.viewContactRequestFunction(id);
+}
+
+function deleteContactRequest(id) {
+    if (window.deleteContactRequestFunction) window.deleteContactRequestFunction(id);
+}
+
+function markAsProcessed(id) {
+    if (window.markAsProcessedFunction) window.markAsProcessedFunction(id);
+}
+
+function saveService(event, id) {
+    if (window.saveServiceFunction) window.saveServiceFunction(event, id);
+}
+
+function saveProject(event, id) {
+    if (window.saveProjectFunction) window.saveProjectFunction(event, id);
+}
+
+function saveReview(event, id) {
+    if (window.saveReviewFunction) window.saveReviewFunction(event, id);
+}
+
+function saveSection(event, id) {
+    if (window.saveSectionFunction) window.saveSectionFunction(event, id);
+}
+
+function saveTeamMember(event, id) {
+    if (window.saveTeamMemberFunction) window.saveTeamMemberFunction(event, id);
+}
+
+function saveFaq(event, id) {
+    if (window.saveFaqFunction) window.saveFaqFunction(event, id);
+}
+
+function deleteServiceImage() {
+    if (window.deleteServiceImageFunction) window.deleteServiceImageFunction();
+}
+
+function deleteProjectMainImage() {
+    if (window.deleteProjectMainImageFunction) window.deleteProjectMainImageFunction();
+}
+
+function deleteProjectGallery() {
+    if (window.deleteProjectGalleryFunction) window.deleteProjectGalleryFunction();
 }
 

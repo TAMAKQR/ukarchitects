@@ -1614,8 +1614,8 @@ app.delete('/api/settings/:key', (req, res) => {
 app.post('/api/contact', (req, res) => {
     try {
         const { name, phone, email, message } = req.body;
-        const stmt = db.prepare('INSERT INTO contact_requests (name, phone, email, message, created_at) VALUES (?, ?, ?, ?, ?)');
-        const info = stmt.run(name, phone, email || '', message || '', new Date().toISOString());
+        const stmt = db.prepare('INSERT INTO contact_requests (name, phone, email, message) VALUES (?, ?, ?, ?)');
+        const info = stmt.run(name, phone, email || '', message || '');
         res.json({ id: info.lastInsertRowid, message: 'Заявка отправлена' });
     } catch (error) {
         res.status(500).json({ error: error.message });
