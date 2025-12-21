@@ -726,20 +726,16 @@ function editProject(id) {
 // ========== КАТЕГОРИИ ПРОЕКТОВ ==========
 async function loadCategories() {
     try {
-        const response = await authFetch(`${API_URL}/settings`);
-        const settings = await response.json();
-
-        const categories = Object.entries(settings)
-            .filter(([key]) => key.startsWith('project_category_'))
-            .sort(([keyA], [keyB]) => keyA.localeCompare(keyB));
+        const response = await authFetch(`${API_URL}/categories`);
+        const categories = await response.json();
 
         const container = document.getElementById('categories-list');
-        container.innerHTML = categories.map(([key, value]) => `
+        container.innerHTML = categories.map(category => `
             <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-                <input type="text" value="${value}" id="${key}" 
+                <input type="text" value="${category.name}" 
                     style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
-                    onchange="updateCategory('${key}', this.value)">
-                <button class="btn btn-danger" onclick="deleteCategory('${key}')">Удалить</button>
+                    onblur="updateCategory(${category.id}, this.value)">
+                <button class="btn btn-danger" onclick="deleteCategory(${category.id})">Удалить</button>
             </div>
         `).join('');
     } catch (error) {
@@ -774,36 +770,53 @@ async function deleteCategory(key) {
     }
 }
 
-function addCategory() {
+async function addCategory() {
     showInputModal(
         'Добавить категорию проекта',
         'Введите название новой категории...',
-        (categoryName) => {
-            // Найти максимальный номер категории
-            authFetch(`${API_URL}/settings`)
-                .then(r => r.json())
-                .then(settings => {
-                    const categoryKeys = Object.keys(settings).filter(k => k.startsWith('project_category_'));
-                    const maxNum = categoryKeys.length > 0
-                        ? Math.max(...categoryKeys.map(k => parseInt(k.replace('project_category_', ''))))
-                        : 0;
-                    const newKey = `project_category_${maxNum + 1}`;
-
-                    return authFetch(`${API_URL}/settings/${newKey}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ value: categoryName })
-                    });
-                })
-                .then(() => {
-                    showAlert('Категория добавлена');
-                    loadCategories();
-                })
-                .catch(error => {
-                    showAlert('Ошибка добавления', 'error');
+        async (categoryName) => {
+            try {
+                await authFetch(`${API_URL}/categories`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name: categoryName })
                 });
+                showAlert('Категория добавлена');
+                loadCategories();
+            } catch (error) {
+                console.error('Ошибка добавления категории:', error);
+                showAlert('Ошибка добавления', 'error');
+            }
         }
     );
+}
+
+async function updateCategory(id, name) {
+    try {
+        await authFetch(`${API_URL}/categories/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name })
+        });
+        showAlert('Категория обновлена');
+    } catch (error) {
+        console.error('Ошибка обновления категории:', error);
+        showAlert('Ошибка обновления', 'error');
+        loadCategories(); // Перезагружаем чтобы откатить изменения
+    }
+}
+
+async function deleteCategory(id) {
+    if (!confirm('Удалить категорию? Это действие нельзя отменить.')) return;
+
+    try {
+        await authFetch(`${API_URL}/categories/${id}`, { method: 'DELETE' });
+        showAlert('Категория удалена');
+        loadCategories();
+    } catch (error) {
+        console.error('Ошибка удаления категории:', error);
+        showAlert('Ошибка удаления', 'error');
+    }
 }
 
 // ========== СТАДИИ ПРОЕКТОВ ==========

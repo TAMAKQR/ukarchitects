@@ -1293,6 +1293,68 @@ app.delete('/api/stages/:id', requireAuth, (req, res) => {
     }
 });
 
+// ============= CATEGORIES =============
+
+app.get('/api/categories', (req, res) => {
+    try {
+        const categories = db.prepare('SELECT * FROM categories WHERE visible = 1 ORDER BY order_num, name').all();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/categories', requireAuth, (req, res) => {
+    try {
+        const { name } = req.body;
+
+        if (!name) {
+            return res.status(400).json({ error: 'Название категории обязательно' });
+        }
+
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+        const maxOrder = db.prepare('SELECT MAX(order_num) as max FROM categories').get();
+        const orderNum = (maxOrder?.max || 0) + 1;
+
+        const result = db.prepare(`
+            INSERT INTO categories (name, slug, order_num, visible)
+            VALUES (?, ?, ?, 1)
+        `).run(name, slug, orderNum);
+
+        const newCategory = db.prepare('SELECT * FROM categories WHERE id = ?').get(result.lastInsertRowid);
+        res.json(newCategory);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/categories/:id', requireAuth, (req, res) => {
+    try {
+        const { name } = req.body;
+        const slug = name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+
+        db.prepare(`
+            UPDATE categories 
+            SET name = ?, slug = ?
+            WHERE id = ?
+        `).run(name, slug, req.params.id);
+
+        const updatedCategory = db.prepare('SELECT * FROM categories WHERE id = ?').get(req.params.id);
+        res.json(updatedCategory);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/categories/:id', requireAuth, (req, res) => {
+    try {
+        db.prepare('DELETE FROM categories WHERE id = ?').run(req.params.id);
+        res.json({ message: 'Категория удалена' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // ============= FAQ =============
 
 app.get('/api/faq', (req, res) => {
