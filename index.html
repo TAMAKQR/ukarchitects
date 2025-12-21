@@ -762,6 +762,7 @@
 
 <body>
     <div id="header-placeholder"></div>
+    <script src="/js/header-contacts.js"></script>
 
     <!-- Hero Slider -->
     <section class="hero-slider" id="hero-slider">
@@ -1671,6 +1672,9 @@
                     loadServicesDropdown();
                     initServicesToggle();
                     initMobileMenu();
+                    if (window.refreshMobileContacts) {
+                        window.refreshMobileContacts();
+                    }
                 }, 100);
             });
 

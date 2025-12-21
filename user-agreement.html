@@ -10,9 +10,14 @@
 
     <!-- Подключение header -->
     <script src="js/jquery-1.10.2.min.js"></script>
+    <script src="js/header-contacts.js"></script>
     <script>
         $(document).ready(function () {
-            $("#header-container").load("header.html");
+            $("#header-container").load("header.html", function () {
+                if (window.refreshMobileContacts) {
+                    window.refreshMobileContacts();
+                }
+            });
         });
     </script>
 </head>

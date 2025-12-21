@@ -479,6 +479,7 @@
 
 <body>
     <div id="header-placeholder"></div>
+    <script src="/js/header-contacts.js"></script>
     <script>
         window.toggleMobileMenu = function () {
             const mobileNav = document.getElementById('mobile-nav');
@@ -555,6 +556,9 @@
                     initServicesToggle();
                     initMobileMenu();
                     loadMobileServices();
+                    if (window.refreshMobileContacts) {
+                        window.refreshMobileContacts();
+                    }
                 }, 100);
             });
 
