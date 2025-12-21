@@ -603,7 +603,7 @@
             console.log('Project image_url:', project.image_url, 'для проекта:', project.title);
             return `
                 <div class="project-card" onclick="window.location.href='/project.html?id=${project.id}'">
-                    ${project.image_url ? `<img src="${project.image_url}" alt="${project.title}" class="project-image">` : '<div class="project-image" style="background: #e0e0e0;"></div>'}
+                    ${project.image_url && project.image_url !== 'undefined' && project.image_url.trim() !== '' ? `<img src="${project.image_url}" alt="${project.title}" class="project-image">` : '<div class="project-image" style="background: #e0e0e0;"></div>'}
                     <div class="project-content">
                         <span class="project-category">${project.category || 'Без категории'}</span>
                         <h3 class="project-title">${project.title}</h3>

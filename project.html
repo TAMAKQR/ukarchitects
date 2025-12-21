@@ -666,7 +666,7 @@
                 document.getElementById('project-title').textContent = project.title;
 
                 // Отображение главного изображения после заголовка
-                if (project.image_url) {
+                if (project.image_url && project.image_url !== 'undefined' && project.image_url.trim() !== '') {
                     document.getElementById('main-image-container').innerHTML = `
                         <img src="${project.image_url}" alt="${project.title}" 
                              style="width: 100%; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
