@@ -209,6 +209,8 @@
             border-radius: 12px;
             font-size: 12px;
             font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
         }
 
         .stage-concept {
@@ -426,13 +428,26 @@
             });
 
         function initMobileMenu() {
+            // Определяем функцию toggleMobileMenu глобально
+            window.toggleMobileMenu = function () {
+                const overlay = document.getElementById('mobile-menu-overlay');
+                const btn = document.getElementById('mobile-menu-btn');
+                if (overlay && btn) {
+                    overlay.classList.toggle('active');
+                    btn.classList.toggle('active');
+
+                    // Предотвращаем прокрутку боди при открытом меню
+                    document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
+                }
+            };
+
             const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', function () {
-                    const mobileNav = document.getElementById('mobile-nav');
+                    const overlay = document.getElementById('mobile-menu-overlay');
                     const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-                    if (mobileNav && mobileMenuBtn) {
-                        mobileNav.classList.remove('active');
+                    if (overlay && mobileMenuBtn) {
+                        overlay.classList.remove('active');
                         mobileMenuBtn.classList.remove('active');
                         document.body.style.overflow = '';
                     }
