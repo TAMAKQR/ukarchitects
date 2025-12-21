@@ -438,36 +438,66 @@
 <script>
     // Mobile menu toggle
     function toggleMobileMenu() {
-        const mobileNav = document.getElementById('mobile-nav');
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const overlay = document.getElementById('mobile-menu-overlay');
+        const btn = document.getElementById('mobile-menu-btn');
 
-        mobileNav.classList.toggle('active');
-        mobileMenuBtn.classList.toggle('active');
+        if (overlay && btn) {
+            overlay.classList.toggle('active');
+            btn.classList.toggle('active');
 
-        // Prevent body scroll when menu is open
-        if (mobileNav.classList.contains('active')) {
-            document.body.style.overflow = 'hidden';
-        } else {
-            document.body.style.overflow = '';
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
         }
     }
 
-    // Close mobile menu when clicking on a link
+    // Close mobile menu when clicking on a link (except services toggle and service items)
     document.addEventListener('DOMContentLoaded', function () {
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav a:not(.mobile-services-title):not(.mobile-service-item)');
         mobileNavLinks.forEach(link => {
             link.addEventListener('click', function () {
-                const mobileNav = document.getElementById('mobile-nav');
-                const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+                const overlay = document.getElementById('mobile-menu-overlay');
+                const btn = document.getElementById('mobile-menu-btn');
 
-                mobileNav.classList.remove('active');
-                mobileMenuBtn.classList.remove('active');
-                document.body.style.overflow = '';
+                if (overlay && btn) {
+                    overlay.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
             });
         });
 
+        // Mobile services toggle
+        const mobileServicesToggle = document.getElementById('mobile-services-toggle');
+        const mobileServicesList = document.getElementById('mobile-services-list');
+        if (mobileServicesToggle && mobileServicesList) {
+            mobileServicesToggle.addEventListener('click', function () {
+                if (mobileServicesList.style.maxHeight === '0px' || !mobileServicesList.style.maxHeight) {
+                    mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
+                } else {
+                    mobileServicesList.style.maxHeight = '0px';
+                }
+            });
+        }
+
         // Load services for mobile menu
         loadMobileServices();
+
+        // Close menu when clicking on service items (after services are loaded)
+        setTimeout(() => {
+            const serviceItems = document.querySelectorAll('.mobile-service-item');
+            serviceItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    const overlay = document.getElementById('mobile-menu-overlay');
+                    const btn = document.getElementById('mobile-menu-btn');
+
+                    if (overlay && btn) {
+                        overlay.classList.remove('active');
+                        btn.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+        }, 500);
     });
 
     async function loadMobileServices() {
