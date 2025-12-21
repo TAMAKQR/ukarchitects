@@ -1521,6 +1521,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     fields: [
                         { key: 'instagram_url', label: 'Instagram', type: 'url', description: 'Полная ссылка на профиль Instagram' },
                         { key: 'facebook_url', label: 'Facebook', type: 'url', description: 'Полная ссылка на страницу Facebook' },
+                        { key: 'whatsapp_url', label: 'WhatsApp', type: 'url', description: 'Полная ссылка на WhatsApp чат' },
                         { key: 'linkedin_url', label: 'LinkedIn', type: 'url', description: 'Полная ссылка на профиль LinkedIn' },
                         { key: 'youtube_url', label: 'YouTube', type: 'url', description: 'Полная ссылка на канал YouTube' },
                         { key: 'telegram_url', label: 'Telegram', type: 'url', description: 'Полная ссылка на Telegram' },

@@ -1214,7 +1214,13 @@ app.delete('/api/reviews/:id', requireAuth, (req, res) => {
 
 app.get('/api/sections', (req, res) => {
     try {
-        const sections = db.prepare('SELECT * FROM sections WHERE visible = 1 ORDER BY order_num').all();
+        // Исключаем служебные страницы из основных разделов сайта
+        const sections = db.prepare(`
+            SELECT * FROM sections 
+            WHERE visible = 1 
+            AND slug NOT IN ('user-agreement', 'privacy-policy', 'about') 
+            ORDER BY order_num
+        `).all();
         res.json(sections);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1569,12 +1575,16 @@ app.delete('/api/faq/:id', (req, res) => {
 
 app.get('/api/settings', (req, res) => {
     try {
-        const settings = db.prepare('SELECT * FROM settings').all();
-        const settingsObj = {};
-        settings.forEach(s => {
-            settingsObj[s.key] = s.value;
-        });
-        res.json(settingsObj);
+        const settings = db.prepare('SELECT * FROM settings WHERE id = 1').get();
+        if (settings) {
+            // Удаляем служебные поля
+            delete settings.id;
+            delete settings.created_at;
+            delete settings.updated_at;
+            res.json(settings);
+        } else {
+            res.json({});
+        }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1583,27 +1593,25 @@ app.get('/api/settings', (req, res) => {
 app.put('/api/settings/:key', requireAuth, (req, res) => {
     try {
         const { value } = req.body;
-        // Проверяем существует ли ключ
-        const existing = db.prepare('SELECT * FROM settings WHERE key = ?').get(req.params.key);
+        const key = req.params.key;
 
-        if (existing) {
-            const stmt = db.prepare('UPDATE settings SET value = ? WHERE key = ?');
-            stmt.run(value, req.params.key);
-        } else {
-            const stmt = db.prepare('INSERT INTO settings (key, value) VALUES (?, ?)');
-            stmt.run(req.params.key, value);
+        // Список разрешенных полей для обновления
+        const allowedFields = [
+            'site_title', 'site_description', 'site_keywords', 'site_phone', 'site_email',
+            'address', 'working_hours', 'whatsapp_phone', 'instagram_url', 'facebook_url',
+            'whatsapp_url', 'telegram_url', 'youtube_url', 'vk_url', 'linkedin_url',
+            'google_analytics_id', 'google_tag_manager_id', 'yandex_metrika_id',
+            'facebook_pixel_id', 'vk_pixel_id', 'custom_head_code', 'custom_body_code',
+            'favicon_url', 'logo_url', 'privacy_policy', 'terms_of_service', 'about_company'
+        ];
+
+        if (!allowedFields.includes(key)) {
+            return res.status(400).json({ error: 'Недопустимое поле настройки' });
         }
-        res.json({ message: 'Настройка обновлена' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
 
-app.delete('/api/settings/:key', (req, res) => {
-    try {
-        const stmt = db.prepare('DELETE FROM settings WHERE key = ?');
-        stmt.run(req.params.key);
-        res.json({ message: 'Настройка удалена' });
+        const stmt = db.prepare(`UPDATE settings SET ${key} = ?, updated_at = CURRENT_TIMESTAMP WHERE id = 1`);
+        stmt.run(value);
+        res.json({ message: 'Настройка обновлена' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
