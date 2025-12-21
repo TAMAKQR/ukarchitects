@@ -744,32 +744,6 @@ async function loadCategories() {
     }
 }
 
-async function updateCategory(key, value) {
-    try {
-        await authFetch(`${API_URL}/settings/${key}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ value })
-        });
-        showAlert('Категория обновлена');
-    } catch (error) {
-        showAlert('Ошибка обновления', 'error');
-    }
-}
-
-async function deleteCategory(key) {
-    if (!confirm('Удалить категорию?')) return;
-
-    try {
-        // Здесь нужно добавить DELETE endpoint в API
-        await authFetch(`${API_URL}/settings/${key}`, { method: 'DELETE' });
-        showAlert('Категория удалена');
-        loadCategories();
-    } catch (error) {
-        showAlert('Ошибка удаления', 'error');
-    }
-}
-
 async function addCategory() {
     showInputModal(
         'Добавить категорию проекта',
@@ -1792,4 +1766,5 @@ async function addStage() {
         }
         closeModal(modalId);
     }
+});
 
