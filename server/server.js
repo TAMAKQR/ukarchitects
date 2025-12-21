@@ -1199,8 +1199,6 @@ app.get('/api/reviews/:id', (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-    }
-});
 
 app.post('/api/reviews', requireAuth, upload.single('image'), async (req, res) => {
     try {
