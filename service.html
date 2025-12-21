@@ -237,76 +237,83 @@
 <body>
     <div id="header-placeholder"></div>
     <script>
-        // Mobile menu toggle function - MUST be global for onclick
         window.toggleMobileMenu = function () {
             const mobileNav = document.getElementById('mobile-nav');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
 
-            if (mobileNav && mobileMenuBtn) {
-                mobileNav.classList.toggle('active');
-                mobileMenuBtn.classList.toggle('active');
-
-                if (mobileNav.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
+            if (!mobileNav || !mobileMenuBtn || !mobileMenuOverlay) {
+                return;
             }
+
+            const isActive = !mobileNav.classList.contains('active');
+            mobileNav.classList.toggle('active', isActive);
+            mobileMenuBtn.classList.toggle('active', isActive);
+            mobileMenuOverlay.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : '';
         };
+
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const btn = document.getElementById('mobile-menu-btn');
+            const nav = document.getElementById('mobile-nav');
+
+            if (overlay) overlay.classList.remove('active');
+            if (btn) btn.classList.remove('active');
+            if (nav) nav.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function initMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
+            }
+
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', function (e) {
+                    if (e.target === mobileMenuOverlay) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+            mobileNavLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    if (link.id === 'mobile-services-toggle' || link.classList.contains('mobile-service-item')) {
+                        return;
+                    }
+                    closeMobileMenu();
+                });
+            });
+
+            const mobileServicesToggle = document.getElementById('mobile-services-toggle');
+            const mobileServicesList = document.getElementById('mobile-services-list');
+
+            if (mobileServicesToggle && mobileServicesList) {
+                mobileServicesToggle.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const isExpanded = mobileServicesList.style.maxHeight && mobileServicesList.style.maxHeight !== '0px';
+                    mobileServicesList.style.maxHeight = isExpanded ? '0px' : mobileServicesList.scrollHeight + 'px';
+                });
+            }
+        }
 
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
                 document.getElementById('header-placeholder').innerHTML = data;
 
-                // Инициализация выпадающего меню услуг после загрузки шапки
                 setTimeout(() => {
                     loadServicesDropdown();
                     initServicesToggle();
                     initMobileMenu();
+                    loadMobileServices();
                 }, 100);
             });
-
-        function initMobileMenu() {
-            // Определяем функцию toggleMobileMenu глобально
-            window.toggleMobileMenu = function () {
-                const overlay = document.getElementById('mobile-menu-overlay');
-                const btn = document.getElementById('mobile-menu-btn');
-                if (overlay && btn) {
-                    overlay.classList.toggle('active');
-                    btn.classList.toggle('active');
-
-                    // Предотвращаем прокрутку боди при открытом меню
-                    document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
-                }
-            };
-
-            const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
-            mobileNavLinks.forEach(link => {
-                link.addEventListener('click', function () {
-                    const overlay = document.getElementById('mobile-menu-overlay');
-                    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-                    if (overlay && mobileMenuBtn) {
-                        overlay.classList.remove('active');
-                        mobileMenuBtn.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
-                });
-            });
-
-            const mobileServicesToggle = document.getElementById('mobile-services-toggle');
-            const mobileServicesList = document.getElementById('mobile-services-list');
-            if (mobileServicesToggle && mobileServicesList) {
-                mobileServicesToggle.addEventListener('click', function () {
-                    if (mobileServicesList.style.maxHeight === '0px' || !mobileServicesList.style.maxHeight) {
-                        mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
-                    } else {
-                        mobileServicesList.style.maxHeight = '0px';
-                    }
-                });
-            }
-            loadMobileServices();
-        }
 
         async function loadMobileServices() {
             try {
@@ -320,13 +327,22 @@
                             <p>${service.description ? service.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...' : ''}</p>
                         </a>
                     `).join('');
+
+                    document.querySelectorAll('.mobile-service-item').forEach(item => {
+                        item.addEventListener('click', closeMobileMenu);
+                    });
+
+                    setTimeout(() => {
+                        if (mobileServicesList.style.maxHeight && mobileServicesList.style.maxHeight !== '0px') {
+                            mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
+                        }
+                    }, 100);
                 }
             } catch (error) {
                 console.error('Error loading mobile services:', error);
             }
         }
 
-        // Загрузка услуг для выпадающего меню
         async function loadServicesDropdown() {
             try {
                 const response = await fetch('/api/services');
@@ -345,7 +361,6 @@
             }
         }
 
-        // Инициализация переключателя услуг
         function initServicesToggle() {
             const toggle = document.getElementById('services-toggle');
             const dropdown = document.getElementById('services-dropdown');

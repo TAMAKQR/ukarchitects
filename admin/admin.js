@@ -981,11 +981,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 closeModal('review-modal');
                 loadReviews();
             } else {
-                const error = await response.json();
-                showAlert(error.error || 'Ошибка сохранения', 'error');
+                console.error('Response status:', response.status);
+                console.error('Response statusText:', response.statusText);
+
+                try {
+                    const error = await response.json();
+                    showAlert(error.error || 'Ошибка сохранения', 'error');
+                } catch (parseError) {
+                    // Если не можем распарсить как JSON, читаем как текст
+                    const text = await response.text();
+                    console.error('Response text:', text);
+                    showAlert('Сервер вернул ошибку HTML вместо JSON', 'error');
+                }
             }
         } catch (error) {
-            console.error('Ошибка:', error);
+            console.error('Ошибка в saveReview:', error);
             showAlert('Ошибка сохранения: ' + error.message, 'error');
         }
     }

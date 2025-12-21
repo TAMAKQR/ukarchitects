@@ -1583,6 +1583,19 @@
         let heroSlides = [];
         let heroInterval;
 
+        function sanitizeMediaUrl(rawUrl) {
+            if (rawUrl === undefined || rawUrl === null) {
+                return null;
+            }
+            const trimmed = String(rawUrl).trim();
+            if (!trimmed || trimmed === 'undefined' || trimmed === 'null') {
+                return null;
+            }
+            const lower = trimmed.toLowerCase();
+            const allowedPrefixes = ['http://', 'https://', '/uploads/', '/images/', 'data:image/'];
+            return allowedPrefixes.some(prefix => lower.startsWith(prefix)) ? trimmed : null;
+        }
+
         // Анимация счетчика
         function animateCounter(element) {
             const target = parseInt(element.getAttribute('data-target'));
@@ -1635,22 +1648,17 @@
         window.toggleMobileMenu = function () {
             const mobileNav = document.getElementById('mobile-nav');
             const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mobileOverlay = document.getElementById('mobile-menu-overlay');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
 
-            if (mobileNav && mobileMenuBtn) {
-                mobileNav.classList.toggle('active');
-                mobileMenuBtn.classList.toggle('active');
-                if (mobileOverlay) {
-                    mobileOverlay.classList.toggle('active');
-                }
-
-                // Prevent body scroll when menu is open
-                if (mobileNav.classList.contains('active')) {
-                    document.body.style.overflow = 'hidden';
-                } else {
-                    document.body.style.overflow = '';
-                }
+            if (!mobileNav || !mobileMenuBtn || !mobileMenuOverlay) {
+                return;
             }
+
+            const isActive = !mobileNav.classList.contains('active');
+            mobileNav.classList.toggle('active', isActive);
+            mobileMenuBtn.classList.toggle('active', isActive);
+            mobileMenuOverlay.classList.toggle('active', isActive);
+            document.body.style.overflow = isActive ? 'hidden' : '';
         };
 
         fetch('/header.html')
@@ -1666,25 +1674,43 @@
                 }, 100);
             });
 
+        function closeMobileMenu() {
+            const overlay = document.getElementById('mobile-menu-overlay');
+            const btn = document.getElementById('mobile-menu-btn');
+            const nav = document.getElementById('mobile-nav');
+
+            if (overlay) overlay.classList.remove('active');
+            if (btn) btn.classList.remove('active');
+            if (nav) nav.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
         // Initialize mobile menu
         function initMobileMenu() {
-            // Close mobile menu when clicking on a link (except services toggle)
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+            const mobileNav = document.getElementById('mobile-nav');
+
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
+            }
+
+            if (mobileMenuOverlay) {
+                mobileMenuOverlay.addEventListener('click', function (e) {
+                    if (e.target === mobileMenuOverlay) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Close mobile menu when clicking on a link (except services toggle or nested service items)
             const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
             mobileNavLinks.forEach(link => {
                 link.addEventListener('click', function (e) {
-                    // Don't close menu if it's the services toggle
-                    if (link.id === 'mobile-services-toggle') {
+                    if (link.id === 'mobile-services-toggle' || link.classList.contains('mobile-service-item')) {
                         return;
                     }
-
-                    const mobileNav = document.getElementById('mobile-nav');
-                    const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-
-                    if (mobileNav && mobileMenuBtn) {
-                        mobileNav.classList.remove('active');
-                        mobileMenuBtn.classList.remove('active');
-                        document.body.style.overflow = '';
-                    }
+                    closeMobileMenu();
                 });
             });
 
@@ -1738,6 +1764,10 @@
                         }
                     }, 100);
                 }
+
+                document.querySelectorAll('.mobile-service-item').forEach(item => {
+                    item.addEventListener('click', closeMobileMenu);
+                });
             } catch (error) {
                 console.error('Error loading mobile services:', error);
             }
@@ -1828,7 +1858,9 @@
             const slidesContainer = document.querySelector('.hero-slides');
             const navContainer = document.getElementById('hero-nav');
 
-            slidesContainer.innerHTML = heroSlides.map((project, index) => `
+            slidesContainer.innerHTML = heroSlides.map((project, index) => {
+                const heroImage = sanitizeMediaUrl(project.image_url);
+                return `
                 <div class="hero-slide ${index === 0 ? 'active' : ''}">
                     <div class="hero-content">
                         <div class="hero-info">
@@ -1859,11 +1891,12 @@
                             </div>
                         </div>
                         <div class="hero-image">
-                            ${project.image_url && project.image_url !== 'undefined' && project.image_url.trim() !== '' ? `<img src="${project.image_url}" alt="${project.title}">` : ''}
+                            ${heroImage ? `<img src="${heroImage}" alt="${project.title}">` : ''}
                         </div>
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
 
             navContainer.innerHTML = heroSlides.map((_, index) => `
                 <span class="hero-dot ${index === 0 ? 'active' : ''}" onclick="goToHeroSlide(${index})"></span>
@@ -1960,7 +1993,7 @@
                     <div style="min-width: 100%; display: flex; flex-direction: column; gap: 20px;">
                         ${servicesData.slice(index * 1, index * 1 + 1).map((s, i) => `
                             <div style="background: white; border-radius: 30px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); min-height: 600px; height: 100vh; display: flex; flex-direction: column; justify-content: flex-end; transition: transform 0.3s; position: relative;">
-                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${(s.image_url && s.image_url !== 'undefined' && s.image_url.trim() !== '') ? s.image_url : backgrounds[index % 3]}'); background-size: cover; background-position: center; filter: blur(2px); z-index: 1;"></div>
+                                <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${sanitizeMediaUrl(s.image_url) || backgrounds[index % backgrounds.length]}'); background-size: cover; background-position: center; filter: blur(2px); z-index: 1;"></div>
                                 <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent 40%, rgba(0, 0, 0, 0.85) 100%); z-index: 2;"></div>
                                 <div class="service-slide-content" style="max-width: 600px; position: relative; z-index: 3; padding: 50px;">
                                     <div>
@@ -2050,23 +2083,26 @@
                     return;
                 }
 
-                container.innerHTML = reviews.map(review => `
+                container.innerHTML = reviews.map(review => {
+                    const avatarUrl = sanitizeMediaUrl(review.image_url);
+                    return `
                     <div class="review-card">
                         <div class="review-stars">
                             ${Array(review.rating).fill('<svg class="review-star" viewBox="0 0 15 14" fill="none"><path d="M7.5 0L9.18386 5.18237H14.6329L10.2245 8.38525L11.9084 13.5676L7.5 10.3647L3.09161 13.5676L4.77547 8.38525L0.367076 5.18237H5.81614L7.5 0Z" fill="#042164"/></svg>').join('')}
                         </div>
                         <div class="review-text">"${review.text}"</div>
                         <div class="review-author">
-                            ${review.image_url && review.image_url !== 'undefined' && review.image_url.trim() !== '' ?
-                        `<img src="${review.image_url}" alt="${review.client_name}" class="review-avatar">` :
-                        `<div class="review-avatar"></div>`
-                    }
+                            ${avatarUrl ?
+                            `<img src="${avatarUrl}" alt="${review.client_name}" class="review-avatar">` :
+                            `<div class="review-avatar"></div>`
+                        }
                             <div class="review-author-info">
                                 <div class="review-author-name">${review.client_name}${review.company ? ', ' + review.company : ''}</div>
                             </div>
                         </div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
             } catch (error) {
                 console.error('Ошибка загрузки отзывов:', error);
             }

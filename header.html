@@ -381,7 +381,7 @@
         </nav>
 
         <!-- Mobile Menu Button -->
-        <button class="mobile-menu-btn" id="mobile-menu-btn" onclick="toggleMobileMenu()">
+        <button class="mobile-menu-btn" id="mobile-menu-btn">
             <span></span>
             <span></span>
             <span></span>
@@ -390,7 +390,7 @@
 </header>
 
 <!-- Mobile Menu Overlay -->
-<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()">
+<div class="mobile-menu-overlay" id="mobile-menu-overlay">
     <!-- Mobile Navigation -->
     <div class="mobile-nav" id="mobile-nav">
         <div class="mobile-nav-inner">
@@ -436,14 +436,18 @@
 <div style="height: 70px;"></div>
 
 <script>
-    // Mobile menu toggle
-    function toggleMobileMenu() {
+    // Mobile menu toggle - делаем глобальной функцией
+    window.toggleMobileMenu = function () {
+        console.log('toggleMobileMenu called'); // Отладка
         const overlay = document.getElementById('mobile-menu-overlay');
         const btn = document.getElementById('mobile-menu-btn');
+
+        console.log('overlay:', overlay, 'btn:', btn); // Отладка
 
         if (overlay && btn) {
             overlay.classList.toggle('active');
             btn.classList.toggle('active');
+            console.log('Menu toggled, active:', overlay.classList.contains('active')); // Отладка
 
             // Prevent body scroll when menu is open
             document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
@@ -452,8 +456,38 @@
 
     // Close mobile menu when clicking on a link (except services toggle and service items)
     document.addEventListener('DOMContentLoaded', function () {
-        const mobileNavLinks = document.querySelectorAll('.mobile-nav a:not(.mobile-services-title):not(.mobile-service-item)');
+        console.log('Header DOMContentLoaded fired'); // Отладка
+
+        // Добавляем event listeners для мобильного меню
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+        console.log('Found elements - btn:', mobileMenuBtn, 'overlay:', mobileMenuOverlay); // Отладка
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
+            console.log('Added click listener to mobile menu button'); // Отладка
+        }
+
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', function (e) {
+                // Закрываем только при клике на сам overlay, не на его содержимое
+                if (e.target === mobileMenuOverlay) {
+                    window.toggleMobileMenu();
+                }
+            });
+            console.log('Added click listener to mobile menu overlay'); // Отладка
+        }
+
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
         mobileNavLinks.forEach(link => {
+            // Пропускаем toggle услуг
+            if (link.classList.contains('mobile-services-title') ||
+                link.classList.contains('mobile-service-item') ||
+                link.id === 'mobile-services-toggle') {
+                return;
+            }
+
             link.addEventListener('click', function () {
                 const overlay = document.getElementById('mobile-menu-overlay');
                 const btn = document.getElementById('mobile-menu-btn');
@@ -470,7 +504,10 @@
         const mobileServicesToggle = document.getElementById('mobile-services-toggle');
         const mobileServicesList = document.getElementById('mobile-services-list');
         if (mobileServicesToggle && mobileServicesList) {
-            mobileServicesToggle.addEventListener('click', function () {
+            mobileServicesToggle.addEventListener('click', function (e) {
+                e.preventDefault(); // Предотвращаем стандартное поведение ссылки
+                console.log('Toggling services menu'); // Отладка
+
                 if (mobileServicesList.style.maxHeight === '0px' || !mobileServicesList.style.maxHeight) {
                     mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
                 } else {
