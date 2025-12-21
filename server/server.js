@@ -1155,6 +1155,14 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
 
 app.get('/api/reviews', (req, res) => {
     try {
+        // Проверяем, существует ли таблица
+        const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").get();
+
+        if (!tableExists) {
+            console.error('Reviews table does not exist');
+            return res.status(500).json({ error: 'Reviews table does not exist' });
+        }
+
         const reviews = db.prepare('SELECT * FROM reviews WHERE visible = 1 ORDER BY created_at DESC').all();
         // Очистка undefined/null значений для image_url
         const cleanedReviews = reviews.map(review => ({
@@ -1163,12 +1171,21 @@ app.get('/api/reviews', (req, res) => {
         }));
         res.json(cleanedReviews);
     } catch (error) {
+        console.error('Error in /api/reviews:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
 app.get('/api/reviews/:id', (req, res) => {
     try {
+        // Проверяем, существует ли таблица
+        const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").get();
+
+        if (!tableExists) {
+            console.error('Reviews table does not exist');
+            return res.status(500).json({ error: 'Reviews table does not exist' });
+        }
+
         const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(req.params.id);
         if (review) {
             // Очистка undefined/null значений для image_url
@@ -1178,17 +1195,39 @@ app.get('/api/reviews/:id', (req, res) => {
             res.status(404).json({ error: 'Отзыв не найден' });
         }
     } catch (error) {
+        console.error('Error in /api/reviews/:id:', error);
         res.status(500).json({ error: error.message });
     }
 });
+    }
+});
 
-app.post('/api/reviews', requireAuth, upload.single('image'), (req, res) => {
+app.post('/api/reviews', requireAuth, upload.single('image'), async (req, res) => {
     try {
         const { client_name, company, text, rating, visible } = req.body;
         let image_url = null;
 
         if (req.file) {
-            image_url = `/uploads/${req.file.filename}`;
+            // Загрузка в Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'uk-architects/reviews',
+                        resource_type: 'auto',
+                        transformation: [
+                            { width: 200, height: 200, crop: 'fill', gravity: 'face' }, // Аватарки 200x200
+                            { quality: 'auto:good' }
+                        ]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+
+            image_url = result.secure_url;
         }
 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
@@ -1197,17 +1236,37 @@ app.post('/api/reviews', requireAuth, upload.single('image'), (req, res) => {
         const result = stmt.run(client_name, company, text, rating || 5, image_url, visibleValue);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Отзыв создан' });
     } catch (error) {
+        console.error('Error creating review:', error);
         res.status(500).json({ error: error.message });
     }
 });
 
-app.put('/api/reviews/:id', requireAuth, upload.single('image'), (req, res) => {
+app.put('/api/reviews/:id', requireAuth, upload.single('image'), async (req, res) => {
     try {
         const { client_name, company, text, rating, visible } = req.body;
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
-            const image_url = `/uploads/${req.file.filename}`;
+            // Загрузка в Cloudinary
+            const result = await new Promise((resolve, reject) => {
+                const uploadStream = cloudinary.uploader.upload_stream(
+                    {
+                        folder: 'uk-architects/reviews',
+                        resource_type: 'auto',
+                        transformation: [
+                            { width: 200, height: 200, crop: 'fill', gravity: 'face' }, // Аватарки 200x200
+                            { quality: 'auto:good' }
+                        ]
+                    },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                );
+                uploadStream.end(req.file.buffer);
+            });
+
+            const image_url = result.secure_url;
             const stmt = db.prepare('UPDATE reviews SET client_name = ?, company = ?, text = ?, rating = ?, image_url = ?, visible = ? WHERE id = ?');
             stmt.run(client_name, company, text, rating || 5, image_url, visibleValue, req.params.id);
         } else {
@@ -1217,6 +1276,7 @@ app.put('/api/reviews/:id', requireAuth, upload.single('image'), (req, res) => {
 
         res.json({ message: 'Отзыв обновлен' });
     } catch (error) {
+        console.error('Error updating review:', error);
         res.status(500).json({ error: error.message });
     }
 });
