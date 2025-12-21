@@ -968,7 +968,12 @@ app.post('/api/upload-image', requireAuth, upload.single('image'), async (req, r
 app.get('/api/services', (req, res) => {
     try {
         const services = db.prepare('SELECT * FROM services WHERE visible = 1 ORDER BY order_num').all();
-        res.json(services);
+        // Очистка undefined/null значений для image_url
+        const cleanedServices = services.map(service => ({
+            ...service,
+            image_url: service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null
+        }));
+        res.json(cleanedServices);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -979,6 +984,8 @@ app.get('/api/services/:id', (req, res) => {
     try {
         const service = db.prepare('SELECT * FROM services WHERE id = ?').get(req.params.id);
         if (service) {
+            // Очистка undefined/null значений для image_url
+            service.image_url = service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null;
             res.json(service);
         } else {
             res.status(404).json({ error: 'Услуга не найдена' });
@@ -1075,7 +1082,12 @@ app.get('/api/projects', (req, res) => {
         query += ' ORDER BY created_at DESC';
 
         const projects = db.prepare(query).all(...params);
-        res.json(projects);
+        // Очистка undefined/null значений для image_url
+        const cleanedProjects = projects.map(project => ({
+            ...project,
+            image_url: project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null
+        }));
+        res.json(cleanedProjects);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1096,6 +1108,8 @@ app.get('/api/projects/:id', (req, res) => {
     try {
         const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
         if (project) {
+            // Очистка undefined/null значений для image_url
+            project.image_url = project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null;
             res.json(project);
         } else {
             res.status(404).json({ error: 'Проект не найден' });
@@ -1142,7 +1156,12 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
 app.get('/api/reviews', (req, res) => {
     try {
         const reviews = db.prepare('SELECT * FROM reviews WHERE visible = 1 ORDER BY created_at DESC').all();
-        res.json(reviews);
+        // Очистка undefined/null значений для image_url
+        const cleanedReviews = reviews.map(review => ({
+            ...review,
+            image_url: review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null
+        }));
+        res.json(cleanedReviews);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1152,6 +1171,8 @@ app.get('/api/reviews/:id', (req, res) => {
     try {
         const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(req.params.id);
         if (review) {
+            // Очистка undefined/null значений для image_url
+            review.image_url = review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null;
             res.json(review);
         } else {
             res.status(404).json({ error: 'Отзыв не найден' });
