@@ -252,6 +252,10 @@
         opacity: 0;
         visibility: hidden;
         transition: opacity 0.3s ease, visibility 0.3s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-top: 100px;
+        /* Отступ от верха для header */
     }
 
     .mobile-menu-overlay.active {
@@ -386,44 +390,41 @@
 </header>
 
 <!-- Mobile Menu Overlay -->
-<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()"></div>
+<div class="mobile-menu-overlay" id="mobile-menu-overlay" onclick="toggleMobileMenu()">
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-inner">
+            <a href="/projects">проекты</a>
+            <a href="#" class="mobile-services-title" id="mobile-services-toggle"
+                style="cursor: pointer; display: block; padding: 15px 0; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #1f1e22;">услуги</a>
 
-<!-- Mobile Navigation -->
-<div class="mobile-nav" id="mobile-nav">
-    <div class="mobile-nav-inner">
-        <a href="/projects">проекты</a>
-        <a href="#" class="mobile-services-title" id="mobile-services-toggle"
-            style="cursor: pointer; display: block; padding: 15px 0; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #1f1e22;">услуги</a>
-
-        <div class="mobile-services-section" style="margin-top: 0; padding-top: 0;">
-            <div id="mobile-services-list" style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
-                <!-- Services will be loaded here -->
-            </div>
-        </div>
-
-        <!-- Контактная информация внизу меню -->
-        <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #e0e0e0;">
-            <div style="margin-bottom: 20px;">
-                <div
-                    style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
-                    Телефон</div>
-                <a href="tel:+78005057728"
-                    style="display: block; font-size: 16px; color: #1f1e22; text-decoration: none; font-weight: 500;"
-                    id="mobile-phone">+7 (800) 505-77-28</a>
+            <div class="mobile-services-section" style="margin-top: 0; padding-top: 0;">
+                <div id="mobile-services-list"
+                    style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                    <!-- Services will be loaded here -->
+                </div>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <div
-                    style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
-                    Адрес</div>
-                <div style="font-size: 16px; color: #1f1e22;" id="mobile-address">Москва</div>
+            <!-- Контактная информация внизу меню -->
+            <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+                <div style="margin-bottom: 20px;">
+                    <div
+                        style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                        Телефон</div>
+                    <a href="tel:+78005057728"
+                        style="display: block; font-size: 16px; color: #1f1e22; text-decoration: none; font-weight: 500;"
+                        id="mobile-phone">+7 (800) 505-77-28</a>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div
+                        style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                        Адрес</div>
+                    <div style="font-size: 16px; color: #1f1e22;" id="mobile-address">Москва</div>
+                </div>
             </div>
-
-
         </div>
     </div>
-</div>
-</div>
 </div>
 
 <div id="services-dropdown" class="services-dropdown">

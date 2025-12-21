@@ -722,6 +722,7 @@
             font-size: 12px;
             font-weight: 600;
             margin-right: 6px;
+            margin-bottom: 6px;
         }
 
         .stage-concept {
@@ -747,6 +748,14 @@
         .stage-completed {
             background: #55efc4;
             color: #00b894;
+        }
+
+        /* Mobile styles for stages */
+        @media (max-width: 768px) {
+            .stage-badge {
+                margin-bottom: 8px;
+                margin-right: 8px;
+            }
         }
     </style>
 </head>
@@ -779,8 +788,9 @@
             </div>
 
             <div style="position: relative;">
-                <div id="services-slider" style="overflow: hidden;">
-                    <div id="services-slides" style="display: flex; transition: transform 0.5s ease;"></div>
+                <div id="services-slider" style="overflow: hidden; touch-action: pan-y;">
+                    <div id="services-slides"
+                        style="display: flex; transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);"></div>
                 </div>
 
                 <div style="display: flex; gap: 10px; margin-top: 30px;">
@@ -1893,13 +1903,38 @@
         }
 
         function startHeroSlider() {
-            heroInterval = setInterval(nextHeroSlide, 5000); // Автопереключение каждые 5 секунд
+            heroInterval = setInterval(nextHeroSlide, 7000); // Плавная автопрокрутка каждые 7 секунд
         }
 
         function resetHeroInterval() {
             clearInterval(heroInterval);
             startHeroSlider();
         }
+
+        // Touch support for hero slider
+        let heroStartX = 0;
+        let heroEndX = 0;
+        const heroSlider = document.getElementById('hero-slider');
+
+        heroSlider.addEventListener('touchstart', (e) => {
+            heroStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        heroSlider.addEventListener('touchend', (e) => {
+            heroEndX = e.changedTouches[0].clientX;
+            const diff = heroStartX - heroEndX;
+
+            if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
+                if (diff > 0) {
+                    // свайп влево - следующий слайд
+                    nextHeroSlide();
+                } else {
+                    // свайп вправо - предыдущий слайд
+                    prevHeroSlide();
+                }
+                resetHeroInterval(); // сброс автопрокрутки при пользовательском действии
+            }
+        }, { passive: true });
 
         // Загрузка проектов для слайдера
         loadHeroProjects();
@@ -1972,6 +2007,30 @@
         document.getElementById('services-next').addEventListener('click', () => {
             showServiceSlide(currentServiceSlide + 1);
         });
+
+        // Touch support for services slider
+        let servicesStartX = 0;
+        let servicesEndX = 0;
+        const servicesSlider = document.getElementById('services-slider');
+
+        servicesSlider.addEventListener('touchstart', (e) => {
+            servicesStartX = e.touches[0].clientX;
+        }, { passive: true });
+
+        servicesSlider.addEventListener('touchend', (e) => {
+            servicesEndX = e.changedTouches[0].clientX;
+            const diff = servicesStartX - servicesEndX;
+
+            if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
+                if (diff > 0) {
+                    // свайп влево - следующий слайд
+                    showServiceSlide(currentServiceSlide + 1);
+                } else {
+                    // свайп вправо - предыдущий слайд
+                    showServiceSlide(currentServiceSlide - 1);
+                }
+            }
+        }, { passive: true });
 
         loadServicesSlider();
         loadReviews();
