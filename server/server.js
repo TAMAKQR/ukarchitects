@@ -54,6 +54,30 @@ const upload = multer({
     }
 });
 
+const uploadImageBuffer = (buffer, options = {}) => {
+    return new Promise((resolve, reject) => {
+        const uploadStream = cloudinary.uploader.upload_stream(
+            {
+                folder: 'uk-architects',
+                resource_type: 'auto',
+                transformation: [
+                    { width: 2000, crop: 'limit' },
+                    { quality: 'auto:good' }
+                ],
+                ...options
+            },
+            (error, result) => {
+                if (error) {
+                    reject(error);
+                } else {
+                    resolve(result);
+                }
+            }
+        );
+        uploadStream.end(buffer);
+    });
+};
+
 // Подключение к БД
 // В продакшене используем persistent disk от Render
 const dbPath = isDevelopment
@@ -965,25 +989,7 @@ app.post('/api/upload-image', requireAuth, upload.single('image'), async (req, r
             return res.status(400).json({ error: 'Файл не загружен' });
         }
 
-        // Загрузка в Cloudinary
-        const result = await new Promise((resolve, reject) => {
-            const uploadStream = cloudinary.uploader.upload_stream(
-                {
-                    folder: 'uk-architects',
-                    resource_type: 'auto',
-                    transformation: [
-                        { width: 2000, crop: 'limit' }, // Максимальная ширина
-                        { quality: 'auto:good' } // Автоматическое сжатие
-                    ]
-                },
-                (error, result) => {
-                    if (error) reject(error);
-                    else resolve(result);
-                }
-            );
-            uploadStream.end(req.file.buffer);
-        });
-
+        const result = await uploadImageBuffer(req.file.buffer);
         res.json({ url: result.secure_url });
     } catch (error) {
         console.error('Ошибка загрузки изображения в Cloudinary:', error);
@@ -1023,7 +1029,7 @@ app.get('/api/services/:id', (req, res) => {
 });
 
 // Создать услугу
-app.post('/api/services', requireAuth, upload.single('image'), (req, res) => {
+app.post('/api/services', requireAuth, upload.single('image'), async (req, res) => {
     try {
         console.log('POST /api/services - Body:', req.body);
         console.log('POST /api/services - File:', req.file);
@@ -1032,8 +1038,9 @@ app.post('/api/services', requireAuth, upload.single('image'), (req, res) => {
         let image_url = null;
 
         if (req.file) {
-            image_url = `/uploads/${req.file.filename}`;
-            console.log('Изображение сохранено:', image_url);
+            const uploadResult = await uploadImageBuffer(req.file.buffer);
+            image_url = uploadResult.secure_url;
+            console.log('Изображение сохранено в Cloudinary:', image_url);
         }
 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
@@ -1052,7 +1059,7 @@ app.post('/api/services', requireAuth, upload.single('image'), (req, res) => {
 });
 
 // Обновить услугу
-app.put('/api/services/:id', requireAuth, upload.single('image'), (req, res) => {
+app.put('/api/services/:id', requireAuth, upload.single('image'), async (req, res) => {
     try {
         console.log('PUT /api/services/:id - Body:', req.body);
         console.log('PUT /api/services/:id - File:', req.file);
@@ -1061,16 +1068,14 @@ app.put('/api/services/:id', requireAuth, upload.single('image'), (req, res) => 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
-            // Если загружено новое изображение
-            const image_url = `/uploads/${req.file.filename}`;
+            const uploadResult = await uploadImageBuffer(req.file.buffer);
+            const image_url = uploadResult.secure_url;
             const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, image_url = ?, order_num = ?, visible = ? WHERE id = ?');
             stmt.run(title, description, icon, image_url, order_num || 0, visibleValue, req.params.id);
         } else if (delete_image === '1') {
-            // Если нужно удалить изображение
             const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, image_url = NULL, order_num = ?, visible = ? WHERE id = ?');
             stmt.run(title, description, icon, order_num || 0, visibleValue, req.params.id);
         } else {
-            // Изображение не изменяется
             const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, order_num = ?, visible = ? WHERE id = ?');
             stmt.run(title, description, icon, order_num || 0, visibleValue, req.params.id);
         }
