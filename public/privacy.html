@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Политика конфиденциальности - UK Architects</title>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&family=Noto+Sans:wght@100..900&subset=latin,cyrillic&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            background: #f5f5f5;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        h1,
+        h2,
+        h3 {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 600;
+            color: #212529;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 60px 40px;
+        }
+
+        .content {
+            background: white;
+            padding: 50px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 42px;
+            margin-bottom: 10px;
+            color: #212529;
+        }
+
+        .last-updated {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        h2 {
+            font-size: 28px;
+            margin-top: 40px;
+            margin-bottom: 20px;
+            color: #212529;
+        }
+
+        h3 {
+            font-size: 20px;
+            margin-top: 30px;
+            margin-bottom: 15px;
+            color: #212529;
+        }
+
+        p {
+            margin-bottom: 20px;
+            font-size: 16px;
+        }
+
+        ul,
+        ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        a {
+            color: #ffffff;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 30px;
+            color: #212529;
+            font-weight: 500;
+        }
+
+        .back-link:hover {
+            color: #ffffff;
+        }
+
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 30px 20px;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            h2 {
+                font-size: 24px;
+            }
+
+            h3 {
+                font-size: 18px;
+            }
+
+            p,
+            li {
+                font-size: 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Вернуться на главную</a>
+
+        <div class="content">
+            <h1>Политика конфиденциальности</h1>
+            <p class="last-updated">Последнее обновление: <span id="update-date">21 декабря 2025 года</span></p>
+
+            <div id="privacy-content">
+                <p>Настоящая Политика конфиденциальности определяет порядок обработки и защиты персональных данных
+                    пользователей сайта <strong>UK Architects</strong>.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/api';
+
+        // Загрузка политики конфиденциальности
+        async function loadPrivacyPolicy() {
+            try {
+                const response = await fetch(`${API_URL}/settings`);
+                const settings = await response.json();
+
+                if (settings.privacy_policy) {
+                    document.getElementById('privacy-content').innerHTML = settings.privacy_policy;
+                }
+
+                if (settings.site_phone) {
+                    const phoneEl = document.getElementById('site-phone');
+                    if (phoneEl) {
+                        phoneEl.textContent = settings.site_phone;
+                    }
+                }
+
+                // Обновляем дату
+                const now = new Date();
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                document.getElementById('update-date').textContent = now.toLocaleDateString('ru-RU', options);
+            } catch (error) {
+                console.error('Ошибка загрузки политики конфиденциальности:', error);
+            }
+        }
+
+        loadPrivacyPolicy();
+    </script>
+
+    <script>
+        // Load and insert footer
+        fetch('/footer.html')
+            .then(response => response.text())
+            .then(html => {
+                document.body.insertAdjacentHTML('beforeend', html);
+            })
+            .catch(error => console.error('Error loading footer:', error));
+    </script>
+</body>
+
+</html>

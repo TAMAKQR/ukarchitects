@@ -105,7 +105,7 @@ const createTables = () => {
   // Таблица настроек сайта
   db.exec(`
     CREATE TABLE IF NOT EXISTS settings (
-      key TEXT PRIMARY KEY,
+      "key" TEXT PRIMARY KEY,
       value TEXT,
       description TEXT
     )

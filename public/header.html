@@ -1,0 +1,670 @@
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link
+    href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&family=Noto+Sans:wght@100..900&subset=latin,cyrillic&display=swap"
+    rel="stylesheet">
+<style>
+    .services-dropdown {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, #ffffff 0%, #f8f9fa 100%);
+        box-shadow: 0 15px 40px rgba(4, 33, 100, 0.12);
+        padding: 0;
+        max-height: 0;
+        overflow: hidden;
+        z-index: 999;
+        opacity: 0;
+        transform: translateY(-20px);
+        transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            padding 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+            opacity 0.4s ease,
+            transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        border-bottom: 3px solid #ffffff;
+    }
+
+    .services-dropdown.active {
+        max-height: 600px;
+        padding: 40px 0;
+        overflow-y: auto;
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .services-dropdown-inner {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 0 40px;
+        box-sizing: border-box;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 15px;
+    }
+
+    .dropdown-item {
+        padding: 20px 24px;
+        border-radius: 12px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        color: #1f1e22;
+        text-decoration: none;
+        display: block;
+        font-family: 'Noto Sans', sans-serif;
+        font-weight: 300;
+        position: relative;
+        overflow: hidden;
+        background: #ffffff;
+        border: 1px solid #e9ecef;
+    }
+
+    .dropdown-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, #ffffff 0%, #212529 100%);
+        transform: scaleY(0);
+        transform-origin: bottom;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .dropdown-item::after {
+        content: '→';
+        position: absolute;
+        right: 24px;
+        top: 50%;
+        transform: translateY(-50%) translateX(-10px);
+        font-size: 20px;
+        color: #ffffff;
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .dropdown-item:hover {
+        background: #ffffff;
+        transform: translateX(8px);
+        box-shadow: 0 10px 30px rgba(4, 33, 100, 0.15);
+        border-color: #ffffff;
+    }
+
+    .dropdown-item:hover::before {
+        transform: scaleY(1);
+        transform-origin: top;
+    }
+
+    .dropdown-item:hover::after {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    .dropdown-item h4 {
+        font-family: 'Ubuntu', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        margin: 0 0 8px 0;
+        color: #212529;
+        transition: color 0.3s ease;
+        padding-right: 30px;
+    }
+
+    .dropdown-item:hover h4 {
+        color: #ffffff;
+    }
+
+    .dropdown-item p {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+        line-height: 1.6;
+        padding-right: 30px;
+    }
+
+    .services-toggle-wrapper {
+        position: relative;
+    }
+
+    /* Mobile Menu Styles */
+    .mobile-menu-btn {
+        display: none;
+        position: absolute;
+        right: 40px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+        z-index: 1001;
+    }
+
+    .mobile-menu-btn span {
+        display: block;
+        width: 25px;
+        height: 3px;
+        background: #212529;
+        margin: 5px 0;
+        transition: all 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .mobile-menu-btn.active span:nth-child(1) {
+        transform: rotate(45deg) translate(7px, 7px);
+    }
+
+    .mobile-menu-btn.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .mobile-menu-btn.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(7px, -7px);
+    }
+
+    .mobile-nav {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 70px);
+        background: white;
+        z-index: 989;
+        overflow-y: auto;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        display: none;
+    }
+
+    .mobile-nav.active {
+        transform: translateX(0);
+    }
+
+    .mobile-nav-inner {
+        padding: 60px 40px 40px 40px;
+        display: flex;
+        flex-direction: column;
+        min-height: calc(100vh - 70px - 60px);
+    }
+
+    .mobile-nav a {
+        display: block;
+        padding: 15px 0;
+        color: #1f1e22;
+        text-decoration: none;
+        font-size: 15px;
+        font-weight: 500;
+        font-family: 'Noto Sans', sans-serif;
+        text-transform: uppercase;
+        border-bottom: 1px solid #f0f0f0;
+        transition: color 0.3s;
+    }
+
+    .mobile-nav a:first-child {
+        padding-top: 20px;
+    }
+
+    .mobile-nav a:hover,
+    .mobile-services-title:hover {
+        color: #212529;
+    }
+
+    .mobile-services-section {
+        margin-top: 0;
+        padding-top: 0;
+        border-top: none;
+    }
+
+    .mobile-services-title {
+        font-family: 'Noto Sans', sans-serif;
+        font-weight: 500;
+        font-size: 15px;
+        text-transform: uppercase;
+        transition: color 0.3s;
+    }
+
+    .mobile-service-item {
+        padding: 12px 0;
+        border-bottom: 1px solid #f5f5f5;
+    }
+
+    .mobile-service-item h4 {
+        font-family: 'Ubuntu', sans-serif;
+        font-weight: 600;
+        font-size: 16px;
+        color: #212529;
+        margin: 0 0 5px 0;
+    }
+
+    .mobile-service-item p {
+        font-size: 13px;
+        color: #666;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Mobile menu overlay */
+    .mobile-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: #ffffff;
+        z-index: 985;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-top: 100px;
+        /* Отступ от верха для header */
+    }
+
+    .mobile-menu-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    @media screen and (max-width: 1024px) {
+        .mobile-menu-btn {
+            display: block;
+        }
+
+        .mobile-nav {
+            display: block;
+        }
+
+        header nav {
+            display: none !important;
+        }
+
+        .services-dropdown {
+            display: none !important;
+        }
+    }
+
+    @media screen and (max-width: 768px) {
+        .mobile-nav-inner {
+            padding: 20px 30px 40px 30px;
+        }
+
+        .mobile-nav a {
+            font-size: 16px;
+        }
+
+        header>div {
+            padding: 30px 20px !important;
+        }
+
+        header a[href="/"] {
+            left: 20px !important;
+        }
+
+        .mobile-menu-btn {
+            right: 20px !important;
+        }
+
+        header img {
+            height: 28px !important;
+        }
+    }
+
+    @media screen and (max-width: 480px) {
+        .mobile-nav-inner {
+            padding: 20px 20px 40px 20px;
+        }
+
+        .mobile-nav a {
+            font-size: 15px;
+            padding: 12px 0;
+        }
+
+        .mobile-services-title {
+            font-size: 18px;
+            margin-bottom: 12px;
+        }
+
+        .mobile-service-item {
+            padding: 10px 0;
+        }
+
+        .mobile-service-item h4 {
+            font-size: 15px;
+        }
+
+        .mobile-service-item p {
+            font-size: 12px;
+        }
+
+        header>div {
+            padding: 30px 15px !important;
+        }
+
+        header a[href="/"] {
+            left: 15px !important;
+        }
+
+        .mobile-menu-btn {
+            right: 15px !important;
+        }
+
+        .mobile-menu-btn span {
+            width: 22px;
+            height: 2.5px;
+        }
+
+        header img {
+            height: 26px !important;
+        }
+    }
+</style>
+<header
+    style="position: fixed; width: 100%; height: 75px; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.35); z-index: 9999; border-bottom: 0; font-family: 'Noto Sans', sans-serif; transition: background-color 0.6s, top 0.3s linear;">
+    <div
+        style="max-width: 1400px; height: 75px; margin: 0 auto; padding: 0 40px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+        <a href="/" style="display: inline-block;">
+            <img id="site-logo" src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg"
+                data-default-logo="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt=""
+                style="height: 35px; width: auto;" />
+        </a>
+
+        <!-- Desktop Navigation -->
+        <nav style="display: flex; gap: 15px; align-items: center; margin-left: auto;">
+            <div class="services-toggle-wrapper" style="position: relative; margin-right: 20px;">
+                <a href="#" id="services-toggle"
+                    style="color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
+                    onmouseover="this.style.color='rgba(255,255,255,0.8)'"
+                    onmouseout="this.style.color='#ffffff'">услуги</a>
+            </div>
+            <a href="/projects"
+                style="color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s; margin-right: 20px;"
+                onmouseover="this.style.color='rgba(255,255,255,0.8)'"
+                onmouseout="this.style.color='#ffffff'">проекты</a>
+            <a href="/#about"
+                style="color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
+                onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='#ffffff'">о
+                компании</a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button class="mobile-menu-btn" id="mobile-menu-btn">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+    </div>
+</header>
+
+<!-- Mobile Menu Overlay -->
+<div class="mobile-menu-overlay" id="mobile-menu-overlay">
+    <!-- Mobile Navigation -->
+    <div class="mobile-nav" id="mobile-nav">
+        <div class="mobile-nav-inner">
+            <a href="/projects">проекты</a>
+            <a href="#" class="mobile-services-title" id="mobile-services-toggle"
+                style="cursor: pointer; display: block; padding: 15px 0; border-bottom: 1px solid #f0f0f0; text-decoration: none; color: #1f1e22;">услуги</a>
+
+            <div class="mobile-services-section" style="margin-top: 0; padding-top: 0;">
+                <div id="mobile-services-list"
+                    style="max-height: 0; overflow: hidden; transition: max-height 0.3s ease;">
+                    <!-- Services will be loaded here -->
+                </div>
+            </div>
+
+            <!-- Контактная информация внизу меню -->
+            <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+                <div style="margin-bottom: 20px;">
+                    <div
+                        style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                        Телефон</div>
+                    <a href="tel:+78005057728"
+                        style="display: block; font-size: 16px; color: #1f1e22; text-decoration: none; font-weight: 500;"
+                        id="mobile-phone">+7 (800) 505-77-28</a>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <div
+                        style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
+                        Адрес</div>
+                    <div style="font-size: 16px; color: #1f1e22;" id="mobile-address">Москва</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="services-dropdown" class="services-dropdown">
+    <div class="services-dropdown-inner">
+        <!-- Services will be loaded here -->
+    </div>
+</div>
+
+<div style="height: 70px;"></div>
+
+<script>
+    // Mobile menu toggle - делаем глобальной функцией
+    window.toggleMobileMenu = function () {
+        console.log('toggleMobileMenu called'); // Отладка
+        const overlay = document.getElementById('mobile-menu-overlay');
+        const btn = document.getElementById('mobile-menu-btn');
+
+        console.log('overlay:', overlay, 'btn:', btn); // Отладка
+
+        if (overlay && btn) {
+            overlay.classList.toggle('active');
+            btn.classList.toggle('active');
+            console.log('Menu toggled, active:', overlay.classList.contains('active')); // Отладка
+
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = overlay.classList.contains('active') ? 'hidden' : '';
+        }
+    }
+
+    // Close mobile menu when clicking on a link (except services toggle and service items)
+    document.addEventListener('DOMContentLoaded', function () {
+        console.log('Header DOMContentLoaded fired'); // Отладка
+
+        // Добавляем event listeners для мобильного меню
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+
+        console.log('Found elements - btn:', mobileMenuBtn, 'overlay:', mobileMenuOverlay); // Отладка
+
+        if (mobileMenuBtn) {
+            mobileMenuBtn.addEventListener('click', window.toggleMobileMenu);
+            console.log('Added click listener to mobile menu button'); // Отладка
+        }
+
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', function (e) {
+                // Закрываем только при клике на сам overlay, не на его содержимое
+                if (e.target === mobileMenuOverlay) {
+                    window.toggleMobileMenu();
+                }
+            });
+            console.log('Added click listener to mobile menu overlay'); // Отладка
+        }
+
+        const mobileNavLinks = document.querySelectorAll('.mobile-nav a');
+        mobileNavLinks.forEach(link => {
+            // Пропускаем toggle услуг
+            if (link.classList.contains('mobile-services-title') ||
+                link.classList.contains('mobile-service-item') ||
+                link.id === 'mobile-services-toggle') {
+                return;
+            }
+
+            link.addEventListener('click', function () {
+                const overlay = document.getElementById('mobile-menu-overlay');
+                const btn = document.getElementById('mobile-menu-btn');
+
+                if (overlay && btn) {
+                    overlay.classList.remove('active');
+                    btn.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            });
+        });
+
+        // Mobile services toggle
+        const mobileServicesToggle = document.getElementById('mobile-services-toggle');
+        const mobileServicesList = document.getElementById('mobile-services-list');
+        if (mobileServicesToggle && mobileServicesList) {
+            mobileServicesToggle.addEventListener('click', function (e) {
+                e.preventDefault(); // Предотвращаем стандартное поведение ссылки
+                console.log('Toggling services menu'); // Отладка
+
+                if (mobileServicesList.style.maxHeight === '0px' || !mobileServicesList.style.maxHeight) {
+                    mobileServicesList.style.maxHeight = mobileServicesList.scrollHeight + 'px';
+                } else {
+                    mobileServicesList.style.maxHeight = '0px';
+                }
+            });
+        }
+
+        // Load services for mobile menu
+        loadMobileServices();
+
+        // Close menu when clicking on service items (after services are loaded)
+        setTimeout(() => {
+            const serviceItems = document.querySelectorAll('.mobile-service-item');
+            serviceItems.forEach(item => {
+                item.addEventListener('click', function () {
+                    const overlay = document.getElementById('mobile-menu-overlay');
+                    const btn = document.getElementById('mobile-menu-btn');
+
+                    if (overlay && btn) {
+                        overlay.classList.remove('active');
+                        btn.classList.remove('active');
+                        document.body.style.overflow = '';
+                    }
+                });
+            });
+        }, 500);
+    });
+
+    async function loadMobileServices() {
+        try {
+            const response = await fetch('/api/services');
+            const services = await response.json();
+
+            const mobileServicesList = document.getElementById('mobile-services-list');
+            if (mobileServicesList && services.length > 0) {
+                mobileServicesList.innerHTML = services
+                    .filter(service => service.visible)
+                    .map(service => `
+                        <a href="/service.html?id=${service.id}" class="mobile-service-item" style="display: block; text-decoration: none;">
+                            <h4>${service.title}</h4>
+                            <p>${service.description ? service.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...' : ''}</p>
+                        </a>
+                    `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading mobile services:', error);
+        }
+    }
+
+    // Desktop dropdown functionality
+    const servicesToggle = document.getElementById('services-toggle');
+    const servicesDropdown = document.getElementById('services-dropdown');
+    let dropdownTimeout;
+
+    if (servicesToggle && servicesDropdown) {
+        servicesToggle.addEventListener('mouseenter', function (e) {
+            e.preventDefault();
+            clearTimeout(dropdownTimeout);
+            servicesDropdown.classList.add('active');
+        });
+
+        servicesToggle.addEventListener('mouseleave', function () {
+            dropdownTimeout = setTimeout(() => {
+                servicesDropdown.classList.remove('active');
+            }, 100);
+        });
+
+        servicesDropdown.addEventListener('mouseenter', function () {
+            clearTimeout(dropdownTimeout);
+            servicesDropdown.classList.add('active');
+        });
+
+        servicesDropdown.addEventListener('mouseleave', function () {
+            servicesDropdown.classList.remove('active');
+        });
+
+        servicesToggle.addEventListener('click', function (e) {
+            e.preventDefault();
+        });
+    }
+
+    // Load desktop services
+    async function loadServices() {
+        try {
+            const response = await fetch('/api/services');
+            const services = await response.json();
+
+            const dropdown = document.querySelector('.services-dropdown-inner');
+            if (dropdown && services.length > 0) {
+                dropdown.innerHTML = `
+                    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">
+                        ${services.filter(service => service.visible).map(service => `
+                            <a href="/service.html?id=${service.id}" class="dropdown-item">
+                                <h4>${service.title}</h4>
+                                <p>${service.description ? service.description.replace(/<[^>]*>/g, '').substring(0, 100) + '...' : ''}</p>
+                            </a>
+                        `).join('')}
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Error loading services:', error);
+        }
+    }
+
+    loadServices();
+
+    // Загрузка контактов в мобильное меню
+    async function loadMobileContacts() {
+        try {
+            const response = await fetch('/api/settings');
+            const settings = await response.json();
+
+            if (settings.site_phone) {
+                const phoneEl = document.getElementById('mobile-phone');
+                if (phoneEl) {
+                    phoneEl.textContent = settings.site_phone;
+                    phoneEl.href = 'tel:' + settings.site_phone.replace(/[^0-9+]/g, '');
+                }
+            }
+
+            if (settings.address) {
+                const addressEl = document.getElementById('mobile-address');
+                if (addressEl) {
+                    addressEl.textContent = settings.address;
+                }
+            }
+
+            if (settings.instagram_url) {
+                const instagramEl = document.getElementById('mobile-instagram');
+                if (instagramEl) {
+                    instagramEl.href = settings.instagram_url;
+                }
+            }
+
+            if (settings.whatsapp_url) {
+                const whatsappEl = document.getElementById('mobile-whatsapp');
+                if (whatsappEl) {
+                    whatsappEl.href = settings.whatsapp_url;
+                }
+            }
+
+            if (settings.facebook_url) {
+                const facebookEl = document.getElementById('mobile-facebook');
+                if (facebookEl) {
+                    facebookEl.href = settings.facebook_url;
+                }
+            }
+        } catch (error) {
+            console.error('Error loading mobile contacts:', error);
+        }
+    }
+
+    loadMobileContacts();
+</script>

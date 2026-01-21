@@ -39,17 +39,20 @@ const storage = multer.memoryStorage();
 const upload = multer({
     storage: storage,
     limits: {
-        fileSize: 10 * 1024 * 1024, // 10MB
+        fileSize: 100 * 1024 * 1024, // 100MB для видео
     },
     fileFilter: function (req, file, cb) {
-        const allowedTypes = /jpeg|jpg|png|gif|webp|svg|ico/;
-        const extname = allowedTypes.test(file.originalname.toLowerCase().split('.').pop());
-        const mimetype = allowedTypes.test(file.mimetype) || file.mimetype === 'image/x-icon' || file.mimetype === 'image/vnd.microsoft.icon';
+        const allowedImageTypes = /jpeg|jpg|png|gif|webp|svg|ico/;
+        const allowedVideoTypes = /mp4|mov|avi|webm/;
+        const ext = file.originalname.toLowerCase().split('.').pop();
 
-        if (mimetype || extname) {
+        const isImage = allowedImageTypes.test(ext) || file.mimetype.startsWith('image/');
+        const isVideo = allowedVideoTypes.test(ext) || file.mimetype.startsWith('video/');
+
+        if (isImage || isVideo) {
             return cb(null, true);
         } else {
-            cb(new Error('Только изображения разрешены!'));
+            cb(new Error('Только изображения и видео разрешены!'));
         }
     }
 });
@@ -135,6 +138,7 @@ const initializeDatabase = async () => {
                     youtube_url TEXT,
                     vk_url TEXT,
                     linkedin_url TEXT,
+                    website_url TEXT,
                     google_analytics_id TEXT,
                     google_tag_manager_id TEXT,
                     yandex_metrika_id TEXT,
@@ -254,7 +258,9 @@ const initializeDatabase = async () => {
                 title TEXT,
                 description TEXT,
                 category TEXT,
+                media_type TEXT DEFAULT 'image',
                 image_url TEXT,
+                video_url TEXT,
                 button_text TEXT DEFAULT 'Подробнее',
                 button_link TEXT,
                 order_num INTEGER DEFAULT 0,
@@ -314,7 +320,8 @@ const initializeDatabase = async () => {
                 'custom_head_code',
                 'custom_body_code',
                 'favicon_url',
-                'logo_url'
+                'logo_url',
+                'website_url'
             ];
 
             newSettingsFields.forEach(field => {
@@ -699,19 +706,19 @@ app.use(session({
 }));
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
-app.use(express.static(join(__dirname, '..')));
+app.use(express.static(join(__dirname, '..', 'public')));
 
 // Middleware для clean URLs (убирает .html из адресов)
 app.use((req, res, next) => {
     if (req.path.endsWith('/')) {
         // Если путь заканчивается на /, ищем index.html
-        const indexPath = join(__dirname, '..', req.path, 'index.html');
+        const indexPath = join(__dirname, '..', 'public', req.path, 'index.html');
         if (existsSync(indexPath)) {
             return res.sendFile(indexPath);
         }
     } else if (!req.path.includes('.')) {
         // Если нет расширения, пробуем добавить .html
-        const htmlPath = join(__dirname, '..', req.path + '.html');
+        const htmlPath = join(__dirname, '..', 'public', req.path + '.html');
         if (existsSync(htmlPath)) {
             return res.sendFile(htmlPath);
         }
@@ -1178,6 +1185,68 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
         const stmt = db.prepare('DELETE FROM projects WHERE id = ?');
         stmt.run(req.params.id);
         res.json({ message: 'Проект удален' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ============= HERO СЛАЙДЫ =============
+
+app.get('/api/hero-slides', (req, res) => {
+    try {
+        const slides = db.prepare('SELECT * FROM slider_items WHERE visible = 1 ORDER BY order_num ASC').all();
+        const cleanedSlides = slides.map(slide => ({
+            ...slide,
+            image_url: slide.image_url && slide.image_url !== 'undefined' && slide.image_url !== 'null' ? slide.image_url : null
+        }));
+        res.json(cleanedSlides);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/api/hero-slides/:id', requireAuth, (req, res) => {
+    try {
+        const slide = db.prepare('SELECT * FROM slider_items WHERE id = ?').get(req.params.id);
+        if (slide) {
+            res.json(slide);
+        } else {
+            res.status(404).json({ error: 'Слайд не найден' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.post('/api/hero-slides', requireAuth, (req, res) => {
+    try {
+        console.log('POST /api/hero-slides - Body:', req.body);
+        const { title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, project_id } = req.body;
+        const stmt = db.prepare('INSERT INTO slider_items (title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, project_id, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
+        const result = stmt.run(title, description, category, media_type || 'image', image_url, video_url, button_text || 'Подробнее', button_link, order_num || 0, project_id || null);
+        res.status(201).json({ id: result.lastInsertRowid, message: 'Слайд создан' });
+    } catch (error) {
+        console.error('Ошибка создания слайда:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.put('/api/hero-slides/:id', requireAuth, (req, res) => {
+    try {
+        const { title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, visible, project_id } = req.body;
+        const stmt = db.prepare('UPDATE slider_items SET title = ?, description = ?, category = ?, media_type = ?, image_url = ?, video_url = ?, button_text = ?, button_link = ?, order_num = ?, visible = ?, project_id = ? WHERE id = ?');
+        stmt.run(title, description, category, media_type || 'image', image_url, video_url, button_text, button_link, order_num, visible, project_id || null, req.params.id);
+        res.json({ message: 'Слайд обновлен' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/api/hero-slides/:id', requireAuth, (req, res) => {
+    try {
+        const stmt = db.prepare('DELETE FROM slider_items WHERE id = ?');
+        stmt.run(req.params.id);
+        res.json({ message: 'Слайд удален' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1710,7 +1779,7 @@ app.put('/api/settings/:key', requireAuth, (req, res) => {
         const allowedFields = [
             'site_title', 'site_description', 'site_keywords', 'site_phone', 'site_email',
             'address', 'working_hours', 'whatsapp_phone', 'instagram_url', 'facebook_url',
-            'whatsapp_url', 'telegram_url', 'youtube_url', 'vk_url', 'linkedin_url',
+            'whatsapp_url', 'telegram_url', 'youtube_url', 'vk_url', 'linkedin_url', 'website_url',
             'google_analytics_id', 'google_tag_manager_id', 'yandex_metrika_id',
             'facebook_pixel_id', 'vk_pixel_id', 'custom_head_code', 'custom_body_code',
             'favicon_url', 'logo_url', 'privacy_policy', 'terms_of_service', 'about_company'
