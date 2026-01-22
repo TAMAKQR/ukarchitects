@@ -535,8 +535,8 @@
             }
 
             [style*="max-width: 1400px"] {
-                padding-left: 20px !important;
-                padding-right: 20px !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
             }
 
             /* Services grid */
@@ -718,6 +718,13 @@
             }
 
             [style*="max-width: 1400px"] {
+                padding-left: 20px !important;
+                padding-right: 20px !important;
+            }
+
+            /* Убираем все боковые отступы на мобильных */
+            div[style*="padding: 0 60px"],
+            section div[style*="padding: 0 60px"] {
                 padding-left: 20px !important;
                 padding-right: 20px !important;
             }
