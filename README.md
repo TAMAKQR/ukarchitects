@@ -12,8 +12,10 @@ UK Global/
 │   ├── js/             # Скрипты
 │   ├── images/         # Изображения
 │   ├── files/          # Файлы
-│   ├── index.html      # Главная страница
-│   ├── projects.html   # Страница проектов
+│   ├── index.html      # Главная страница (RU)
+│   ├── index-en.html   # Главная страница (EN)
+│   ├── projects.html   # Страница проектов (RU)
+│   ├── projects-en.html # Страница проектов (EN)
 │   ├── about.html      # О компании
 │   ├── service.html    # Услуги
 │   ├── privacy.html    # Политика конфиденциальности
@@ -52,11 +54,18 @@ npm run dev
 
 ## 📋 Доступные страницы
 
+### Русская версия
 - **Главная**: http://localhost:3000/
 - **Проекты**: http://localhost:3000/projects
 - **О компании**: http://localhost:3000/about
 - **Услуги**: http://localhost:3000/service
 - **Админ-панель**: http://localhost:3000/admin/
+
+### English version
+- **Home**: http://localhost:3000/index-en.html
+- **Projects**: http://localhost:3000/projects-en.html
+
+> 💡 Переключение языка доступно в правом верхнем углу (EN/RU)
 
 ## 🔐 Админ-панель
 

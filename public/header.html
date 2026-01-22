@@ -279,6 +279,11 @@
         .services-dropdown {
             display: none !important;
         }
+
+        /* Показываем переключатель языка на мобильных отдельно */
+        .mobile-lang-switcher {
+            display: flex !important;
+        }
     }
 
     @media screen and (max-width: 768px) {
@@ -358,40 +363,80 @@
 
     /* Language Switcher */
     .lang-switcher {
-        display: flex;
+        display: flex !important;
         align-items: center;
         gap: 5px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
         border-radius: 20px;
-        padding: 5px 8px;
+        padding: 6px 10px;
         margin-left: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
     }
 
     .lang-switcher a {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(255, 255, 255, 0.7);
         text-decoration: none;
-        font-size: 13px;
-        font-weight: 500;
-        padding: 4px 10px;
+        font-size: 14px;
+        font-weight: 600;
+        padding: 6px 12px;
         border-radius: 15px;
         transition: all 0.3s;
         text-transform: uppercase;
+        font-family: 'Ubuntu', sans-serif;
     }
 
     .lang-switcher a.active {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.3);
         color: #ffffff;
     }
 
     .lang-switcher a:hover {
         color: #ffffff;
+        background: rgba(255, 255, 255, 0.15);
     }
 
     @media screen and (max-width: 768px) {
         .lang-switcher {
-            margin-left: 10px;
-            margin-right: 10px;
+            display: none !important;
         }
+    }
+
+    /* Fixed Language Switcher - Always visible */
+    .fixed-lang-switcher {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 99999;
+        display: flex;
+        gap: 5px;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 8px 12px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .fixed-lang-switcher a {
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 700;
+        padding: 6px 14px;
+        border-radius: 15px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        font-family: 'Ubuntu', sans-serif;
+    }
+
+    .fixed-lang-switcher a.active {
+        background: #ffffff;
+        color: #000000;
+    }
+
+    .fixed-lang-switcher a:hover {
+        color: #ffffff;
+        background: rgba(255, 255, 255, 0.2);
     }
 </style>
 <header
@@ -422,9 +467,12 @@
                 компании</a>
 
             <!-- Language Switcher -->
-            <div class="lang-switcher">
-                <a href="/" class="lang-link active" data-lang="ru">RU</a>
-                <a href="/index-en.html" class="lang-link" data-lang="en">EN</a>
+            <div
+                style="display: flex; align-items: center; gap: 5px; background: rgba(255, 255, 255, 0.15); border-radius: 20px; padding: 6px 10px; margin-left: 20px; border: 1px solid rgba(255, 255, 255, 0.3);">
+                <a href="/"
+                    style="color: #ffffff; text-decoration: none; font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 15px; background: rgba(255, 255, 255, 0.3); font-family: 'Ubuntu', sans-serif;">RU</a>
+                <a href="/index-en.html"
+                    style="color: rgba(255, 255, 255, 0.7); text-decoration: none; font-size: 14px; font-weight: 600; padding: 6px 12px; border-radius: 15px; font-family: 'Ubuntu', sans-serif;">EN</a>
             </div>
         </nav>
 
@@ -434,8 +482,23 @@
             <span></span>
             <span></span>
         </button>
+
+        <!-- Mobile Language Switcher -->
+        <div class="mobile-lang-switcher"
+            style="display: none; position: absolute; right: 80px; top: 50%; transform: translateY(-50%); background: rgba(255, 255, 255, 0.15); border-radius: 15px; padding: 4px 6px; border: 1px solid rgba(255, 255, 255, 0.3);">
+            <a href="/"
+                style="color: #ffffff; text-decoration: none; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 10px; background: rgba(255, 255, 255, 0.3); font-family: 'Ubuntu', sans-serif;">RU</a>
+            <a href="/index-en.html"
+                style="color: rgba(255, 255, 255, 0.7); text-decoration: none; font-size: 12px; font-weight: 600; padding: 4px 8px; border-radius: 10px; font-family: 'Ubuntu', sans-serif; margin-left: 3px;">EN</a>
+        </div>
     </div>
 </header>
+
+<!-- Fixed Language Switcher - Always visible on top -->
+<div class="fixed-lang-switcher">
+    <a href="/" class="active">RU</a>
+    <a href="/index-en.html">EN</a>
+</div>
 
 <!-- Mobile Menu Overlay -->
 <div class="mobile-menu-overlay" id="mobile-menu-overlay">

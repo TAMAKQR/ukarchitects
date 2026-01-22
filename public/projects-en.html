@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Проекты - UK Architects</title>
+    <title>Projects - UK Architects</title>
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&family=Noto+Sans:wght@100..900&subset=latin,cyrillic&display=swap"
@@ -134,7 +134,7 @@
         }
 
         .project-image::before {
-            content: 'Нет изображения';
+            content: 'No image';
             font-family: 'Noto Sans', sans-serif;
         }
 
@@ -548,17 +548,18 @@
     <div id="lang-switcher"
         style="position: fixed; top: 22px; right: 40px; z-index: 99999; display: flex; gap: 3px; background: rgba(0, 0, 0, 0.1); border-radius: 20px; padding: 5px 6px;">
         <a href="/projects.html"
-            style="color: #ffffff; background: #000000; text-decoration: none; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-family: 'Ubuntu', sans-serif;">RU</a>
-        <a href="/projects-en.html"
             style="color: rgba(0, 0, 0, 0.6); text-decoration: none; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-family: 'Ubuntu', sans-serif; transition: all 0.3s;"
             onmouseover="this.style.color='#000000'; this.style.background='rgba(0, 0, 0, 0.15)'"
-            onmouseout="this.style.color='rgba(0, 0, 0, 0.6)'; this.style.background='transparent'">EN</a>
+            onmouseout="this.style.color='rgba(0, 0, 0, 0.6)'; this.style.background='transparent'">RU</a>
+        <a href="/projects-en.html"
+            style="color: #ffffff; background: #000000; text-decoration: none; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-family: 'Ubuntu', sans-serif;">EN</a>
     </div>
 
     <div class="categories">
         <div class="container">
             <div class="category-menu" id="category-menu">
-                <button class="category-btn active" data-category="" onclick="filterByCategory('')">Все проекты</button>
+                <button class="category-btn active" data-category="" onclick="filterByCategory('')">All
+                    Projects</button>
             </div>
         </div>
     </div>
@@ -566,7 +567,7 @@
     <section class="projects-section">
         <div class="container">
             <div id="projects-container" class="loading">
-                Загрузка проектов...
+                Loading projects...
             </div>
         </div>
     </section>
@@ -607,7 +608,7 @@
                     menuContainer.appendChild(btn);
                 });
             } catch (error) {
-                console.error('Ошибка загрузки категорий:', error);
+                console.error('Error loading categories:', error);
             }
         }
 
@@ -618,8 +619,8 @@
                 allProjects = await response.json();
                 displayProjects(allProjects);
             } catch (error) {
-                console.error('Ошибка загрузки проектов:', error);
-                document.getElementById('projects-container').innerHTML = '<div class="no-projects">Ошибка загрузки проектов</div>';
+                console.error('Error loading projects:', error);
+                document.getElementById('projects-container').innerHTML = '<div class="no-projects">Error loading projects</div>';
             }
         }
 
@@ -647,7 +648,7 @@
             const container = document.getElementById('projects-container');
 
             if (projects.length === 0) {
-                container.innerHTML = '<div class="no-projects">Проекты не найдены</div>';
+                container.innerHTML = '<div class="no-projects">No projects found</div>';
                 container.className = 'no-projects';
                 return;
             }
