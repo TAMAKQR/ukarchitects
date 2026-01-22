@@ -2174,7 +2174,7 @@ async function saveHeroSlide(event, id = null) {
         visible
     };
 
-    console.log('Отправляем данные слайда:', slideData);
+    console.log('Отправляем данные слайда:', JSON.stringify(slideData, null, 2));
 
     try {
         const response = await authFetch(
@@ -2189,8 +2189,13 @@ async function saveHeroSlide(event, id = null) {
             closeModal('hero-slide-modal');
             loadHeroSlides();
             alert(id ? 'Слайд обновлен!' : 'Слайд создан!');
+        } else {
+            const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+            console.error('Ошибка от сервера:', errorData);
+            alert('Ошибка сохранения: ' + (errorData.error || response.statusText));
         }
     } catch (error) {
+        console.error('Ошибка сохранения слайда:', error);
         alert('Ошибка сохранения слайда: ' + error.message);
     }
 }

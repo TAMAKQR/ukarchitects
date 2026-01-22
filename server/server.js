@@ -1220,7 +1220,7 @@ app.get('/api/hero-slides/:id', requireAuth, (req, res) => {
 
 app.post('/api/hero-slides', requireAuth, (req, res) => {
     try {
-        console.log('POST /api/hero-slides - Body:', req.body);
+        console.log('POST /api/hero-slides - Body:', JSON.stringify(req.body, null, 2));
         const { title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, project_id } = req.body;
 
         // Валидация обязательных полей
