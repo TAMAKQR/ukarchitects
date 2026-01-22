@@ -566,12 +566,15 @@
             }
 
             /* Цитата на планшетах */
-            blockquote[style*="font-size: 28px"] {
-                font-size: 22px !important;
+            blockquote[style*="font-size: 28px"],
+            blockquote[style*="font-size: 24px"] {
+                font-size: 20px !important;
+                padding: 0 !important;
             }
 
+            div[style*="height: 350px"][style*="padding: 40px 45px"],
             div[style*="height: 350px"][style*="padding: 50px 60px"] {
-                padding: 40px !important;
+                padding: 30px !important;
             }
 
             /* Typography */
@@ -824,16 +827,20 @@
             }
 
             /* Цитата на мобильных */
-            blockquote[style*="font-size: 28px"] {
-                font-size: 18px !important;
-                padding: 20px !important;
-                line-height: 1.5 !important;
+            blockquote[style*="font-size: 28px"],
+            blockquote[style*="font-size: 24px"],
+            blockquote[style*="font-size: 20px"] {
+                font-size: 16px !important;
+                padding: 0 !important;
+                line-height: 1.4 !important;
             }
 
-            div[style*="height: 350px"][style*="padding: 50px 60px"] {
+            div[style*="height: 350px"][style*="padding: 40px 45px"],
+            div[style*="height: 350px"][style*="padding: 50px 60px"],
+            div[style*="height: 350px"][style*="padding: 30px"] {
                 height: auto !important;
-                padding: 30px 20px !important;
-                min-height: 300px !important;
+                padding: 25px 20px !important;
+                min-height: 250px !important;
             }
 
             /* Статистика - все в 1 колонку */
@@ -925,10 +932,89 @@
             color: rgba(255, 255, 255, 0.6);
             opacity: 1;
         }
+
+        /* Прелоадер */
+        #page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #1a1a1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+        }
+
+        #page-loader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        #page-loader img {
+            height: 80px;
+            width: auto;
+            filter: brightness(0) invert(1);
+            animation: heartbeat 4s ease-in-out infinite;
+        }
+
+        @keyframes heartbeat {
+            0% {
+                transform: scale(0.95);
+                opacity: 0.4;
+            }
+
+            15% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            30% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+
+            45% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            50% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            55% {
+                transform: scale(1);
+                opacity: 0.7;
+            }
+
+            70% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+
+            85% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: scale(0.95);
+                opacity: 0.4;
+            }
+        }
     </style>
 </head>
 
 <body>
+    <!-- Page Loader -->
+    <div id="page-loader">
+        <img src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="Loading...">
+    </div>
+
     <header
         style="position: fixed; width: 100%; height: 75px; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.35); z-index: 9999; border-bottom: 0; font-family: 'Noto Sans', sans-serif; transition: background-color 0.6s, top 0.3s linear;">
         <div
@@ -952,7 +1038,7 @@
     </div>
 
     <script>
-        // Hide header and language switcher on scroll down and at top, show only when scrolling up
+        // Show header at top and when scrolling up, hide when scrolling down
         let lastScrollTop = 0;
         const header = document.querySelector('header');
         const langSwitcher = document.getElementById('lang-switcher');
@@ -960,12 +1046,12 @@
         window.addEventListener('scroll', function () {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
 
-            if (scrollTop > lastScrollTop && scrollTop > 100) {
-                // Scrolling down & past 100px - hide
-                header.style.top = '-75px';
-                langSwitcher.style.top = '-75px';
-            } else if (scrollTop < 100) {
-                // Near top - hide
+            if (scrollTop <= 100) {
+                // Near top - always show
+                header.style.top = '0';
+                langSwitcher.style.top = '22px';
+            } else if (scrollTop > lastScrollTop) {
+                // Scrolling down - hide
                 header.style.top = '-75px';
                 langSwitcher.style.top = '-75px';
             } else {
@@ -1862,7 +1948,10 @@
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
+                const headerPlaceholder = document.getElementById('header-placeholder');
+                if (headerPlaceholder) {
+                    headerPlaceholder.innerHTML = data;
+                }
 
                 // After header is loaded, initialize services dropdown
                 setTimeout(() => {
@@ -2180,6 +2269,11 @@
                 servicesData = await response.json();
 
                 const servicesSlides = document.getElementById('services-slides');
+                if (!servicesSlides) {
+                    console.warn('services-slides element not found');
+                    return;
+                }
+
                 const backgrounds = [
                     '/project4923123/images/tild3333-6661-4136-b231-366261626666_________.jpg',
                     '/project4923123/images/tild3634-3139-4564-a430-616636396532_________.jpg',
@@ -2256,67 +2350,69 @@
         let servicesEndX = 0;
         const servicesSlider = document.getElementById('services-slider');
 
-        servicesSlider.addEventListener('touchstart', (e) => {
-            servicesStartX = e.touches[0].clientX;
-        }, { passive: true });
+        if (servicesSlider) {
+            servicesSlider.addEventListener('touchstart', (e) => {
+                servicesStartX = e.touches[0].clientX;
+            }, { passive: true });
 
-        servicesSlider.addEventListener('touchend', (e) => {
-            servicesEndX = e.changedTouches[0].clientX;
-            const diff = servicesStartX - servicesEndX;
+            servicesSlider.addEventListener('touchend', (e) => {
+                servicesEndX = e.changedTouches[0].clientX;
+                const diff = servicesStartX - servicesEndX;
 
-            if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
-                if (diff > 0) {
-                    // свайп влево - следующий слайд
-                    showServiceSlide(currentServiceSlide + 1);
-                } else {
-                    // свайп вправо - предыдущий слайд
-                    showServiceSlide(currentServiceSlide - 1);
+                if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
+                    if (diff > 0) {
+                        // свайп влево - следующий слайд
+                        showServiceSlide(currentServiceSlide + 1);
+                    } else {
+                        // свайп вправо - предыдущий слайд
+                        showServiceSlide(currentServiceSlide - 1);
+                    }
                 }
-            }
-        }, { passive: true });
+            }, { passive: true });
 
-        // Mouse drag support for services slider
-        let servicesMouseDown = false;
+            // Mouse drag support for services slider
+            let servicesMouseDown = false;
 
-        servicesSlider.addEventListener('mousedown', (e) => {
-            servicesMouseDown = true;
-            servicesStartX = e.clientX;
-            servicesSlider.style.cursor = 'grabbing';
-        });
+            servicesSlider.addEventListener('mousedown', (e) => {
+                servicesMouseDown = true;
+                servicesStartX = e.clientX;
+                servicesSlider.style.cursor = 'grabbing';
+            });
 
-        servicesSlider.addEventListener('mousemove', (e) => {
-            if (!servicesMouseDown) return;
-            e.preventDefault();
-        });
+            servicesSlider.addEventListener('mousemove', (e) => {
+                if (!servicesMouseDown) return;
+                e.preventDefault();
+            });
 
-        servicesSlider.addEventListener('mouseup', (e) => {
-            if (!servicesMouseDown) return;
-            servicesMouseDown = false;
-            servicesEndX = e.clientX;
-            servicesSlider.style.cursor = 'grab';
-
-            const diff = servicesStartX - servicesEndX;
-
-            if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
-                if (diff > 0) {
-                    // свайп влево - следующий слайд
-                    showServiceSlide(currentServiceSlide + 1);
-                } else {
-                    // свайп вправо - предыдущий слайд
-                    showServiceSlide(currentServiceSlide - 1);
-                }
-            }
-        });
-
-        servicesSlider.addEventListener('mouseleave', () => {
-            if (servicesMouseDown) {
+            servicesSlider.addEventListener('mouseup', (e) => {
+                if (!servicesMouseDown) return;
                 servicesMouseDown = false;
+                servicesEndX = e.clientX;
                 servicesSlider.style.cursor = 'grab';
-            }
-        });
 
-        // Set initial cursor
-        servicesSlider.style.cursor = 'grab';
+                const diff = servicesStartX - servicesEndX;
+
+                if (Math.abs(diff) > 50) { // минимальная дистанция для свайпа
+                    if (diff > 0) {
+                        // свайп влево - следующий слайд
+                        showServiceSlide(currentServiceSlide + 1);
+                    } else {
+                        // свайп вправо - предыдущий слайд
+                        showServiceSlide(currentServiceSlide - 1);
+                    }
+                }
+            });
+
+            servicesSlider.addEventListener('mouseleave', () => {
+                if (servicesMouseDown) {
+                    servicesMouseDown = false;
+                    servicesSlider.style.cursor = 'grab';
+                }
+            });
+
+            // Set initial cursor
+            servicesSlider.style.cursor = 'grab';
+        }
 
         loadServicesSlider();
         loadReviews();
@@ -2330,6 +2426,10 @@
                 console.log('Loaded reviews:', reviews); // Отладочная информация
 
                 const container = document.getElementById('reviews-slider');
+                if (!container) {
+                    console.warn('reviews-slider element not found');
+                    return;
+                }
 
                 if (reviews.length === 0) {
                     container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #666;">No reviews yet</p>';
@@ -2371,6 +2471,11 @@
 
                 if (team.length === 0) {
                     document.getElementById('team-section').style.display = 'none';
+                    return;
+                }
+
+                if (!container) {
+                    console.warn('team-grid element not found');
                     return;
                 }
 
@@ -2709,6 +2814,36 @@
         if (history.scrollRestoration) {
             history.scrollRestoration = 'manual';
         }
+
+        // Скрыть прелоадер после загрузки контента
+        function hideLoader() {
+            const loader = document.getElementById('page-loader');
+            const heroSlider = document.querySelector('.hero-slider');
+
+            // Проверяем, что hero секция загружена
+            const checkHeroLoaded = setInterval(function () {
+                if (heroSlider && heroSlides.length > 0) {
+                    clearInterval(checkHeroLoaded);
+                    setTimeout(function () {
+                        loader.classList.add('fade-out');
+                        setTimeout(function () {
+                            loader.style.display = 'none';
+                        }, 1500);
+                    }, 300);
+                }
+            }, 100);
+
+            // Максимальное время ожидания 5 секунд
+            setTimeout(function () {
+                clearInterval(checkHeroLoaded);
+                loader.classList.add('fade-out');
+                setTimeout(function () {
+                    loader.style.display = 'none';
+                }, 1500);
+            }, 5000);
+        }
+
+        window.addEventListener('load', hideLoader);
     </script>
 </body>
 
