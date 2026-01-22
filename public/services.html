@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>О компании - UK Architects</title>
-    <meta name="description" content="UK-Architects — международное архитектурное бюро с английским менеджментом">
+    <title>Услуги - UK Architects</title>
+    <meta name="description" content="Архитектурные услуги UK-Architects">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -48,67 +48,67 @@
             line-height: 1.2;
         }
 
-        .content-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
+        .services-grid {
             padding: 80px 60px;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
         }
 
-        .content-section:nth-child(even) {
-            background: #1a1a1a;
-        }
-
-        .content-section:nth-child(odd) {
+        .service-card {
             background: #222222;
-        }
-
-        .content-section.reverse {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .content-section.reverse .text-content {
-            order: 2;
-        }
-
-        .content-section.reverse .image-content {
-            order: 1;
-        }
-
-        .text-content h2 {
-            font-family: 'Ubuntu', sans-serif;
-            font-weight: 400;
-            font-size: 38px;
-            color: #ffffff;
-            margin-bottom: 25px;
-            line-height: 1.3;
-        }
-
-        .text-content p {
-            font-family: 'Noto Sans', sans-serif;
-            font-size: 17px;
-            color: #cccccc;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .image-content {
-            width: 100%;
-            height: 450px;
             border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .service-image {
+            width: 100%;
+            height: 250px;
             overflow: hidden;
         }
 
-        .image-content img {
+        .service-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
 
-        .image-content:hover img {
-            transform: scale(1.05);
+        .service-card:hover .service-image img {
+            transform: scale(1.1);
+        }
+
+        .service-content {
+            padding: 30px;
+        }
+
+        .service-title {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 400;
+            font-size: 28px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .service-description {
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 16px;
+            color: #cccccc;
+            line-height: 1.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 0;
+            color: #999;
+            font-size: 18px;
         }
 
         #lang-switcher {
@@ -155,30 +155,9 @@
                 font-size: 38px;
             }
 
-            .content-section {
-                grid-template-columns: 1fr;
-                gap: 40px;
+            .services-grid {
                 padding: 60px 40px;
-            }
-
-            .content-section.reverse .text-content {
-                order: 1;
-            }
-
-            .content-section.reverse .image-content {
-                order: 2;
-            }
-
-            .text-content h2 {
-                font-size: 28px;
-            }
-
-            .text-content p {
-                font-size: 16px;
-            }
-
-            .image-content {
-                height: 300px;
+                grid-template-columns: 1fr;
             }
         }
 
@@ -191,16 +170,12 @@
                 font-size: 32px;
             }
 
-            .content-section {
+            .services-grid {
                 padding: 40px 25px;
             }
 
-            .text-content h2 {
+            .service-title {
                 font-size: 24px;
-            }
-
-            .image-content {
-                height: 250px;
             }
         }
     </style>
@@ -218,53 +193,66 @@
     </header>
 
     <div id="lang-switcher">
-        <a href="/about.html" class="active">RU</a>
-        <a href="/about-en.html">EN</a>
+        <a href="/services.html" class="active">RU</a>
+        <a href="/services-en.html">EN</a>
     </div>
 
     <section class="hero-section">
-        <h1>О компании</h1>
+        <h1>Наши услуги</h1>
     </section>
 
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Международная команда архитекторов</h2>
-            <p>Мы — UK-Architects, международное бюро с английским менеджментом.</p>
-            <p>Создаём города и пространства для жизни, работы и развития, учитывая урбанизацию и устойчивый рост.</p>
-            <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Международная команда">
-        </div>
-    </section>
-
-    <section class="content-section reverse">
-        <div class="text-content">
-            <h2>Проекты и городское планирование</h2>
-            <p>Работаем с жилыми, коммерческими и общественными пространствами, включая интерьеры и городское
-                планирование.</p>
-            <p>Применяем международные стандарты, BIM и контроль на всех этапах — от идеи до реализации.</p>
-            <p>Сотрудничаем с ведущими мировыми бюро, такими как Zaha Hadid Architects и Nikken Sekkei.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/proekti.jpg" alt="Проекты и городское планирование">
-        </div>
-    </section>
-
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Обучение и обмен опытом</h2>
-            <p>Организуем архитектурные туры и воркшопы для профессионалов: изучение лучших городских кейсов, посещение
-                ведущих бюро и нетворкинг.</p>
-            <p>Наша миссия — внедрять глобальные стандарты на локальном уровне и создавать устойчивые пространства для
-                будущих поколений.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Обучение и обмен опытом">
-        </div>
-    </section>
+    <div class="services-grid" id="services-container">
+        <div class="loading">Загрузка услуг...</div>
+    </div>
 
     <script>
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://ukarchitects.onrender.com/api';
+
+        function sanitizeMediaUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                return url;
+            }
+            if (url.startsWith('/')) {
+                return url;
+            }
+            return '/' + url;
+        }
+
+        async function loadServices() {
+            try {
+                const response = await fetch(`${API_URL}/services`);
+                const services = await response.json();
+
+                const container = document.getElementById('services-container');
+
+                if (services.length === 0) {
+                    container.innerHTML = '<div class="loading">Услуги пока не добавлены</div>';
+                    return;
+                }
+
+                container.innerHTML = services.map(service => {
+                    const imageUrl = sanitizeMediaUrl(service.image_url);
+                    return `
+                        <div class="service-card">
+                            ${imageUrl ? `
+                                <div class="service-image">
+                                    <img src="${imageUrl}" alt="${service.title_ru || service.title}">
+                                </div>
+                            ` : ''}
+                            <div class="service-content">
+                                <h2 class="service-title">${service.title_ru || service.title}</h2>
+                                <p class="service-description">${service.description_ru || service.description}</p>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки услуг:', error);
+                document.getElementById('services-container').innerHTML = '<div class="loading">Ошибка загрузки услуг</div>';
+            }
+        }
+
         let lastScrollTop = 0;
         const header = document.querySelector('header');
         const langSwitcher = document.getElementById('lang-switcher');
@@ -285,6 +273,8 @@
 
             lastScrollTop = scrollTop;
         });
+
+        loadServices();
     </script>
 
     <!-- Footer -->

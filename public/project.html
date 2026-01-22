@@ -18,33 +18,74 @@
 
         body {
             font-family: 'Ubuntu', 'Noto Sans', Arial, sans-serif;
-            background: #f5f5f5;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(26, 26, 26, 0.95);
+            backdrop-filter: blur(10px);
+            transition: top 0.3s linear;
+        }
+
+        #lang-switcher {
+            position: fixed;
+            top: 22px;
+            right: 40px;
+            z-index: 99999;
+            display: flex;
+            gap: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 5px 6px;
+            transition: top 0.3s linear;
+        }
+
+        #lang-switcher a {
+            color: rgba(255, 255, 255, 0.6);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 15px;
+            text-transform: uppercase;
+            font-family: 'Ubuntu', sans-serif;
+            transition: all 0.3s;
+        }
+
+        #lang-switcher a.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.2);
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 40px;
+            padding: 140px 60px 80px 60px;
             box-sizing: border-box;
         }
 
         .project-detail {
-            padding: 40px 0;
+            padding: 0;
         }
 
         .project-header {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
+            background: #222222;
+            padding: 40px;
+            border-radius: 15px;
             margin-bottom: 30px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
         .project-category-badge {
             display: inline-block;
             padding: 6px 16px;
             background: #ffffff;
-            color: white;
+            color: #1a1a1a;
             border-radius: 20px;
             font-size: 14px;
             margin-bottom: 15px;
@@ -53,17 +94,17 @@
         .project-title {
             font-family: 'Ubuntu', sans-serif;
             font-size: 42px;
-            font-weight: 600;
-            color: #212529;
+            font-weight: 400;
+            color: #ffffff;
             margin-bottom: 15px;
             line-height: 1.1;
         }
 
         .project-description {
             font-family: 'Noto Sans', sans-serif;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 300;
-            color: #666;
+            color: #cccccc;
             line-height: 1.8;
             margin-bottom: 20px;
             max-width: 100%;
@@ -197,10 +238,9 @@
 
         /* Слайдер */
         .gallery-section {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            background: #222222;
+            padding: 40px;
+            border-radius: 15px;
         }
 
         .slider-container {
@@ -478,24 +518,42 @@
 </head>
 
 <body>
-    <div id="header-placeholder"></div>
-    <script src="/js/header-contacts.js"></script>
-    <script>
-        window.toggleMobileMenu = function () {
-            const mobileNav = document.getElementById('mobile-nav');
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-            const mobileMenuOverlay = document.getElementById('mobile-menu-overlay');
+    <header>
+        <div
+            style="height: 75px; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
+            <a href="/" style="display: inline-block;">
+                <img src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="UK Architects"
+                    style="height: 35px; width: auto; filter: brightness(0) invert(1);" />
+            </a>
+        </div>
+    </header>
 
-            if (!mobileNav || !mobileMenuBtn || !mobileMenuOverlay) {
-                return;
+    <div id="lang-switcher">
+        <a href="/" class="active">RU</a>
+        <a href="/index-en.html">EN</a>
+    </div>
+
+    <script>
+        let lastScrollTop = 0;
+        const header = document.querySelector('header');
+        const langSwitcher = document.getElementById('lang-switcher');
+
+        window.addEventListener('scroll', function () {
+            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (scrollTop <= 100) {
+                header.style.top = '0';
+                langSwitcher.style.top = '22px';
+            } else if (scrollTop > lastScrollTop) {
+                header.style.top = '-75px';
+                langSwitcher.style.top = '-75px';
+            } else {
+                header.style.top = '0';
+                langSwitcher.style.top = '22px';
             }
 
-            const isActive = !mobileNav.classList.contains('active');
-            mobileNav.classList.toggle('active', isActive);
-            mobileMenuBtn.classList.toggle('active', isActive);
-            mobileMenuOverlay.classList.toggle('active', isActive);
-            document.body.style.overflow = isActive ? 'hidden' : '';
-        };
+            lastScrollTop = scrollTop;
+        });
 
         function closeMobileMenu() {
             const overlay = document.getElementById('mobile-menu-overlay');

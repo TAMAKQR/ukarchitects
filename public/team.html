@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>О компании - UK Architects</title>
-    <meta name="description" content="UK-Architects — международное архитектурное бюро с английским менеджментом">
+    <title>Наша команда - UK Architects</title>
+    <meta name="description" content="Команда профессионалов UK-Architects">
     <link href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -48,67 +48,75 @@
             line-height: 1.2;
         }
 
-        .content-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
+        .team-grid {
             padding: 80px 60px;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 40px;
         }
 
-        .content-section:nth-child(even) {
-            background: #1a1a1a;
-        }
-
-        .content-section:nth-child(odd) {
+        .team-card {
             background: #222222;
-        }
-
-        .content-section.reverse {
-            grid-template-columns: 1fr 1fr;
-        }
-
-        .content-section.reverse .text-content {
-            order: 2;
-        }
-
-        .content-section.reverse .image-content {
-            order: 1;
-        }
-
-        .text-content h2 {
-            font-family: 'Ubuntu', sans-serif;
-            font-weight: 400;
-            font-size: 38px;
-            color: #ffffff;
-            margin-bottom: 25px;
-            line-height: 1.3;
-        }
-
-        .text-content p {
-            font-family: 'Noto Sans', sans-serif;
-            font-size: 17px;
-            color: #cccccc;
-            line-height: 1.8;
-            margin-bottom: 15px;
-        }
-
-        .image-content {
-            width: 100%;
-            height: 450px;
             border-radius: 15px;
             overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            text-align: center;
         }
 
-        .image-content img {
+        .team-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .team-photo {
+            width: 100%;
+            height: 350px;
+            overflow: hidden;
+            background: #2a2a2a;
+        }
+
+        .team-photo img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             transition: transform 0.5s ease;
         }
 
-        .image-content:hover img {
-            transform: scale(1.05);
+        .team-card:hover .team-photo img {
+            transform: scale(1.1);
+        }
+
+        .team-info {
+            padding: 30px;
+        }
+
+        .team-name {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 500;
+            font-size: 24px;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .team-position {
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 16px;
+            color: #999999;
+            margin-bottom: 15px;
+        }
+
+        .team-bio {
+            font-family: 'Noto Sans', sans-serif;
+            font-size: 15px;
+            color: #cccccc;
+            line-height: 1.7;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 100px 0;
+            color: #999;
+            font-size: 18px;
         }
 
         #lang-switcher {
@@ -155,30 +163,9 @@
                 font-size: 38px;
             }
 
-            .content-section {
-                grid-template-columns: 1fr;
-                gap: 40px;
+            .team-grid {
                 padding: 60px 40px;
-            }
-
-            .content-section.reverse .text-content {
-                order: 1;
-            }
-
-            .content-section.reverse .image-content {
-                order: 2;
-            }
-
-            .text-content h2 {
-                font-size: 28px;
-            }
-
-            .text-content p {
-                font-size: 16px;
-            }
-
-            .image-content {
-                height: 300px;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             }
         }
 
@@ -191,16 +178,9 @@
                 font-size: 32px;
             }
 
-            .content-section {
+            .team-grid {
                 padding: 40px 25px;
-            }
-
-            .text-content h2 {
-                font-size: 24px;
-            }
-
-            .image-content {
-                height: 250px;
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -218,53 +198,67 @@
     </header>
 
     <div id="lang-switcher">
-        <a href="/about.html" class="active">RU</a>
-        <a href="/about-en.html">EN</a>
+        <a href="/team.html" class="active">RU</a>
+        <a href="/team-en.html">EN</a>
     </div>
 
     <section class="hero-section">
-        <h1>О компании</h1>
+        <h1>Наша команда</h1>
     </section>
 
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Международная команда архитекторов</h2>
-            <p>Мы — UK-Architects, международное бюро с английским менеджментом.</p>
-            <p>Создаём города и пространства для жизни, работы и развития, учитывая урбанизацию и устойчивый рост.</p>
-            <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Международная команда">
-        </div>
-    </section>
-
-    <section class="content-section reverse">
-        <div class="text-content">
-            <h2>Проекты и городское планирование</h2>
-            <p>Работаем с жилыми, коммерческими и общественными пространствами, включая интерьеры и городское
-                планирование.</p>
-            <p>Применяем международные стандарты, BIM и контроль на всех этапах — от идеи до реализации.</p>
-            <p>Сотрудничаем с ведущими мировыми бюро, такими как Zaha Hadid Architects и Nikken Sekkei.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/proekti.jpg" alt="Проекты и городское планирование">
-        </div>
-    </section>
-
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Обучение и обмен опытом</h2>
-            <p>Организуем архитектурные туры и воркшопы для профессионалов: изучение лучших городских кейсов, посещение
-                ведущих бюро и нетворкинг.</p>
-            <p>Наша миссия — внедрять глобальные стандарты на локальном уровне и создавать устойчивые пространства для
-                будущих поколений.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Обучение и обмен опытом">
-        </div>
-    </section>
+    <div class="team-grid" id="team-container">
+        <div class="loading">Загрузка команды...</div>
+    </div>
 
     <script>
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000/api' : 'https://ukarchitects.onrender.com/api';
+
+        function sanitizeMediaUrl(url) {
+            if (!url) return '';
+            if (url.startsWith('http://') || url.startsWith('https://')) {
+                return url;
+            }
+            if (url.startsWith('/')) {
+                return url;
+            }
+            return '/' + url;
+        }
+
+        async function loadTeam() {
+            try {
+                const response = await fetch(`${API_URL}/team`);
+                const team = await response.json();
+
+                const container = document.getElementById('team-container');
+
+                if (team.length === 0) {
+                    container.innerHTML = '<div class="loading">Члены команды пока не добавлены</div>';
+                    return;
+                }
+
+                container.innerHTML = team.map(member => {
+                    const photoUrl = sanitizeMediaUrl(member.photo_url);
+                    return `
+                        <div class="team-card">
+                            ${photoUrl ? `
+                                <div class="team-photo">
+                                    <img src="${photoUrl}" alt="${member.name}">
+                                </div>
+                            ` : '<div class="team-photo"></div>'}
+                            <div class="team-info">
+                                <h2 class="team-name">${member.name}</h2>
+                                <p class="team-position">${member.position_ru || member.position}</p>
+                                ${member.bio_ru || member.bio ? `<p class="team-bio">${member.bio_ru || member.bio}</p>` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки команды:', error);
+                document.getElementById('team-container').innerHTML = '<div class="loading">Ошибка загрузки команды</div>';
+            }
+        }
+
         let lastScrollTop = 0;
         const header = document.querySelector('header');
         const langSwitcher = document.getElementById('lang-switcher');
@@ -285,6 +279,8 @@
 
             lastScrollTop = scrollTop;
         });
+
+        loadTeam();
     </script>
 
     <!-- Footer -->
