@@ -331,6 +331,21 @@ const initializeDatabase = async () => {
                     console.log(`✅ Добавлен столбец ${field} в таблицу settings`);
                 }
             });
+
+            // Проверяем и добавляем media_type и video_url в slider_items
+            const sliderColumns = db.prepare("PRAGMA table_info(slider_items)").all();
+            const hasMediaType = sliderColumns.some(col => col.name === 'media_type');
+            const hasVideoUrl = sliderColumns.some(col => col.name === 'video_url');
+
+            if (!hasMediaType) {
+                db.prepare("ALTER TABLE slider_items ADD COLUMN media_type TEXT DEFAULT 'image'").run();
+                console.log('✅ Добавлен столбец media_type в таблицу slider_items');
+            }
+
+            if (!hasVideoUrl) {
+                db.prepare("ALTER TABLE slider_items ADD COLUMN video_url TEXT").run();
+                console.log('✅ Добавлен столбец video_url в таблицу slider_items');
+            }
         } catch (error) {
             console.log('ℹ️ Миграция столбцов: пропущено (возможно, уже выполнено)');
         }
