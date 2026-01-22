@@ -1972,13 +1972,13 @@ function openHeroSlideModal(id = null) {
                     </div>
                     
                     <div class="form-group" id="image-field">
-                        <label>Изображение *</label>
+                        <label>Изображение * <small style="color: #999;">(макс. 10 МБ)</small></label>
                         <input type="file" id="slide-image" accept="image/*">
                         <div id="slide-image-preview" style="margin-top: 10px;"></div>
                     </div>
                     
                     <div class="form-group" id="video-field" style="display: none;">
-                        <label>Видео *</label>
+                        <label>Видео * <small style="color: #999;">(макс. 100 МБ)</small></label>
                         <input type="file" id="slide-video-file" accept="video/mp4,video/webm,video/mov">
                         <div id="slide-video-preview" style="margin-top: 10px;"></div>
                         <div style="text-align: center; margin: 10px 0; color: #999;">— или —</div>
@@ -2131,11 +2131,20 @@ async function saveHeroSlide(event, id = null) {
         // Для изображения загружаем файл
         const imageFile = document.getElementById('slide-image').files[0];
 
+        console.log('Обработка изображения:', { hasFile: !!imageFile, fileName: imageFile?.name });
+
         if (imageFile) {
+            // Проверка размера файла (10 МБ)
+            const maxSize = 10 * 1024 * 1024; // 10 МБ в байтах
+            if (imageFile.size > maxSize) {
+                alert(`Размер изображения слишком большой (${(imageFile.size / 1024 / 1024).toFixed(2)} МБ). Максимальный размер: 10 МБ`);
+                return;
+            }
             const formData = new FormData();
             formData.append('image', imageFile);
 
             try {
+                console.log('Загружаем изображение на сервер...');
                 const uploadResponse = await authFetch(`${API_URL}/upload-image`, {
                     method: 'POST',
                     body: formData
@@ -2149,7 +2158,9 @@ async function saveHeroSlide(event, id = null) {
 
                 const uploadData = await uploadResponse.json();
                 imageUrl = uploadData.url;
+                console.log('Изображение загружено, URL:', imageUrl);
             } catch (error) {
+                console.error('Ошибка при загрузке изображения:', error);
                 alert('Ошибка загрузки изображения: ' + error.message);
                 return;
             }
@@ -2158,6 +2169,11 @@ async function saveHeroSlide(event, id = null) {
             const response = await authFetch(`${API_URL}/hero-slides/${id}`);
             const slide = await response.json();
             imageUrl = slide.image_url;
+            console.log('Используем существующее изображение:', imageUrl);
+        } else {
+            // Новый слайд без изображения
+            alert('Выберите изображение для слайда');
+            return;
         }
     }
 

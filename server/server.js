@@ -33,6 +33,13 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+// Проверка конфигурации Cloudinary при старте
+console.log('Cloudinary config:', {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME ? '✓' : '✗',
+    api_key: process.env.CLOUDINARY_API_KEY ? '✓' : '✗',
+    api_secret: process.env.CLOUDINARY_API_SECRET ? '✓' : '✗'
+});
+
 // Настройка Multer для временного хранения (memory storage для Cloudinary)
 const storage = multer.memoryStorage();
 
@@ -59,6 +66,9 @@ const upload = multer({
 
 const uploadImageBuffer = (buffer, options = {}) => {
     return new Promise((resolve, reject) => {
+        console.log('uploadImageBuffer вызван, размер буфера:', buffer?.length, 'байт');
+        console.log('Cloudinary options:', { folder: 'uk-architects', resource_type: 'auto', ...options });
+
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: 'uk-architects',
@@ -71,8 +81,10 @@ const uploadImageBuffer = (buffer, options = {}) => {
             },
             (error, result) => {
                 if (error) {
+                    console.error('Cloudinary upload error:', error);
                     reject(error);
                 } else {
+                    console.log('Cloudinary upload success:', result.secure_url);
                     resolve(result);
                 }
             }
@@ -1007,15 +1019,27 @@ app.post('/api/auth/change-password', requireAuth, async (req, res) => {
 // Загрузка изображения (требует авторизации)
 app.post('/api/upload-image', requireAuth, upload.single('image'), async (req, res) => {
     try {
+        console.log('POST /api/upload-image вызван');
+        console.log('File:', req.file ? {
+            fieldname: req.file.fieldname,
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size
+        } : 'нет файла');
+
         if (!req.file) {
+            console.error('Ошибка: файл не загружен');
             return res.status(400).json({ error: 'Файл не загружен' });
         }
 
+        console.log('Загружаем в Cloudinary...');
         const result = await uploadImageBuffer(req.file.buffer);
+        console.log('Успешно загружено:', result.secure_url);
         res.json({ url: result.secure_url });
     } catch (error) {
         console.error('Ошибка загрузки изображения в Cloudinary:', error);
-        res.status(500).json({ error: 'Ошибка загрузки изображения' });
+        console.error('Stack trace:', error.stack);
+        res.status(500).json({ error: 'Ошибка загрузки изображения', details: error.message });
     }
 });
 
