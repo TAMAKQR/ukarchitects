@@ -1222,11 +1222,23 @@ app.post('/api/hero-slides', requireAuth, (req, res) => {
     try {
         console.log('POST /api/hero-slides - Body:', req.body);
         const { title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, project_id } = req.body;
+
+        // Валидация обязательных полей
+        if (!title) {
+            console.error('Ошибка: отсутствует title');
+            return res.status(400).json({ error: 'Название обязательно' });
+        }
+
+        console.log('Вставляем слайд:', { title, media_type, image_url, video_url });
+
         const stmt = db.prepare('INSERT INTO slider_items (title, description, category, media_type, image_url, video_url, button_text, button_link, order_num, project_id, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)');
         const result = stmt.run(title, description, category, media_type || 'image', image_url, video_url, button_text || 'Подробнее', button_link, order_num || 0, project_id || null);
+
+        console.log('Слайд создан успешно, ID:', result.lastInsertRowid);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Слайд создан' });
     } catch (error) {
         console.error('Ошибка создания слайда:', error);
+        console.error('Stack trace:', error.stack);
         res.status(500).json({ error: error.message });
     }
 });

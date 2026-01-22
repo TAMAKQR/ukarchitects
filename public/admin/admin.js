@@ -2088,6 +2088,8 @@ async function saveHeroSlide(event, id = null) {
         const videoFile = document.getElementById('slide-video-file').files[0];
         const videoUrlInput = document.getElementById('slide-video-url').value;
 
+        console.log('Обработка видео:', { hasFile: !!videoFile, urlInput: videoUrlInput });
+
         if (videoFile) {
             const formData = new FormData();
             formData.append('image', videoFile); // используем тот же параметр 'image'
@@ -2106,17 +2108,24 @@ async function saveHeroSlide(event, id = null) {
 
                 const uploadData = await uploadResponse.json();
                 videoUrl = uploadData.url;
+                console.log('Видео загружено, URL:', videoUrl);
             } catch (error) {
                 alert('Ошибка загрузки видео: ' + error.message);
                 return;
             }
         } else if (videoUrlInput) {
             videoUrl = videoUrlInput;
+            console.log('Используем URL видео:', videoUrl);
         } else if (id) {
             // Если редактируем и видео не меняли, получаем старое
             const response = await authFetch(`${API_URL}/hero-slides/${id}`);
             const slide = await response.json();
             videoUrl = slide.video_url;
+            console.log('Используем существующее видео:', videoUrl);
+        } else {
+            // Новый слайд без видео
+            alert('Выберите видео файл или вставьте ссылку на видео');
+            return;
         }
     } else {
         // Для изображения загружаем файл
@@ -2164,6 +2173,8 @@ async function saveHeroSlide(event, id = null) {
         order_num: parseInt(orderNum),
         visible
     };
+
+    console.log('Отправляем данные слайда:', slideData);
 
     try {
         const response = await authFetch(
