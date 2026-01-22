@@ -355,6 +355,44 @@
             height: 26px !important;
         }
     }
+
+    /* Language Switcher */
+    .lang-switcher {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 20px;
+        padding: 5px 8px;
+        margin-left: 20px;
+    }
+
+    .lang-switcher a {
+        color: rgba(255, 255, 255, 0.6);
+        text-decoration: none;
+        font-size: 13px;
+        font-weight: 500;
+        padding: 4px 10px;
+        border-radius: 15px;
+        transition: all 0.3s;
+        text-transform: uppercase;
+    }
+
+    .lang-switcher a.active {
+        background: rgba(255, 255, 255, 0.2);
+        color: #ffffff;
+    }
+
+    .lang-switcher a:hover {
+        color: #ffffff;
+    }
+
+    @media screen and (max-width: 768px) {
+        .lang-switcher {
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+    }
 </style>
 <header
     style="position: fixed; width: 100%; height: 75px; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.35); z-index: 9999; border-bottom: 0; font-family: 'Noto Sans', sans-serif; transition: background-color 0.6s, top 0.3s linear;">
@@ -382,6 +420,12 @@
                 style="color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 500; font-family: 'Noto Sans', sans-serif; text-transform: uppercase; padding: 10px 15px; border-radius: 10px; transition: all 0.3s;"
                 onmouseover="this.style.color='rgba(255,255,255,0.8)'" onmouseout="this.style.color='#ffffff'">о
                 компании</a>
+
+            <!-- Language Switcher -->
+            <div class="lang-switcher">
+                <a href="/" class="lang-link active" data-lang="ru">RU</a>
+                <a href="/index-en.html" class="lang-link" data-lang="en">EN</a>
+            </div>
         </nav>
 
         <!-- Mobile Menu Button -->
@@ -411,6 +455,19 @@
 
             <!-- Контактная информация внизу меню -->
             <div style="margin-top: auto; padding-top: 30px; border-top: 1px solid #e0e0e0;">
+                <!-- Language Switcher Mobile -->
+                <div style="margin-bottom: 25px;">
+                    <div
+                        style="font-size: 12px; color: #999; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px;">
+                        Language / Язык</div>
+                    <div style="display: flex; gap: 10px;">
+                        <a href="/"
+                            style="flex: 1; text-align: center; padding: 10px; background: #212529; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 500;">RU</a>
+                        <a href="/index-en.html"
+                            style="flex: 1; text-align: center; padding: 10px; background: #f5f5f5; color: #1f1e22; text-decoration: none; border-radius: 8px; font-weight: 500;">EN</a>
+                    </div>
+                </div>
+
                 <div style="margin-bottom: 20px;">
                     <div
                         style="font-size: 12px; color: #999; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px;">
