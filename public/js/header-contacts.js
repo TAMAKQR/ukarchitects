@@ -32,6 +32,17 @@
         return trimmed && trimmed !== 'null' && trimmed !== 'undefined' ? trimmed : '';
     }
 
+    function normalizeMediaUrl(value) {
+        const url = sanitizeUrl(value);
+        if (!url) {
+            return '';
+        }
+        if (/^https?:\/\//i.test(url) || url.startsWith('data:')) {
+            return url;
+        }
+        return url.startsWith('/') ? url : '/' + url;
+    }
+
     async function refreshMobileContacts() {
         try {
             const response = await fetch(`${getApiBase()}/settings`);
@@ -54,7 +65,7 @@
             }
 
             const logoEl = document.getElementById('site-logo');
-            const logoUrl = sanitizeUrl(settings.logo_url);
+            const logoUrl = normalizeMediaUrl(settings.logo_url);
             if (logoEl) {
                 if (!logoEl.dataset.defaultLogo) {
                     logoEl.dataset.defaultLogo = logoEl.getAttribute('src') || '';
@@ -68,7 +79,7 @@
 
             const faviconLink = ensureFaviconLink();
             if (faviconLink) {
-                const faviconUrl = sanitizeUrl(settings.favicon_url) || DEFAULT_FAVICON;
+                const faviconUrl = normalizeMediaUrl(settings.favicon_url) || DEFAULT_FAVICON;
                 faviconLink.href = faviconUrl;
             }
         } catch (error) {

@@ -10,6 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
 
+    <script src="js/header-contacts.js" defer></script>
+
     <style>
         * {
             margin: 0;
@@ -191,8 +193,8 @@
         <div
             style="height: 75px; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
             <a href="/index-en.html" style="display: inline-block;">
-                <img src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="UK Architects"
-                    style="height: 35px; width: auto; filter: brightness(0) invert(1);" />
+                <img id="site-logo" src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg"
+                    alt="UK Architects" style="height: 35px; width: auto; filter: brightness(0) invert(1);" />
             </a>
         </div>
     </header>
@@ -281,6 +283,12 @@
         });
 
         loadTeam();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.refreshMobileContacts) {
+                window.refreshMobileContacts();
+            }
+        });
     </script>
 
     <!-- Footer -->
