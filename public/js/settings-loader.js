@@ -1,7 +1,21 @@
 // Загрузка и применение настроек сайта
 (async function loadSiteSettings() {
     try {
-        const response = await fetch('/api/settings');
+        const getApiBase = () => {
+            const host = window.location.hostname;
+            if (host === 'localhost' || host === '127.0.0.1') {
+                return 'http://localhost:3000/api';
+            }
+            // Если фронт и API на одном домене (например, когда сайт обслуживается Express на Render)
+            if (host.endsWith('onrender.com')) {
+                return '/api';
+            }
+            // Production: статический фронтенд на отдельном домене
+            return 'https://uk-architects.onrender.com/api';
+        };
+
+        const API_BASE = getApiBase();
+        const response = await fetch(`${API_BASE}/settings`);
         const settings = await response.json();
 
         console.log('Settings loaded:', settings);

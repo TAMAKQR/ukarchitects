@@ -1,6 +1,17 @@
 (function () {
     const DEFAULT_FAVICON = '/images/tildafavicon.ico';
 
+    function getApiBase() {
+        const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+        if (host.endsWith('onrender.com')) {
+            return '/api';
+        }
+        return 'https://uk-architects.onrender.com/api';
+    }
+
     function ensureFaviconLink() {
         let faviconLink = document.querySelector('link[rel="icon"][data-dynamic-favicon="true"]');
         if (!faviconLink) {
@@ -23,7 +34,7 @@
 
     async function refreshMobileContacts() {
         try {
-            const response = await fetch('/api/settings');
+            const response = await fetch(`${getApiBase()}/settings`);
             if (!response.ok) {
                 throw new Error('Failed to load settings');
             }

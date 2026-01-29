@@ -560,6 +560,21 @@
 <div style="height: 70px;"></div>
 
 <script>
+    function getApiBase() {
+        const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') {
+            return 'http://localhost:3000/api';
+        }
+        // When the site is served by the backend itself (e.g., on Render)
+        if (host.endsWith('onrender.com')) {
+            return '/api';
+        }
+        // Static frontend on a custom domain
+        return 'https://uk-architects.onrender.com/api';
+    }
+
+    const API_BASE = getApiBase();
+
     // Mobile menu toggle - делаем глобальной функцией
     window.toggleMobileMenu = function () {
         console.log('toggleMobileMenu called'); // Отладка
@@ -663,7 +678,7 @@
 
     async function loadMobileServices() {
         try {
-            const response = await fetch('/api/services');
+            const response = await fetch(`${API_BASE}/services`);
             const services = await response.json();
 
             const mobileServicesList = document.getElementById('mobile-services-list');
@@ -717,7 +732,7 @@
     // Load desktop services
     async function loadServices() {
         try {
-            const response = await fetch('/api/services');
+            const response = await fetch(`${API_BASE}/services`);
             const services = await response.json();
 
             const dropdown = document.querySelector('.services-dropdown-inner');
@@ -743,7 +758,7 @@
     // Загрузка контактов в мобильное меню
     async function loadMobileContacts() {
         try {
-            const response = await fetch('/api/settings');
+            const response = await fetch(`${API_BASE}/settings`);
             const settings = await response.json();
 
             if (settings.site_phone) {
