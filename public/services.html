@@ -287,87 +287,26 @@
         });
     </script>
 
-    <!-- Footer -->
-    <footer
-        style="background: #1a1a1a; padding: 40px 0 20px 0; color: white; border-top: 1px solid rgba(255,255,255,0.1);">
-        <div style="padding: 0 60px;">
-            <div
-                style="display: grid; grid-template-columns: 2fr 2fr 2fr; gap: 80px; margin-bottom: 60px; align-items: start;">
-                <!-- Column 1 - Logo & Description -->
-                <div style="padding-top: 0;">
-                    <img src="images/tild3465-3331-4337-b736-396361326438__architects_global_50.svg" alt="UK ARCHITECTS"
-                        style="height: 50px; margin-bottom: 25px; display: block;">
-                    <p
-                        style="font-family: 'Noto Sans', sans-serif; font-size: 15px; color: rgba(255,255,255,0.7); line-height: 1.6; margin: 0;">
-                        Архитектурное бюро полного цикла. Создаём пространства, которые вдохновляют и служат
-                        десятилетиями.
-                    </p>
-                </div>
+    <script>
+        (function () {
+            function loadSharedFooter() {
+                fetch('/footer.html')
+                    .then(response => response.text())
+                    .then(html => {
+                        const existingFooter = document.querySelector('body > footer');
+                        if (existingFooter) existingFooter.remove();
+                        document.body.insertAdjacentHTML('beforeend', html);
+                    })
+                    .catch(error => console.error('Error loading footer:', error));
+            }
 
-                <!-- Column 2 - Address & Contact -->
-                <div style="padding-top: 0;">
-                    <div style="margin-bottom: 40px;">
-                        <p
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.5); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-                            АДРЕС
-                        </p>
-                        <p
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 24px; font-weight: 400; color: white; margin: 0 0 10px 0; line-height: 1.1;">
-                            Ch.Aitmatova street 243
-                        </p>
-                        <p
-                            style="font-family: 'Noto Sans', sans-serif; font-size: 15px; color: rgba(255,255,255,0.7); margin: 0;">
-                            Время работы: Пн–Пт: 9:00–19:00
-                        </p>
-                    </div>
-
-                    <div style="margin-bottom: 40px;">
-                        <p
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.5); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-                            Телефон
-                        </p>
-                        <a href="tel:+996779777666"
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 24px; font-weight: 400; color: white; text-decoration: none; display: block; line-height: 1.1;">
-                            +996 779 777 666
-                        </a>
-                    </div>
-
-                    <div>
-                        <p
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.5); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-                            Email
-                        </p>
-                        <a href="mailto:info@ukglobal.com"
-                            style="font-family: 'Ubuntu', sans-serif; font-size: 24px; font-weight: 400; color: white; text-decoration: none; display: block; line-height: 1.1;">
-                            info@ukglobal.com
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Column 3 - Socials -->
-                <div style="padding-top: 0;">
-                    <p
-                        style="font-family: 'Ubuntu', sans-serif; font-size: 15px; font-weight: 400; color: rgba(255,255,255,0.5); margin: 0 0 15px 0; text-transform: uppercase; letter-spacing: 0.5px;">
-                        Мы в соцсетях
-                    </p>
-                </div>
-            </div>
-
-            <!-- Footer Bottom -->
-            <div
-                style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; display: flex; justify-content: space-between; align-items: center;">
-                <p
-                    style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.5); margin: 0;">
-                    © 2024 UK ARCHITECTS. Все права защищены
-                </p>
-                <a href="/privacy.html"
-                    style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.5); text-decoration: none; transition: color 0.3s;"
-                    onmouseover="this.style.color='white'" onmouseout="this.style.color='rgba(255,255,255,0.5)'">
-                    Политика конфиденциальности
-                </a>
-            </div>
-        </div>
-    </footer>
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', loadSharedFooter);
+            } else {
+                loadSharedFooter();
+            }
+        })();
+    </script>
 </body>
 
 </html>

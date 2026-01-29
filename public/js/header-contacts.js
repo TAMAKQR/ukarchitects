@@ -77,6 +77,18 @@
                 }
             }
 
+            const loaderLogoEl = document.querySelector('#page-loader img');
+            if (loaderLogoEl) {
+                if (!loaderLogoEl.dataset.defaultLogo) {
+                    loaderLogoEl.dataset.defaultLogo = loaderLogoEl.getAttribute('src') || '';
+                }
+                if (logoUrl) {
+                    loaderLogoEl.src = logoUrl;
+                } else if (loaderLogoEl.dataset.defaultLogo) {
+                    loaderLogoEl.src = loaderLogoEl.dataset.defaultLogo;
+                }
+            }
+
             const faviconLink = ensureFaviconLink();
             if (faviconLink) {
                 const faviconUrl = normalizeMediaUrl(settings.favicon_url) || DEFAULT_FAVICON;
