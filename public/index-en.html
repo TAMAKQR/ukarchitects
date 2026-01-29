@@ -854,6 +854,29 @@
             data-default-logo="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="Loading...">
     </div>
 
+    <script>
+        // Apply cached loader logo ASAP (avoid waiting for deferred scripts / network).
+        (function () {
+            try {
+                var img = document.querySelector('#page-loader img');
+                if (!img) return;
+
+                var cached = window.localStorage ? window.localStorage.getItem('uk_architects_logo_url') : '';
+                cached = (cached || '').toString().trim();
+                if (!cached || cached === 'null' || cached === 'undefined') return;
+
+                // Normalize relative URLs to site root.
+                if (!/^https?:\/\//i.test(cached) && cached.indexOf('data:') !== 0) {
+                    if (cached.charAt(0) !== '/') cached = '/' + cached;
+                }
+
+                img.src = cached;
+            } catch (e) {
+                // ignore
+            }
+        })();
+    </script>
+
     <header
         style="position: fixed; width: 100%; height: 75px; top: 0; left: 0; background-color: rgba(0, 0, 0, 0.35); z-index: 9999; border-bottom: 0; font-family: 'Noto Sans', sans-serif; transition: background-color 0.6s, top 0.3s linear;">
         <div
