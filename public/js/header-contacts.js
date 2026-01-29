@@ -1,5 +1,7 @@
 (function () {
     const DEFAULT_FAVICON = '/images/tildafavicon.ico';
+    const STORAGE_LOGO_KEY = 'uk_architects_logo_url';
+    const STORAGE_FAVICON_KEY = 'uk_architects_favicon_url';
 
     function getApiBase() {
         const host = window.location.hostname;
@@ -43,8 +45,81 @@
         return url.startsWith('/') ? url : '/' + url;
     }
 
+    function getCachedValue(key) {
+        try {
+            return sanitizeUrl(window.localStorage.getItem(key));
+        } catch (error) {
+            return '';
+        }
+    }
+
+    function setCachedValue(key, value) {
+        try {
+            const normalized = sanitizeUrl(value);
+            if (!normalized) {
+                window.localStorage.removeItem(key);
+            } else {
+                window.localStorage.setItem(key, normalized);
+            }
+        } catch (error) {
+            // ignore
+        }
+    }
+
+    function applyBrandingToDom(logoUrl, faviconUrl) {
+        const normalizedLogoUrl = normalizeMediaUrl(logoUrl);
+
+        const logoEl = document.getElementById('site-logo');
+        if (logoEl) {
+            if (!logoEl.dataset.defaultLogo) {
+                logoEl.dataset.defaultLogo = logoEl.getAttribute('src') || '';
+            }
+            if (normalizedLogoUrl) {
+                logoEl.src = normalizedLogoUrl;
+            } else if (logoEl.dataset.defaultLogo) {
+                logoEl.src = logoEl.dataset.defaultLogo;
+            }
+        }
+
+        const loaderLogoEl = document.querySelector('#page-loader img');
+        if (loaderLogoEl) {
+            if (!loaderLogoEl.dataset.defaultLogo) {
+                loaderLogoEl.dataset.defaultLogo = loaderLogoEl.getAttribute('src') || '';
+            }
+            if (normalizedLogoUrl) {
+                loaderLogoEl.src = normalizedLogoUrl;
+            } else if (loaderLogoEl.dataset.defaultLogo) {
+                loaderLogoEl.src = loaderLogoEl.dataset.defaultLogo;
+            }
+        }
+
+        const faviconLink = ensureFaviconLink();
+        if (faviconLink) {
+            const normalizedFaviconUrl = normalizeMediaUrl(faviconUrl) || DEFAULT_FAVICON;
+            faviconLink.href = normalizedFaviconUrl;
+        }
+    }
+
+    function applyCachedBranding() {
+        const cachedLogoUrl = getCachedValue(STORAGE_LOGO_KEY);
+        const cachedFaviconUrl = getCachedValue(STORAGE_FAVICON_KEY);
+        if (!cachedLogoUrl && !cachedFaviconUrl) {
+            return;
+        }
+
+        const tryApply = () => applyBrandingToDom(cachedLogoUrl, cachedFaviconUrl);
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', tryApply, { once: true });
+        } else {
+            tryApply();
+        }
+    }
+
     async function refreshMobileContacts() {
         try {
+            // Apply cached branding ASAP to avoid visible "old logo" flash in the preloader.
+            applyCachedBranding();
+
             const response = await fetch(`${getApiBase()}/settings`);
             if (!response.ok) {
                 throw new Error('Failed to load settings');
@@ -64,40 +139,19 @@
                 addressEl.textContent = settings.address.trim();
             }
 
-            const logoEl = document.getElementById('site-logo');
-            const logoUrl = normalizeMediaUrl(settings.logo_url);
-            if (logoEl) {
-                if (!logoEl.dataset.defaultLogo) {
-                    logoEl.dataset.defaultLogo = logoEl.getAttribute('src') || '';
-                }
-                if (logoUrl) {
-                    logoEl.src = logoUrl;
-                } else if (logoEl.dataset.defaultLogo) {
-                    logoEl.src = logoEl.dataset.defaultLogo;
-                }
-            }
+            const rawLogoUrl = sanitizeUrl(settings.logo_url);
+            const rawFaviconUrl = sanitizeUrl(settings.favicon_url);
 
-            const loaderLogoEl = document.querySelector('#page-loader img');
-            if (loaderLogoEl) {
-                if (!loaderLogoEl.dataset.defaultLogo) {
-                    loaderLogoEl.dataset.defaultLogo = loaderLogoEl.getAttribute('src') || '';
-                }
-                if (logoUrl) {
-                    loaderLogoEl.src = logoUrl;
-                } else if (loaderLogoEl.dataset.defaultLogo) {
-                    loaderLogoEl.src = loaderLogoEl.dataset.defaultLogo;
-                }
-            }
-
-            const faviconLink = ensureFaviconLink();
-            if (faviconLink) {
-                const faviconUrl = normalizeMediaUrl(settings.favicon_url) || DEFAULT_FAVICON;
-                faviconLink.href = faviconUrl;
-            }
+            applyBrandingToDom(rawLogoUrl, rawFaviconUrl);
+            setCachedValue(STORAGE_LOGO_KEY, rawLogoUrl);
+            setCachedValue(STORAGE_FAVICON_KEY, rawFaviconUrl);
         } catch (error) {
             console.error('Error refreshing mobile contacts:', error);
         }
     }
 
     window.refreshMobileContacts = refreshMobileContacts;
+
+    // Best-effort: apply cached branding even before refreshMobileContacts() is called.
+    applyCachedBranding();
 })();

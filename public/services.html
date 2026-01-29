@@ -106,6 +106,43 @@
             font-size: 16px;
             color: #cccccc;
             line-height: 1.7;
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            word-break: break-word;
+        }
+
+        /* Rich content inside description (from admin editor) */
+        .service-description * {
+            max-width: 100%;
+        }
+
+        .service-description img {
+            max-width: 100% !important;
+            height: auto !important;
+            display: block;
+            margin: 12px 0;
+            border-radius: 8px;
+        }
+
+        .service-description a {
+            color: inherit;
+            text-decoration: underline;
+            overflow-wrap: anywhere;
+        }
+
+        .service-description iframe,
+        .service-description video,
+        .service-description embed {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .service-description table {
+            width: 100%;
+            max-width: 100%;
+            border-collapse: collapse;
+            display: block;
+            overflow-x: auto;
         }
 
         .loading {
@@ -246,7 +283,7 @@
                             ` : ''}
                             <div class="service-content">
                                 <h2 class="service-title">${service.title_ru || service.title}</h2>
-                                <p class="service-description">${service.description_ru || service.description}</p>
+                                <div class="service-description">${service.description_ru || service.description}</div>
                             </div>
                         </div>
                     `;
