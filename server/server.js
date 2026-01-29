@@ -713,10 +713,43 @@ const initializeDatabase = async () => {
 initializeDatabase();
 
 // Middleware
-app.use(cors({
-    origin: isDevelopment ? true : process.env.FRONTEND_URL || true,
-    credentials: true
-}));
+const normalizeOrigin = (origin) => {
+    if (typeof origin !== 'string') return origin;
+    return origin.trim().replace(/\/+$/, '');
+};
+
+const configuredFrontendUrls = (process.env.FRONTEND_URL || '')
+    .split(',')
+    .map(normalizeOrigin)
+    .filter(Boolean);
+
+const defaultProductionOrigins = [
+    'https://ukarchitects.global',
+    'https://www.ukarchitects.global'
+].map(normalizeOrigin);
+
+const allowedOrigins = new Set([
+    ...defaultProductionOrigins,
+    ...configuredFrontendUrls
+]);
+
+const corsOptions = {
+    origin: (origin, callback) => {
+        // Запросы без Origin (curl/healthcheck) — разрешаем
+        if (!origin) return callback(null, true);
+
+        // В development разрешаем любые origin
+        if (isDevelopment) return callback(null, true);
+
+        const normalized = normalizeOrigin(origin);
+        return callback(null, allowedOrigins.has(normalized));
+    },
+    credentials: true,
+    optionsSuccessStatus: 204
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(cookieParser());
 app.use(session({
     secret: process.env.SESSION_SECRET || 'uk-architects-secret-key-change-in-production',
