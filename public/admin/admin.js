@@ -735,11 +735,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const container = document.getElementById('categories-list');
             container.innerHTML = categories.map(category => `
-            <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 5px;">
-                <input type="text" value="${category.name}" 
-                    style="flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
-                    onblur="updateCategory(${category.id}, this.value)">
-                <button class="btn btn-danger" onclick="deleteCategory(${category.id})">Удалить</button>
+            <div style="display: flex; gap: 10px; margin-bottom: 15px; align-items: center; padding: 15px; background: #f8f9fa; border-radius: 5px; flex-wrap: wrap;">
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 3px;">RU</label>
+                    <input type="text" value="${category.name}" 
+                        data-id="${category.id}"
+                        data-field="name"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
+                        onblur="updateCategoryField(${category.id}, 'name', this.value)">
+                </div>
+                <div style="flex: 1; min-width: 200px;">
+                    <label style="display: block; font-size: 12px; color: #666; margin-bottom: 3px;">EN</label>
+                    <input type="text" value="${category.name_en || ''}" 
+                        data-id="${category.id}"
+                        data-field="name_en"
+                        placeholder="English name"
+                        style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;"
+                        onblur="updateCategoryField(${category.id}, 'name_en', this.value)">
+                </div>
+                <button class="btn btn-danger" onclick="deleteCategory(${category.id})" style="align-self: flex-end;">Удалить</button>
             </div>
         `).join('');
         } catch (error) {
@@ -749,39 +763,87 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addCategory() {
-        showInputModal(
-            'Добавить категорию проекта',
-            'Введите название новой категории...',
-            async (categoryName) => {
-                try {
-                    await authFetch(`${API_URL}/categories`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: categoryName })
-                    });
-                    showAlert('Категория добавлена');
-                    loadCategories();
-                } catch (error) {
-                    console.error('Ошибка добавления категории:', error);
-                    showAlert('Ошибка добавления', 'error');
-                }
-            }
-        );
+        const modalHtml = `
+            <div class="modal active" id="category-modal">
+                <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-header">
+                        <h3>Добавить категорию проекта</h3>
+                        <span class="close" onclick="closeModal('category-modal')">&times;</span>
+                    </div>
+                    <form onsubmit="saveCategoryForm(event)">
+                        <div class="form-group">
+                            <label>Название (RU) *</label>
+                            <input type="text" id="category-name-ru" required placeholder="Введите название категории..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        </div>
+                        <div class="form-group">
+                            <label>Название (EN)</label>
+                            <input type="text" id="category-name-en" placeholder="Enter category name in English..." style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 16px;">
+                        </div>
+                        <div style="margin-top: 20px; display: flex; gap: 10px;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">Создать</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal('category-modal')" style="flex: 1;">Отмена</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        `;
+
+        document.getElementById('modal-container').innerHTML = modalHtml;
+        document.getElementById('category-name-ru').focus();
     }
 
-    async function updateCategory(id, name) {
+    async function saveCategoryForm(event) {
+        event.preventDefault();
+        const name = document.getElementById('category-name-ru').value.trim();
+        const name_en = document.getElementById('category-name-en').value.trim();
+
+        if (!name) return;
+
         try {
+            await authFetch(`${API_URL}/categories`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, name_en })
+            });
+            showAlert('Категория добавлена');
+            closeModal('category-modal');
+            loadCategories();
+        } catch (error) {
+            console.error('Ошибка добавления категории:', error);
+            showAlert('Ошибка добавления', 'error');
+        }
+    }
+
+    async function updateCategoryField(id, field, value) {
+        try {
+            // Получаем текущие значения
+            const response = await authFetch(`${API_URL}/categories`);
+            const categories = await response.json();
+            const category = categories.find(c => c.id === id);
+
+            if (!category) return;
+
+            const updateData = {
+                name: field === 'name' ? value : category.name,
+                name_en: field === 'name_en' ? value : category.name_en
+            };
+
             await authFetch(`${API_URL}/categories/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name })
+                body: JSON.stringify(updateData)
             });
             showAlert('Категория обновлена');
         } catch (error) {
             console.error('Ошибка обновления категории:', error);
             showAlert('Ошибка обновления', 'error');
-            loadCategories(); // Перезагружаем чтобы откатить изменения
+            loadCategories();
         }
+    }
+
+    async function updateCategory(id, name) {
+        // Оставляем для обратной совместимости
+        updateCategoryField(id, 'name', name);
     }
 
     async function deleteCategory(id) {
@@ -1762,6 +1824,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.deleteProjectMainImageFunction = deleteProjectMainImage;
     window.deleteProjectGalleryFunction = deleteProjectGallery;
     window.updateCategory = updateCategory;
+    window.updateCategoryField = updateCategoryField;
+    window.saveCategoryForm = saveCategoryForm;
     window.deleteCategory = deleteCategory;
     window.addCategory = addCategory;
     window.updateStage = updateStage;
