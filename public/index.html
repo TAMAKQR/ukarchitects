@@ -1053,22 +1053,11 @@
         </div>
     </header>
 
-    <!-- Fixed Language Switcher - Minimalist style -->
-    <div id="lang-switcher"
-        style="position: fixed; top: 22px; right: 40px; z-index: 99999; display: flex; gap: 3px; background: rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 5px 6px; transition: top 0.3s linear;">
-        <a href="/"
-            style="color: #ffffff; background: rgba(255, 255, 255, 0.2); text-decoration: none; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-family: 'Ubuntu', sans-serif;">RU</a>
-        <a href="/index-en.html"
-            style="color: rgba(255, 255, 255, 0.6); text-decoration: none; font-size: 13px; font-weight: 600; padding: 5px 12px; border-radius: 15px; text-transform: uppercase; font-family: 'Ubuntu', sans-serif; transition: all 0.3s;"
-            onmouseover="this.style.color='#ffffff'; this.style.background='rgba(255, 255, 255, 0.15)'"
-            onmouseout="this.style.color='rgba(255, 255, 255, 0.6)'; this.style.background='transparent'">EN</a>
-    </div>
-
     <script>
         // Show header at top and when scrolling up, hide when scrolling down
         let lastScrollTop = 0;
         const header = document.querySelector('header');
-        const langSwitcher = document.getElementById('lang-switcher');
+        const langSwitcher = document.querySelector('.fixed-lang-switcher');
 
         window.addEventListener('scroll', function () {
             let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
@@ -1076,15 +1065,15 @@
             if (scrollTop <= 100) {
                 // Near top - always show
                 header.style.top = '0';
-                langSwitcher.style.top = '22px';
+                if (langSwitcher) langSwitcher.style.top = '20px';
             } else if (scrollTop > lastScrollTop) {
                 // Scrolling down - hide
                 header.style.top = '-75px';
-                langSwitcher.style.top = '-75px';
+                if (langSwitcher) langSwitcher.style.top = '-75px';
             } else {
                 // Scrolling up - show
                 header.style.top = '0';
-                langSwitcher.style.top = '22px';
+                if (langSwitcher) langSwitcher.style.top = '20px';
             }
 
             lastScrollTop = scrollTop;

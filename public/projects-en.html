@@ -498,7 +498,7 @@
 
         async function loadMobileServices() {
             try {
-                const response = await fetch('/api/services');
+                const response = await fetch('/api/services?lang=en');
                 const services = await response.json();
                 const mobileServicesList = document.getElementById('mobile-services-list');
                 if (mobileServicesList && services.length > 0) {
@@ -526,7 +526,7 @@
 
         async function loadServicesDropdown() {
             try {
-                const response = await fetch('/api/services');
+                const response = await fetch('/api/services?lang=en');
                 const services = await response.json();
                 const dropdown = document.querySelector('.services-dropdown-inner');
 
@@ -580,6 +580,7 @@
 
     <script>
         const API_URL = '/api';
+        const LANG = 'en';
         let allProjects = [];
         let currentCategory = '';
 
@@ -599,7 +600,7 @@
         // Load categories
         async function loadCategories() {
             try {
-                const response = await fetch(`${API_URL}/project-categories`);
+                const response = await fetch(`${API_URL}/project-categories?lang=${LANG}`);
                 const categories = await response.json();
 
                 const menuContainer = document.getElementById('category-menu');
@@ -621,7 +622,7 @@
         // Load projects
         async function loadProjects() {
             try {
-                const response = await fetch(`${API_URL}/projects`);
+                const response = await fetch(`${API_URL}/projects?lang=${LANG}`);
                 allProjects = await response.json();
                 displayProjects(allProjects);
             } catch (error) {

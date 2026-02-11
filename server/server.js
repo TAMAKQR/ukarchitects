@@ -358,6 +358,30 @@ const initializeDatabase = async () => {
                 db.prepare("ALTER TABLE slider_items ADD COLUMN video_url TEXT").run();
                 console.log('✅ Добавлен столбец video_url в таблицу slider_items');
             }
+
+            // ========== МУЛЬТИЯЗЫЧНОСТЬ: добавляем поля _en ==========
+            const multiLangMigrations = [
+                { table: 'projects', fields: ['title_en', 'description_en', 'address_en', 'stage_en'] },
+                { table: 'services', fields: ['title_en', 'description_en'] },
+                { table: 'team', fields: ['name_en', 'position_en', 'bio_en'] },
+                { table: 'slider_items', fields: ['title_en', 'description_en', 'button_text_en'] },
+                { table: 'reviews', fields: ['client_name_en', 'company_en', 'text_en'] },
+                { table: 'faq', fields: ['question_en', 'answer_en'] },
+                { table: 'categories', fields: ['name_en', 'description_en'] },
+                { table: 'stages', fields: ['name_en', 'description_en'] },
+                { table: 'sections', fields: ['title_en', 'subtitle_en', 'content_en'] }
+            ];
+
+            multiLangMigrations.forEach(({ table, fields }) => {
+                const columns = db.prepare(`PRAGMA table_info(${table})`).all();
+                fields.forEach(field => {
+                    const hasField = columns.some(col => col.name === field);
+                    if (!hasField) {
+                        db.prepare(`ALTER TABLE ${table} ADD COLUMN ${field} TEXT`).run();
+                        console.log(`✅ Добавлен столбец ${field} в таблицу ${table}`);
+                    }
+                });
+            });
         } catch (error) {
             console.log('ℹ️ Миграция столбцов: пропущено (возможно, уже выполнено)');
         }
@@ -1076,15 +1100,37 @@ app.post('/api/upload-image', requireAuth, upload.single('image'), async (req, r
     }
 });
 
+// ============= HELPER: Мультиязычность =============
+// Возвращает значение на нужном языке (если есть перевод, иначе оригинал)
+function localizeField(item, field, lang) {
+    if (lang === 'en') {
+        const enValue = item[`${field}_en`];
+        return (enValue && enValue.trim()) ? enValue : item[field];
+    }
+    return item[field];
+}
+
+function localizeItem(item, fields, lang) {
+    const localized = { ...item };
+    fields.forEach(field => {
+        localized[field] = localizeField(item, field, lang);
+    });
+    return localized;
+}
+
 // Получить все услуги
 app.get('/api/services', (req, res) => {
     try {
+        const { lang } = req.query;
         const services = db.prepare('SELECT * FROM services WHERE visible = 1 ORDER BY order_num').all();
-        // Очистка undefined/null значений для image_url
-        const cleanedServices = services.map(service => ({
-            ...service,
-            image_url: service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null
-        }));
+        // Очистка undefined/null значений для image_url + локализация
+        const cleanedServices = services.map(service => {
+            const localized = localizeItem(service, ['title', 'description'], lang);
+            return {
+                ...localized,
+                image_url: service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null
+            };
+        });
         res.json(cleanedServices);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1094,11 +1140,13 @@ app.get('/api/services', (req, res) => {
 // Получить услугу по ID
 app.get('/api/services/:id', (req, res) => {
     try {
+        const { lang } = req.query;
         const service = db.prepare('SELECT * FROM services WHERE id = ?').get(req.params.id);
         if (service) {
+            const localized = localizeItem(service, ['title', 'description'], lang);
             // Очистка undefined/null значений для image_url
-            service.image_url = service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null;
-            res.json(service);
+            localized.image_url = service.image_url && service.image_url !== 'undefined' && service.image_url !== 'null' ? service.image_url : null;
+            res.json(localized);
         } else {
             res.status(404).json({ error: 'Услуга не найдена' });
         }
@@ -1113,7 +1161,7 @@ app.post('/api/services', requireAuth, upload.single('image'), async (req, res) 
         console.log('POST /api/services - Body:', req.body);
         console.log('POST /api/services - File:', req.file);
 
-        const { title, description, icon, order_num, visible } = req.body;
+        const { title, title_en, description, description_en, icon, order_num, visible } = req.body;
         let image_url = null;
 
         if (req.file) {
@@ -1124,10 +1172,10 @@ app.post('/api/services', requireAuth, upload.single('image'), async (req, res) 
 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
-        console.log('Создание услуги:', { title, description: description?.substring(0, 50), icon, image_url, order_num, visibleValue });
+        console.log('Создание услуги:', { title, title_en, description: description?.substring(0, 50), icon, image_url, order_num, visibleValue });
 
-        const stmt = db.prepare('INSERT INTO services (title, description, icon, image_url, order_num, visible) VALUES (?, ?, ?, ?, ?, ?)');
-        const result = stmt.run(title, description, icon || null, image_url, order_num || 0, visibleValue);
+        const stmt = db.prepare('INSERT INTO services (title, title_en, description, description_en, icon, image_url, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(title, title_en || null, description, description_en || null, icon || null, image_url, order_num || 0, visibleValue);
 
         console.log('Услуга создана с ID:', result.lastInsertRowid);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Услуга создана' });
@@ -1143,20 +1191,20 @@ app.put('/api/services/:id', requireAuth, upload.single('image'), async (req, re
         console.log('PUT /api/services/:id - Body:', req.body);
         console.log('PUT /api/services/:id - File:', req.file);
 
-        const { title, description, icon, order_num, visible, delete_image } = req.body;
+        const { title, title_en, description, description_en, icon, order_num, visible, delete_image } = req.body;
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
             const uploadResult = await uploadImageBuffer(req.file.buffer);
             const image_url = uploadResult.secure_url;
-            const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, image_url = ?, order_num = ?, visible = ? WHERE id = ?');
-            stmt.run(title, description, icon, image_url, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE services SET title = ?, title_en = ?, description = ?, description_en = ?, icon = ?, image_url = ?, order_num = ?, visible = ? WHERE id = ?');
+            stmt.run(title, title_en || null, description, description_en || null, icon, image_url, order_num || 0, visibleValue, req.params.id);
         } else if (delete_image === '1') {
-            const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, image_url = NULL, order_num = ?, visible = ? WHERE id = ?');
-            stmt.run(title, description, icon, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE services SET title = ?, title_en = ?, description = ?, description_en = ?, icon = ?, image_url = NULL, order_num = ?, visible = ? WHERE id = ?');
+            stmt.run(title, title_en || null, description, description_en || null, icon, order_num || 0, visibleValue, req.params.id);
         } else {
-            const stmt = db.prepare('UPDATE services SET title = ?, description = ?, icon = ?, order_num = ?, visible = ? WHERE id = ?');
-            stmt.run(title, description, icon, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE services SET title = ?, title_en = ?, description = ?, description_en = ?, icon = ?, order_num = ?, visible = ? WHERE id = ?');
+            stmt.run(title, title_en || null, description, description_en || null, icon, order_num || 0, visibleValue, req.params.id);
         }
 
         res.json({ message: 'Услуга обновлена' });
@@ -1181,7 +1229,7 @@ app.delete('/api/services/:id', requireAuth, (req, res) => {
 
 app.get('/api/projects', (req, res) => {
     try {
-        const { category } = req.query;
+        const { category, lang } = req.query;
         let query = 'SELECT * FROM projects WHERE visible = 1';
         let params = [];
 
@@ -1193,11 +1241,14 @@ app.get('/api/projects', (req, res) => {
         query += ' ORDER BY created_at DESC';
 
         const projects = db.prepare(query).all(...params);
-        // Очистка undefined/null значений для image_url
-        const cleanedProjects = projects.map(project => ({
-            ...project,
-            image_url: project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null
-        }));
+        // Очистка undefined/null значений для image_url + локализация
+        const cleanedProjects = projects.map(project => {
+            const localized = localizeItem(project, ['title', 'description', 'address', 'stage'], lang);
+            return {
+                ...localized,
+                image_url: project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null
+            };
+        });
         res.json(cleanedProjects);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1207,8 +1258,10 @@ app.get('/api/projects', (req, res) => {
 // Получить категории проектов
 app.get('/api/project-categories', (req, res) => {
     try {
-        const categories = db.prepare("SELECT name FROM categories WHERE visible = 1 ORDER BY order_num, name").all();
-        res.json(categories.map(c => c.name));
+        const { lang } = req.query;
+        const categories = db.prepare("SELECT * FROM categories WHERE visible = 1 ORDER BY order_num, name").all();
+        const localizedNames = categories.map(c => localizeField(c, 'name', lang));
+        res.json(localizedNames);
     } catch (error) {
         console.error('Ошибка получения категорий:', error);
         res.status(500).json({ error: error.message });
@@ -1217,11 +1270,13 @@ app.get('/api/project-categories', (req, res) => {
 
 app.get('/api/projects/:id', (req, res) => {
     try {
+        const { lang } = req.query;
         const project = db.prepare('SELECT * FROM projects WHERE id = ?').get(req.params.id);
         if (project) {
+            const localized = localizeItem(project, ['title', 'description', 'address', 'stage'], lang);
             // Очистка undefined/null значений для image_url
-            project.image_url = project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null;
-            res.json(project);
+            localized.image_url = project.image_url && project.image_url !== 'undefined' && project.image_url !== 'null' ? project.image_url : null;
+            res.json(localized);
         } else {
             res.status(404).json({ error: 'Проект не найден' });
         }
@@ -1232,9 +1287,9 @@ app.get('/api/projects/:id', (req, res) => {
 
 app.post('/api/projects', requireAuth, (req, res) => {
     try {
-        const { title, description, category, image_url, gallery_images, address, year, total_area, floors, client, stage } = req.body;
-        const stmt = db.prepare('INSERT INTO projects (title, description, category, image_url, gallery_images, address, year, total_area, floors, client, stage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-        const result = stmt.run(title, description, category, image_url, gallery_images, address, year, total_area, floors, client, stage);
+        const { title, title_en, description, description_en, category, image_url, gallery_images, address, address_en, year, total_area, floors, client, stage, stage_en } = req.body;
+        const stmt = db.prepare('INSERT INTO projects (title, title_en, description, description_en, category, image_url, gallery_images, address, address_en, year, total_area, floors, client, stage, stage_en) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(title, title_en, description, description_en, category, image_url, gallery_images, address, address_en, year, total_area, floors, client, stage, stage_en);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Проект создан' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1243,9 +1298,9 @@ app.post('/api/projects', requireAuth, (req, res) => {
 
 app.put('/api/projects/:id', requireAuth, (req, res) => {
     try {
-        const { title, description, category, image_url, gallery_images, address, year, total_area, floors, client, stage, visible } = req.body;
-        const stmt = db.prepare('UPDATE projects SET title = ?, description = ?, category = ?, image_url = ?, gallery_images = ?, address = ?, year = ?, total_area = ?, floors = ?, client = ?, stage = ?, visible = ? WHERE id = ?');
-        stmt.run(title, description, category, image_url, gallery_images, address, year, total_area, floors, client, stage, visible, req.params.id);
+        const { title, title_en, description, description_en, category, image_url, gallery_images, address, address_en, year, total_area, floors, client, stage, stage_en, visible } = req.body;
+        const stmt = db.prepare('UPDATE projects SET title = ?, title_en = ?, description = ?, description_en = ?, category = ?, image_url = ?, gallery_images = ?, address = ?, address_en = ?, year = ?, total_area = ?, floors = ?, client = ?, stage = ?, stage_en = ?, visible = ? WHERE id = ?');
+        stmt.run(title, title_en, description, description_en, category, image_url, gallery_images, address, address_en, year, total_area, floors, client, stage, stage_en, visible, req.params.id);
         res.json({ message: 'Проект обновлен' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1266,11 +1321,15 @@ app.delete('/api/projects/:id', requireAuth, (req, res) => {
 
 app.get('/api/hero-slides', (req, res) => {
     try {
+        const { lang } = req.query;
         const slides = db.prepare('SELECT * FROM slider_items WHERE visible = 1 ORDER BY order_num ASC').all();
-        const cleanedSlides = slides.map(slide => ({
-            ...slide,
-            image_url: slide.image_url && slide.image_url !== 'undefined' && slide.image_url !== 'null' ? slide.image_url : null
-        }));
+        const cleanedSlides = slides.map(slide => {
+            const localized = localizeItem(slide, ['title', 'description', 'button_text'], lang);
+            return {
+                ...localized,
+                image_url: slide.image_url && slide.image_url !== 'undefined' && slide.image_url !== 'null' ? slide.image_url : null
+            };
+        });
         res.json(cleanedSlides);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1340,6 +1399,7 @@ app.delete('/api/hero-slides/:id', requireAuth, (req, res) => {
 
 app.get('/api/reviews', (req, res) => {
     try {
+        const { lang } = req.query;
         // Проверяем, существует ли таблица
         const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").get();
 
@@ -1349,11 +1409,14 @@ app.get('/api/reviews', (req, res) => {
         }
 
         const reviews = db.prepare('SELECT * FROM reviews WHERE visible = 1 ORDER BY created_at DESC').all();
-        // Очистка undefined/null значений для image_url
-        const cleanedReviews = reviews.map(review => ({
-            ...review,
-            image_url: review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null
-        }));
+        // Очистка undefined/null значений для image_url + локализация
+        const cleanedReviews = reviews.map(review => {
+            const localized = localizeItem(review, ['client_name', 'company', 'text'], lang);
+            return {
+                ...localized,
+                image_url: review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null
+            };
+        });
         res.json(cleanedReviews);
     } catch (error) {
         console.error('Error in /api/reviews:', error);
@@ -1363,6 +1426,7 @@ app.get('/api/reviews', (req, res) => {
 
 app.get('/api/reviews/:id', (req, res) => {
     try {
+        const { lang } = req.query;
         // Проверяем, существует ли таблица
         const tableExists = db.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name='reviews'").get();
 
@@ -1373,9 +1437,10 @@ app.get('/api/reviews/:id', (req, res) => {
 
         const review = db.prepare('SELECT * FROM reviews WHERE id = ?').get(req.params.id);
         if (review) {
+            const localized = localizeItem(review, ['client_name', 'company', 'text'], lang);
             // Очистка undefined/null значений для image_url
-            review.image_url = review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null;
-            res.json(review);
+            localized.image_url = review.image_url && review.image_url !== 'undefined' && review.image_url !== 'null' ? review.image_url : null;
+            res.json(localized);
         } else {
             res.status(404).json({ error: 'Отзыв не найден' });
         }
@@ -1544,8 +1609,10 @@ app.delete('/api/sections/:id', (req, res) => {
 
 app.get('/api/team', (req, res) => {
     try {
+        const { lang } = req.query;
         const team = db.prepare('SELECT * FROM team WHERE visible = 1 ORDER BY order_num').all();
-        res.json(team);
+        const localizedTeam = team.map(member => localizeItem(member, ['name', 'position', 'bio'], lang));
+        res.json(localizedTeam);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1553,9 +1620,11 @@ app.get('/api/team', (req, res) => {
 
 app.get('/api/team/:id', (req, res) => {
     try {
+        const { lang } = req.query;
         const member = db.prepare('SELECT * FROM team WHERE id = ?').get(req.params.id);
         if (member) {
-            res.json(member);
+            const localized = localizeItem(member, ['name', 'position', 'bio'], lang);
+            res.json(localized);
         } else {
             res.status(404).json({ error: 'Сотрудник не найден' });
         }
@@ -1566,7 +1635,7 @@ app.get('/api/team/:id', (req, res) => {
 
 app.post('/api/team', upload.single('photo'), async (req, res) => {
     try {
-        const { name, position, bio, email, phone, order_num, visible } = req.body;
+        const { name, name_en, position, position_en, bio, bio_en, email, phone, order_num, visible } = req.body;
         let photo_url = null;
 
         if (req.file) {
@@ -1589,8 +1658,8 @@ app.post('/api/team', upload.single('photo'), async (req, res) => {
 
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
-        const stmt = db.prepare('INSERT INTO team (name, position, bio, photo_url, email, phone, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-        const result = stmt.run(name, position, bio, photo_url, email, phone, order_num || 0, visibleValue);
+        const stmt = db.prepare('INSERT INTO team (name, name_en, position, position_en, bio, bio_en, photo_url, email, phone, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(name, name_en || null, position, position_en || null, bio, bio_en || null, photo_url, email, phone, order_num || 0, visibleValue);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Сотрудник добавлен' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1599,7 +1668,7 @@ app.post('/api/team', upload.single('photo'), async (req, res) => {
 
 app.put('/api/team/:id', upload.single('photo'), async (req, res) => {
     try {
-        const { name, position, bio, email, phone, order_num, visible } = req.body;
+        const { name, name_en, position, position_en, bio, bio_en, email, phone, order_num, visible } = req.body;
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
@@ -1618,11 +1687,11 @@ app.put('/api/team/:id', upload.single('photo'), async (req, res) => {
                 uploadStream.end(req.file.buffer);
             });
             const photo_url = result.secure_url;
-            const stmt = db.prepare('UPDATE team SET name = ?, position = ?, bio = ?, photo_url = ?, email = ?, phone = ?, order_num = ?, visible = ? WHERE id = ?');
-            stmt.run(name, position, bio, photo_url, email, phone, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE team SET name = ?, name_en = ?, position = ?, position_en = ?, bio = ?, bio_en = ?, photo_url = ?, email = ?, phone = ?, order_num = ?, visible = ? WHERE id = ?');
+            stmt.run(name, name_en || null, position, position_en || null, bio, bio_en || null, photo_url, email, phone, order_num || 0, visibleValue, req.params.id);
         } else {
-            const stmt = db.prepare('UPDATE team SET name = ?, position = ?, bio = ?, email = ?, phone = ?, order_num = ?, visible = ? WHERE id = ?');
-            stmt.run(name, position, bio, email, phone, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE team SET name = ?, name_en = ?, position = ?, position_en = ?, bio = ?, bio_en = ?, email = ?, phone = ?, order_num = ?, visible = ? WHERE id = ?');
+            stmt.run(name, name_en || null, position, position_en || null, bio, bio_en || null, email, phone, order_num || 0, visibleValue, req.params.id);
         }
 
         res.json({ message: 'Информация обновлена' });

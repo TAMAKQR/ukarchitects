@@ -174,7 +174,7 @@
 
         async function loadTeam() {
             try {
-                const response = await fetch(`${API_URL}/team`);
+                const response = await fetch(`${API_URL}/team?lang=en`);
                 const team = await response.json();
 
                 const container = document.getElementById('team-container');
@@ -195,8 +195,8 @@
                             ` : '<div class="team-photo"></div>'}
                             <div class="team-info">
                                 <h2 class="team-name">${member.name}</h2>
-                                <p class="team-position">${member.position_en || member.position}</p>
-                                ${member.bio_en || member.bio ? `<p class="team-bio">${member.bio_en || member.bio}</p>` : ''}
+                                <p class="team-position">${member.position}</p>
+                                ${member.bio ? `<p class="team-bio">${member.bio}</p>` : ''}
                             </div>
                         </div>
                     `;
