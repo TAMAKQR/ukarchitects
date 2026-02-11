@@ -7,7 +7,7 @@
             <div>
                 <img src="/images/tild3465-3331-4337-b736-396361326438__architects_global_50.svg" alt="UK ARCHITECTS"
                     style="height: 45px; margin-bottom: 18px; display: block;">
-                <p data-setting="site_description"
+                <p data-setting="site_description" data-translate="site-description"
                     style="font-family: 'Noto Sans', sans-serif; font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6; margin: 0;">
                     Архитектурное бюро полного цикла
                 </p>
@@ -16,7 +16,7 @@
             <!-- Column 2 - Contact Info -->
             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 35px;">
                 <div>
-                    <p
+                    <p data-translate="address-label"
                         style="font-family: 'Noto Sans', sans-serif; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">
                         Адрес
                     </p>
@@ -24,14 +24,14 @@
                         style="font-family: 'Ubuntu', sans-serif; font-size: 15px; font-weight: 500; color: white; margin: 0; line-height: 1.5;">
                         Ch.Aitmatova street 243
                     </p>
-                    <p data-setting="working_hours"
+                    <p data-setting="working_hours" data-translate="working-hours"
                         style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.5); margin: 8px 0 0 0;">
                         Пн–Пт: 9:00–19:00
                     </p>
                 </div>
 
                 <div>
-                    <p
+                    <p data-translate="phone-label"
                         style="font-family: 'Noto Sans', sans-serif; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">
                         Телефон
                     </p>
@@ -42,7 +42,7 @@
                 </div>
 
                 <div>
-                    <p
+                    <p data-translate="email-label"
                         style="font-family: 'Noto Sans', sans-serif; font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.4); margin: 0 0 10px 0; text-transform: uppercase; letter-spacing: 1px;">
                         Email
                     </p>
@@ -55,7 +55,7 @@
 
             <!-- Column 3 - CTA & Socials -->
             <div style="text-align: right;">
-                <a href="/#form"
+                <a href="/#form" data-translate="cta-button" data-link-ru="/#form" data-link-en="/index-en.html#form"
                     style="display: inline-block; background: #ffffff; color: #1a1a1a; padding: 14px 32px; border-radius: 8px; text-decoration: none; font-family: 'Ubuntu', sans-serif; font-weight: 500; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.3s; margin-bottom: 20px;"
                     onmouseover="this.style.background='#f0f0f0'" onmouseout="this.style.background='#ffffff'">
                     Оставить заявку
@@ -133,23 +133,25 @@
         <!-- Footer Bottom -->
         <div
             style="border-top: 1px solid rgba(255,255,255,0.08); padding-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <p style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.4); margin: 0;">
+            <p data-translate="copyright"
+                style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.4); margin: 0;">
                 © 2024 UK ARCHITECTS. Все права защищены
             </p>
             <div style="display: flex; gap: 30px; flex-wrap: wrap;">
-                <a href="/about.html"
+                <a href="/about.html" data-translate="about-link" data-link-ru="/about.html"
+                    data-link-en="/about-en.html"
                     style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.3s;"
                     onmouseover="this.style.color='rgba(255,255,255,0.8)'"
                     onmouseout="this.style.color='rgba(255,255,255,0.4)'">
                     О компании
                 </a>
-                <a href="/privacy-policy.html"
+                <a href="/privacy-policy.html" data-translate="privacy-link"
                     style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.3s;"
                     onmouseover="this.style.color='rgba(255,255,255,0.8)'"
                     onmouseout="this.style.color='rgba(255,255,255,0.4)'">
                     Политика конфиденциальности
                 </a>
-                <a href="/user-agreement.html"
+                <a href="/user-agreement.html" data-translate="terms-link"
                     style="font-family: 'Noto Sans', sans-serif; font-size: 13px; color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.3s;"
                     onmouseover="this.style.color='rgba(255,255,255,0.8)'"
                     onmouseout="this.style.color='rgba(255,255,255,0.4)'">
@@ -264,8 +266,41 @@
     }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', loadFooterSettings);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFooterSettings();
+            translateFooter();
+        });
     } else {
         loadFooterSettings();
+        translateFooter();
+    }
+
+    function translateFooter() {
+        const isEnglish = window.location.pathname.includes('-en');
+        if (!isEnglish) return;
+
+        const translations = {
+            'site-description': 'Full-cycle architecture bureau',
+            'address-label': 'Address',
+            'phone-label': 'Phone',
+            'email-label': 'Email',
+            'working-hours': 'Mon-Fri: 9:00-19:00',
+            'cta-button': 'Get in touch',
+            'copyright': '© 2024 UK ARCHITECTS. All rights reserved',
+            'about-link': 'About',
+            'privacy-link': 'Privacy Policy',
+            'terms-link': 'Terms of Service'
+        };
+
+        Object.keys(translations).forEach(key => {
+            const el = document.querySelector(`footer [data-translate="${key}"]`);
+            if (el) {
+                el.textContent = translations[key];
+                // Обновляем ссылки для EN версии
+                if (el.dataset.linkEn) {
+                    el.href = el.dataset.linkEn;
+                }
+            }
+        });
     }
 </script>
