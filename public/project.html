@@ -24,46 +24,9 @@
             color: #ffffff;
         }
 
-        header {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 1000;
-            background: rgba(26, 26, 26, 0.95);
-            backdrop-filter: blur(10px);
-            transition: top 0.3s linear;
-        }
+        /* Header styles moved to header.html */
 
-        #lang-switcher {
-            position: fixed;
-            top: 22px;
-            right: 40px;
-            z-index: 99999;
-            display: flex;
-            gap: 3px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 5px 6px;
-            transition: top 0.3s linear;
-        }
-
-        #lang-switcher a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 5px 12px;
-            border-radius: 15px;
-            text-transform: uppercase;
-            font-family: 'Ubuntu', sans-serif;
-            transition: all 0.3s;
-        }
-
-        #lang-switcher a.active {
-            color: #ffffff;
-            background: rgba(255, 255, 255, 0.2);
-        }
+        /* Lang switcher styles moved to header.html */
 
         .container {
             max-width: 1400px;
@@ -520,43 +483,10 @@
 </head>
 
 <body>
-    <header>
-        <div
-            style="height: 75px; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
-            <a href="/" style="display: inline-block;">
-                <img src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="UK Architects"
-                    style="height: 35px; width: auto; filter: none;" />
-            </a>
-        </div>
-    </header>
-
-    <div id="lang-switcher">
-        <a href="/" class="active">RU</a>
-        <a href="/index-en.html">EN</a>
-    </div>
+    <!-- Shared header from header.html -->
+    <div id="header-placeholder"></div>
 
     <script>
-        let lastScrollTop = 0;
-        const header = document.querySelector('header');
-        const langSwitcher = document.getElementById('lang-switcher');
-
-        window.addEventListener('scroll', function () {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-            if (scrollTop <= 100) {
-                header.style.top = '0';
-                langSwitcher.style.top = '22px';
-            } else if (scrollTop > lastScrollTop) {
-                header.style.top = '-75px';
-                langSwitcher.style.top = '-75px';
-            } else {
-                header.style.top = '0';
-                langSwitcher.style.top = '22px';
-            }
-
-            lastScrollTop = scrollTop;
-        });
-
         function closeMobileMenu() {
             const overlay = document.getElementById('mobile-menu-overlay');
             const btn = document.getElementById('mobile-menu-btn');
@@ -609,7 +539,32 @@
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
+                const placeholder = document.getElementById('header-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = data;
+                }
+
+                // Initialize header scroll behavior after loading
+                let lastScrollTop = 0;
+                const header = document.querySelector('header');
+                const langSwitcher = document.querySelector('.fixed-lang-switcher');
+
+                window.addEventListener('scroll', function () {
+                    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                    if (scrollTop <= 100) {
+                        if (header) header.style.top = '0';
+                        if (langSwitcher) langSwitcher.style.top = '20px';
+                    } else if (scrollTop > lastScrollTop) {
+                        if (header) header.style.top = '-75px';
+                        if (langSwitcher) langSwitcher.style.top = '-75px';
+                    } else {
+                        if (header) header.style.top = '0';
+                        if (langSwitcher) langSwitcher.style.top = '20px';
+                    }
+
+                    lastScrollTop = scrollTop;
+                });
 
                 setTimeout(() => {
                     loadServicesDropdown();
@@ -629,7 +584,8 @@
                 const mobileServicesList = document.getElementById('mobile-services-list');
                 if (mobileServicesList && services.length > 0) {
                     mobileServicesList.innerHTML = services.filter(service => service.visible).map(service => `
-                        <a href="/service.html?id=${service.id}" class="mobile-service-item" style="display: block; text-decoration: none; cursor: pointer;">
+                        <a href="/service.html?id=${service.id}" class="mobile-service-item"
+                            style="display: block; text-decoration: none; cursor: pointer;">
                             <h4>${service.title}</h4>
                             <p>${service.description ? service.description.replace(/<[^>]*>/g, '').substring(0, 80) + '...' : ''}</p>
                         </a>

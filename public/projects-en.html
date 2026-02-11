@@ -5,473 +5,407 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Projects - UK Architects</title>
-
-    // Duplicate Fixed Language Switcher
-    // This block is being removed to avoid duplication.
     <link rel="preconnect" href="https://fonts.gstatic.com">
     <link
         href="https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;600;700&family=Noto+Sans:wght@100..900&subset=latin,cyrillic&display=swap"
-        <div class="categories">
-    font-family: 'Noto Sans', sans-serif;
-    font-weight: 300;
-    background: #1a1a1a;
-    color: #ffffff;
-    }
-
-    header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 1000;
-    background: rgba(26, 26, 26, 0.95);
-    backdrop-filter: blur(10px);
-    transition: top 0.3s linear;
-    }
-
-    #lang-switcher {
-    position: fixed;
-    top: 22px;
-    right: 40px;
-    z-index: 99999;
-    display: flex;
-    gap: 3px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 20px;
-    padding: 5px 6px;
-    transition: top 0.3s linear;
-    }
-
-    #lang-switcher a {
-    color: rgba(255, 255, 255, 0.6);
-    text-decoration: none;
-    font-size: 13px;
-    font-weight: 600;
-    padding: 5px 12px;
-    border-radius: 15px;
-    text-transform: uppercase;
-    font-family: 'Ubuntu', sans-serif;
-    transition: all 0.3s;
-    }
-
-    #lang-switcher a.active {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.2);
-    }
-
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-    font-family: 'Ubuntu', sans-serif;
-    font-weight: 600;
-    }
-
-    p,
-    span,
-    div,
-    a,
-    li {
-    font-family: 'Noto Sans', sans-serif;
-    font-weight: 300;
-    }
-
-    .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 40px;
-    box-sizing: border-box;
-    }
-
-    .categories {
-    background: white;
-    padding: 20px 0;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-
-    .category-menu {
-    display: flex;
-    gap: 20px;
-    overflow-x: auto;
-    padding: 10px 0;
-    max-width: 100%;
-    }
-
-    .category-menu::-webkit-scrollbar {
-    height: 6px;
-    }
-
-    .category-menu::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    }
-
-    .category-menu::-webkit-scrollbar-thumb {
-    background: #212529;
-    border-radius: 3px;
-    }
-
-    .category-btn {
-    padding: 10px 24px;
-    background: white;
-    border: none;
-    border-radius: 10px;
-    color: #212529;
-    cursor: pointer;
-    font-size: 15px;
-    font-family: 'Noto Sans', sans-serif;
-    font-weight: 300;
-    white-space: nowrap;
-    transition: all 0.3s;
-    }
-
-    .category-btn:hover,
-    .category-btn.active {
-    background: #212529;
-    color: white;
-    }
-
-    .projects-section {
-    padding: 40px 0;
-    }
-
-    .projects-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-    gap: 30px;
-    margin-top: 30px;
-    }
-
-    .project-card {
-    background: white;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s, box-shadow 0.3s;
-    cursor: pointer;
-    }
-
-    .project-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .project-image {
-    width: 100%;
-    height: 250px;
-    object-fit: cover;
-    object-position: top;
-    background: linear-gradient(135deg, #e0e0e0 25%, #f5f5f5 25%, #f5f5f5 50%, #e0e0e0 50%, #e0e0e0 75%, #f5f5f5 75%,
-    #f5f5f5);
-    background-size: 40px 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #999;
-    font-size: 14px;
-    }
-
-    .project-image::before {
-    content: 'No image';
-    font-family: 'Noto Sans', sans-serif;
-    }
-
-    .project-image[src] {
-    background: none;
-    }
-
-    .project-image[src]::before {
-    content: '';
-    }
-
-    .project-content {
-    padding: 20px;
-    }
-
-    .project-category {
-    display: inline-block;
-    padding: 4px 12px;
-    background: #ffffff;
-    color: white;
-    border-radius: 15px;
-    font-size: 12px;
-    margin-bottom: 10px;
-    }
-
-    .project-title {
-    font-size: 22px;
-    font-weight: 600;
-    font-family: 'Ubuntu', sans-serif;
-    color: #212529;
-    margin: 10px 0;
-    }
-
-    .project-description {
-    color: #666;
-    font-size: 14px;
-    font-family: 'Noto Sans', sans-serif;
-    font-weight: 300;
-    line-height: 1.6;
-    margin-bottom: 15px;
-    }
-
-    .project-info {
-    border-top: 1px solid #e0e0e0;
-    padding-top: 15px;
-    margin-top: 15px;
-    }
-
-    .project-info-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 8px 0;
-    font-size: 14px;
-    }
-
-    .project-info-label {
-    color: #999;
-    font-weight: 500;
-    }
-
-    .project-info-value {
-    color: #333;
-    font-weight: 600;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
-    white-space: normal;
-    }
-
-    .stage-badge {
-    display: inline-block;
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 600;
-    margin-right: 6px;
-    margin-bottom: 6px;
-    }
-
-    .stage-concept {
-    background: #ffeaa7;
-    color: #fdcb6e;
-    }
-
-    .stage-project {
-    background: #74b9ff;
-    color: #0984e3;
-    }
-
-    .stage-working {
-    background: #a29bfe;
-    color: #6c5ce7;
-    }
-
-    .stage-construction {
-    background: #fd79a8;
-    color: #e84393;
-    }
-
-    .stage-completed {
-    background: #55efc4;
-    color: #00b894;
-    }
-
-    .no-projects {
-    text-align: center;
-    padding: 60px 20px;
-    color: #999;
-    font-size: 18px;
-    }
-
-    .loading {
-    text-align: center;
-    padding: 60px 20px;
-    color: #212529;
-    font-size: 18px;
-    }
-
-    /* ========== RESPONSIVE STYLES ========== */
-
-    /* Tablets (1024px and below) */
-    @media screen and (max-width: 1024px) {
-    .container {
-    padding: 0 30px;
-    }
-
-    .projects-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 25px;
-    }
-
-    .projects-section {
-    padding: 30px 0;
-    }
-
-    h1 {
-    font-size: 42px !important;
-    }
-    }
-
-    /* Mobile (768px and below) */
-    @media screen and (max-width: 768px) {
-    .container {
-    padding: 0 20px;
-    }
-
-    .projects-grid {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    }
-
-    .category-menu {
-    gap: 10px;
-    }
-
-    .category-btn {
-    padding: 10px 20px;
-    font-size: 14px;
-    }
-
-    .projects-section {
-    padding: 25px 0;
-    }
-
-    h1 {
-    font-size: 32px !important;
-    }
-
-    .project-title {
-    font-size: 20px !important;
-    }
-
-    .project-description {
-    font-size: 13px !important;
-    }
-
-    .project-info-label,
-    .project-info-value {
-    font-size: 13px !important;
-    }
-    }
-
-    /* Small mobile (480px and below) */
-    @media screen and (max-width: 480px) {
-    .container {
-    padding: 0 15px;
-    }
-
-    .categories {
-    padding: 15px 0;
-    }
-
-    .category-menu {
-    gap: 8px;
-    padding: 5px 0;
-    }
-
-    .category-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-    }
-
-    .projects-section {
-    padding: 20px 0;
-    }
-
-    h1 {
-    font-size: 28px !important;
-    margin-bottom: 20px !important;
-    }
-
-    .project-card {
-    border-radius: 10px;
-    }
-
-    .project-card * {
-    text-align: left !important;
-    }
-
-    .project-image {
-    height: 200px !important;
-    }
-
-    .project-content {
-    padding: 15px !important;
-    }
-
-    .project-title {
-    font-size: 18px !important;
-    margin-bottom: 8px !important;
-    }
-
-    .project-description {
-    font-size: 12px !important;
-    margin-bottom: 12px !important;
-    }
-
-    .project-meta {
-    gap: 10px !important;
-    }
-
-    .project-info {
-    flex-direction: column;
-    gap: 8px !important;
-    }
-
-    .stage-badge {
-    font-size: 11px;
-    padding: 3px 8px;
-    }
-
-    .no-projects,
-    .loading {
-    padding: 40px 15px;
-    font-size: 16px;
-    }
-    }
+        rel="stylesheet">
+
+    <script src="js/header-contacts.js" defer></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            background: #1a1a1a;
+            color: #ffffff;
+        }
+
+        /* Header styles moved to header.html */
+
+        /* Lang switcher styles moved to header.html */
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
+            font-family: 'Ubuntu', sans-serif;
+            font-weight: 600;
+        }
+
+        p,
+        span,
+        div,
+        a,
+        li {
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 100px 60px 80px 60px;
+            box-sizing: border-box;
+        }
+
+        .categories {
+            background: #222222;
+            padding: 20px 0;
+            margin-bottom: 40px;
+            border-radius: 15px;
+        }
+
+        .category-menu {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding: 10px 0;
+            max-width: 100%;
+        }
+
+        .category-menu::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .category-menu::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .category-menu::-webkit-scrollbar-thumb {
+            background: #212529;
+            border-radius: 3px;
+        }
+
+        .category-btn {
+            padding: 10px 24px;
+            background: #2a2a2a;
+            color: #cccccc;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 15px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            white-space: nowrap;
+            transition: all 0.3s;
+        }
+
+        .category-btn:hover,
+        .category-btn.active {
+            background: #ffffff;
+            color: #1a1a1a;
+        }
+
+        .projects-section {
+            padding: 40px 0;
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .project-card {
+            background: #222222;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .project-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .project-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            object-position: top;
+            background: #2a2a2a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .project-image::before {
+            content: 'No image';
+            font-family: 'Noto Sans', sans-serif;
+        }
+
+        .project-image[src] {
+            background: none;
+        }
+
+        .project-image[src]::before {
+            content: '';
+        }
+
+        .project-content {
+            padding: 20px;
+        }
+
+        .project-category {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #ffffff;
+            color: #1a1a1a;
+            border-radius: 15px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .project-title {
+            font-size: 22px;
+            font-weight: 400;
+            font-family: 'Ubuntu', sans-serif;
+            color: #ffffff;
+            margin: 10px 0;
+        }
+
+        .project-description {
+            color: #cccccc;
+            font-size: 14px;
+            font-family: 'Noto Sans', sans-serif;
+            font-weight: 300;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .project-info {
+            border-top: 1px solid #333;
+            padding-top: 15px;
+            margin-top: 15px;
+        }
+
+        .project-info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            font-size: 14px;
+        }
+
+        .project-info-label {
+            color: #999;
+            font-weight: 500;
+        }
+
+        .project-info-value {
+            color: #ffffff;
+            font-weight: 600;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            white-space: normal;
+        }
+
+        .stage-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 6px;
+            margin-bottom: 6px;
+        }
+
+        .stage-concept {
+            background: #ffeaa7;
+            color: #fdcb6e;
+        }
+
+        .stage-project {
+            background: #74b9ff;
+            color: #0984e3;
+        }
+
+        .stage-working {
+            background: #a29bfe;
+            color: #6c5ce7;
+        }
+
+        .stage-construction {
+            background: #fd79a8;
+            color: #e84393;
+        }
+
+        .stage-completed {
+            background: #55efc4;
+            color: #00b894;
+        }
+
+        .no-projects {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+            font-size: 18px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            color: #212529;
+            font-size: 18px;
+        }
+
+        /* ========== RESPONSIVE STYLES ========== */
+
+        /* Tablets (1024px and below) */
+        @media screen and (max-width: 1024px) {
+            .container {
+                padding: 0 30px;
+            }
+
+            .projects-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 25px;
+            }
+
+            .projects-section {
+                padding: 30px 0;
+            }
+
+            h1 {
+                font-size: 42px !important;
+            }
+        }
+
+        /* Mobile (768px and below) */
+        @media screen and (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .category-menu {
+                gap: 10px;
+            }
+
+            .category-btn {
+                padding: 10px 20px;
+                font-size: 14px;
+            }
+
+            .projects-section {
+                padding: 25px 0;
+            }
+
+            h1 {
+                font-size: 32px !important;
+            }
+
+            .project-title {
+                font-size: 20px !important;
+            }
+
+            .project-description {
+                font-size: 13px !important;
+            }
+
+            .project-info-label,
+            .project-info-value {
+                font-size: 13px !important;
+            }
+        }
+
+        /* Small mobile (480px and below) */
+        @media screen and (max-width: 480px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .categories {
+                padding: 15px 0;
+            }
+
+            .category-menu {
+                gap: 8px;
+                padding: 5px 0;
+            }
+
+            .category-btn {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            .projects-section {
+                padding: 20px 0;
+            }
+
+            h1 {
+                font-size: 28px !important;
+                margin-bottom: 20px !important;
+            }
+
+            .project-card {
+                border-radius: 10px;
+            }
+
+            .project-card * {
+                text-align: left !important;
+            }
+
+            .project-image {
+                height: 200px !important;
+            }
+
+            .project-content {
+                padding: 15px !important;
+            }
+
+            .project-title {
+                font-size: 18px !important;
+                margin-bottom: 8px !important;
+            }
+
+            .project-description {
+                font-size: 12px !important;
+                margin-bottom: 12px !important;
+            }
+
+            .project-meta {
+                gap: 10px !important;
+            }
+
+            .project-info {
+                flex-direction: column;
+                gap: 8px !important;
+            }
+
+            .stage-badge {
+                font-size: 11px;
+                padding: 3px 8px;
+            }
+
+            .no-projects,
+            .loading {
+                padding: 40px 15px;
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
 <body>
-    <header>
-        <div
-            style="height: 75px; padding: 0 60px; display: flex; align-items: center; justify-content: space-between; box-sizing: border-box;">
-            <a href="/index-en.html" style="display: inline-block;">
-                <img src="images/tild6265-3061-4762-a339-323263366339__architects_global_50.svg" alt="UK Architects"
-                    style="height: 35px; width: auto; filter: none;" />
-            </a>
-        </div>
-    </header>
+    <!-- Shared header from header.html -->
+    <div id="header-placeholder"></div>
 
     <script>
-        let lastScrollTop = 0;
-        const header = document.querySelector('header');
-        const langSwitcher = document.getElementById('lang-switcher');
-
-        window.addEventListener('scroll', function () {
-            let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-
-            if (scrollTop <= 100) {
-                header.style.top = '0';
-                if (langSwitcher) {
-                    langSwitcher.style.top = '22px';
-                }
-            } else if (scrollTop > lastScrollTop) {
-                header.style.top = '-75px';
-                if (langSwitcher) {
-                    langSwitcher.style.top = '-75px';
-                }
-            } else {
-                header.style.top = '0';
-                if (langSwitcher) {
-                    langSwitcher.style.top = '22px';
-                }
-            }
-
-            lastScrollTop = scrollTop;
-        });
-
         function closeMobileMenu() {
             const overlay = document.getElementById('mobile-menu-overlay');
             const btn = document.getElementById('mobile-menu-btn');
@@ -524,7 +458,32 @@
         fetch('/header.html')
             .then(response => response.text())
             .then(data => {
-                document.getElementById('header-placeholder').innerHTML = data;
+                const placeholder = document.getElementById('header-placeholder');
+                if (placeholder) {
+                    placeholder.innerHTML = data;
+                }
+
+                // Initialize header scroll behavior after loading
+                let lastScrollTop = 0;
+                const header = document.querySelector('header');
+                const langSwitcher = document.querySelector('.fixed-lang-switcher');
+
+                window.addEventListener('scroll', function () {
+                    let scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+                    if (scrollTop <= 100) {
+                        if (header) header.style.top = '0';
+                        if (langSwitcher) langSwitcher.style.top = '20px';
+                    } else if (scrollTop > lastScrollTop) {
+                        if (header) header.style.top = '-75px';
+                        if (langSwitcher) langSwitcher.style.top = '-75px';
+                    } else {
+                        if (header) header.style.top = '0';
+                        if (langSwitcher) langSwitcher.style.top = '20px';
+                    }
+
+                    lastScrollTop = scrollTop;
+                });
 
                 setTimeout(() => {
                     loadServicesDropdown();
@@ -601,6 +560,7 @@
             }
         }
     </script>
+
     <div class="categories">
         <div class="container">
             <div class="category-menu" id="category-menu">
@@ -636,7 +596,7 @@
             return allowedPrefixes.some(prefix => lower.startsWith(prefix)) ? trimmed : null;
         }
 
-        // Загрузка категорий
+        // Load categories
         async function loadCategories() {
             try {
                 const response = await fetch(`${API_URL}/project-categories`);
@@ -658,7 +618,7 @@
             }
         }
 
-        // Загрузка проектов
+        // Load projects
         async function loadProjects() {
             try {
                 const response = await fetch(`${API_URL}/projects`);
@@ -670,11 +630,11 @@
             }
         }
 
-        // Фильтрация по категории
+        // Filter by category
         function filterByCategory(category) {
             currentCategory = category;
 
-            // Обновление активной кнопки
+            // Update active button
             document.querySelectorAll('.category-btn').forEach(btn => {
                 btn.classList.remove('active');
                 if (btn.dataset.category === category) {
@@ -689,7 +649,7 @@
             displayProjects(filtered);
         }
 
-        // Отображение проектов
+        // Display projects
         function displayProjects(projects) {
             const container = document.getElementById('projects-container');
 
@@ -703,39 +663,39 @@
             container.innerHTML = projects.map(project => createProjectCard(project)).join('');
         }
 
-        // Создание карточки проекта
+        // Create project card
         function createProjectCard(project) {
             const projectImage = sanitizeMediaUrl(project.image_url);
             return `
                 <div class="project-card" onclick="window.location.href='/project.html?id=${project.id}'">
                     ${projectImage ? `<img src="${projectImage}" alt="${project.title}" class="project-image">` : '<div class="project-image" style="background: #e0e0e0;"></div>'}
                     <div class="project-content">
-                        <span class="project-category">${project.category || 'Без категории'}</span>
+                        <span class="project-category">${project.category || 'Uncategorized'}</span>
                         <h3 class="project-title">${project.title}</h3>
                         ${project.description ? `<p class="project-description">${project.description.replace(/<[^>]*>/g, '').substring(0, 120)}...</p>` : ''}
                         
                         <div class="project-info">
                             ${project.address ? `
                             <div class="project-info-row">
-                                <span class="project-info-label">Адрес</span>
+                                <span class="project-info-label">Address</span>
                                 <span class="project-info-value">${project.address}</span>
                             </div>` : ''}
                             
                             ${project.year ? `
                             <div class="project-info-row">
-                                <span class="project-info-label">Год</span>
+                                <span class="project-info-label">Year</span>
                                 <span class="project-info-value">${project.year}</span>
                             </div>` : ''}
                             
                             ${project.total_area ? `
                             <div class="project-info-row">
-                                <span class="project-info-label">Площадь</span>
+                                <span class="project-info-label">Area</span>
                                 <span class="project-info-value">${project.total_area}</span>
                             </div>` : ''}
                             
                             ${project.stage ? `
                             <div class="project-info-row">
-                                <span class="project-info-label">Стадия</span>
+                                <span class="project-info-label">Stage</span>
                                 <div class="project-info-value">${formatStages(project.stage)}</div>
                             </div>` : ''}
                         </div>
@@ -768,7 +728,7 @@
             }).join(' ');
         }
 
-        // Инициализация
+        // Initialize
         loadCategories();
         loadProjects();
     </script>
