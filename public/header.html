@@ -744,4 +744,74 @@
     }
 
     loadMobileContacts();
+
+    // Автоопределение языка и обновление ссылок
+    function updateHeaderForLanguage() {
+        const isEnglish = window.location.pathname.includes('-en');
+
+        // Обновляем переключатель языка в десктопном меню
+        const desktopLangLinks = document.querySelectorAll('header nav > div:last-child a');
+        desktopLangLinks.forEach(link => {
+            if (link.textContent.trim() === 'EN') {
+                if (isEnglish) {
+                    link.style.background = 'rgba(255, 255, 255, 0.3)';
+                    link.style.color = '#ffffff';
+                } else {
+                    link.style.background = 'transparent';
+                    link.style.color = 'rgba(255, 255, 255, 0.7)';
+                }
+            } else if (link.textContent.trim() === 'RU') {
+                if (!isEnglish) {
+                    link.style.background = 'rgba(255, 255, 255, 0.3)';
+                    link.style.color = '#ffffff';
+                } else {
+                    link.style.background = 'transparent';
+                    link.style.color = 'rgba(255, 255, 255, 0.7)';
+                }
+            }
+        });
+
+        // Обновляем ссылки в навигации для EN версии
+        if (isEnglish) {
+            // Десктоп меню
+            const projectsLink = document.querySelector('header nav a[href="/projects"]');
+            if (projectsLink) projectsLink.href = '/projects-en.html';
+
+            const aboutLink = document.querySelector('header nav a[href="/#about"]');
+            if (aboutLink) aboutLink.href = '/about-en.html';
+
+            // Текст ссылок
+            if (projectsLink) projectsLink.textContent = 'projects';
+            if (aboutLink) aboutLink.textContent = 'about';
+
+            const servicesToggle = document.getElementById('services-toggle');
+            if (servicesToggle) servicesToggle.textContent = 'services';
+
+            // Мобильные ссылки
+            const mobileLinks = document.querySelectorAll('.mobile-nav a');
+            mobileLinks.forEach(link => {
+                if (link.href.endsWith('/projects') || link.href.includes('/projects.html')) {
+                    link.href = '/projects-en.html';
+                    link.textContent = 'projects';
+                }
+            });
+
+            const mobileServicesToggle = document.getElementById('mobile-services-toggle');
+            if (mobileServicesToggle) mobileServicesToggle.textContent = 'services';
+
+            // Обновляем мобильный переключатель языка
+            const mobileLangRu = document.querySelector('.mobile-nav a[href="/"]');
+            const mobileLangEn = document.querySelector('.mobile-nav a[href="/index-en.html"]');
+            if (mobileLangRu) {
+                mobileLangRu.style.background = '#f5f5f5';
+                mobileLangRu.style.color = '#1f1e22';
+            }
+            if (mobileLangEn) {
+                mobileLangEn.style.background = '#212529';
+                mobileLangEn.style.color = '#ffffff';
+            }
+        }
+    }
+
+    updateHeaderForLanguage();
 </script>
