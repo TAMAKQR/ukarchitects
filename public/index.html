@@ -1281,15 +1281,24 @@
                     .then(html => {
                         const existingFooter = document.querySelector('body > footer');
                         if (existingFooter) existingFooter.remove();
-                        document.body.insertAdjacentHTML('beforeend', html);
 
-                        // Execute scripts in the loaded footer
-                        const footerScripts = document.querySelectorAll('footer script');
-                        footerScripts.forEach(oldScript => {
+                        // Create a temporary container to parse HTML
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+
+                        // Insert footer and styles
+                        const footer = temp.querySelector('footer');
+                        const styles = temp.querySelectorAll('style');
+                        const scripts = temp.querySelectorAll('script');
+
+                        if (footer) document.body.appendChild(footer);
+                        styles.forEach(style => document.head.appendChild(style.cloneNode(true)));
+
+                        // Execute scripts
+                        scripts.forEach(oldScript => {
                             const newScript = document.createElement('script');
                             newScript.textContent = oldScript.textContent;
                             document.body.appendChild(newScript);
-                            oldScript.remove();
                         });
                     })
                     .catch(error => console.error('Error loading footer:', error));
