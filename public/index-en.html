@@ -2295,7 +2295,7 @@
         // ========== FAQ ==========
         async function loadFaq() {
             try {
-                const response = await fetch(`${API_URL}/faq`);
+                const response = await fetch(`${API_URL}/faq?lang=en`);
                 const faq = await response.json();
 
                 // Load FAQ intro text from settings
