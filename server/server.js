@@ -1852,8 +1852,19 @@ app.delete('/api/categories/:id', requireAuth, (req, res) => {
 
 app.get('/api/faq', (req, res) => {
     try {
+        const lang = req.query.lang;
         const faq = db.prepare('SELECT * FROM faq WHERE visible = 1 ORDER BY order_num').all();
-        res.json(faq);
+
+        if (lang === 'en') {
+            const localizedFaq = faq.map(item => ({
+                ...item,
+                question: item.question_en || item.question,
+                answer: item.answer_en || item.answer
+            }));
+            res.json(localizedFaq);
+        } else {
+            res.json(faq);
+        }
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1874,9 +1885,9 @@ app.get('/api/faq/:id', (req, res) => {
 
 app.post('/api/faq', (req, res) => {
     try {
-        const { question, answer, category, order_num } = req.body;
-        const stmt = db.prepare('INSERT INTO faq (question, answer, category, order_num) VALUES (?, ?, ?, ?)');
-        const result = stmt.run(question, answer, category, order_num || 0);
+        const { question, answer, question_en, answer_en, category, order_num } = req.body;
+        const stmt = db.prepare('INSERT INTO faq (question, answer, question_en, answer_en, category, order_num) VALUES (?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(question, answer, question_en || '', answer_en || '', category, order_num || 0);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Вопрос добавлен' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1885,9 +1896,9 @@ app.post('/api/faq', (req, res) => {
 
 app.put('/api/faq/:id', (req, res) => {
     try {
-        const { question, answer, category, order_num, visible } = req.body;
-        const stmt = db.prepare('UPDATE faq SET question = ?, answer = ?, category = ?, order_num = ?, visible = ? WHERE id = ?');
-        stmt.run(question, answer, category, order_num, visible, req.params.id);
+        const { question, answer, question_en, answer_en, category, order_num, visible } = req.body;
+        const stmt = db.prepare('UPDATE faq SET question = ?, answer = ?, question_en = ?, answer_en = ?, category = ?, order_num = ?, visible = ? WHERE id = ?');
+        stmt.run(question, answer, question_en || '', answer_en || '', category, order_num, visible, req.params.id);
         res.json({ message: 'Вопрос обновлен' });
     } catch (error) {
         res.status(500).json({ error: error.message });

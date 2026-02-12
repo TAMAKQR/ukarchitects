@@ -844,6 +844,24 @@
                 opacity: 0.4;
             }
         }
+
+        /* Hover эффект для колонок с изображениями */
+        .column-hover {
+            cursor: pointer;
+        }
+
+        .column-hover:hover {
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .column-hover img {
+            transition: transform 1s ease;
+        }
+
+        .column-hover:hover img {
+            transform: scale(1.1);
+        }
     </style>
 </head>
 
@@ -960,9 +978,9 @@
     <section style="padding: 60px 0; background: #1a1a1a;">
         <div style="padding: 0 60px;">
             <div style="display: grid; grid-template-columns: 1fr; gap: 60px;">
-                <!-- Column 1 - Одна колонка -->
-                <div class="column-hover"
-                    style="position: relative; width: 100%; height: 350px; background: #2a2a2a; border-radius: 15px; overflow: hidden;">
+                <!-- Column 1 - Our Team -->
+                <a href="/team-en.html" class="column-hover"
+                    style="position: relative; width: 100%; height: 350px; background: #2a2a2a; border-radius: 15px; overflow: hidden; text-decoration: none; display: block;">
                     <img src="images/okomande.jpeg" alt="About Team"
                         style="width: 100%; height: 100%; object-fit: cover;">
                     <div
@@ -971,7 +989,7 @@
                     <h3
                         style="position: absolute; bottom: 15px; left: 30px; right: 30px; font-family: 'Ubuntu', sans-serif; font-weight: 400; font-size: 32px; color: #ffffff; margin: 0; line-height: 1.2; z-index: 2;">
                         Our Team</h3>
-                </div>
+                </a>
             </div>
         </div>
     </section>

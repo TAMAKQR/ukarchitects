@@ -1369,6 +1369,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td>${item.id}</td>
                 <td>${item.question}</td>
+                <td>${item.question_en ? '<span style="color: green;">✓ EN</span>' : '<span style="color: #999;">—</span>'}</td>
                 <td>${item.category || '-'}</td>
                 <td class="actions">
                     <button class="btn btn-secondary" onclick="editFaq(${item.id})">Редактировать</button>
@@ -1385,32 +1386,52 @@ document.addEventListener('DOMContentLoaded', () => {
     function openFaqModal(id = null) {
         const modalHtml = `
         <div class="modal active" id="faq-modal">
-            <div class="modal-content">
+            <div class="modal-content" style="max-width: 800px;">
                 <div class="modal-header">
                     <h3>${id ? 'Редактировать вопрос' : 'Добавить вопрос'}</h3>
                     <span class="close" onclick="closeModal('faq-modal')">&times;</span>
                 </div>
                 <form onsubmit="saveFaq(event, ${id})">
-                    <div class="form-group">
-                        <label>Вопрос *</label>
-                        <input type="text" name="question" required id="faq-question">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <!-- Русская версия -->
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 15px; color: #042164;">🇷🇺 Русский</h4>
+                            <div class="form-group">
+                                <label>Вопрос *</label>
+                                <input type="text" name="question" required id="faq-question">
+                            </div>
+                            <div class="form-group">
+                                <label>Ответ *</label>
+                                <textarea name="answer" required id="faq-answer" rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                            </div>
+                        </div>
+                        <!-- Английская версия -->
+                        <div style="background: #e8f4fd; padding: 15px; border-radius: 8px;">
+                            <h4 style="margin-bottom: 15px; color: #042164;">🇬🇧 English</h4>
+                            <div class="form-group">
+                                <label>Question (EN)</label>
+                                <input type="text" name="question_en" id="faq-question-en" placeholder="English translation">
+                            </div>
+                            <div class="form-group">
+                                <label>Answer (EN)</label>
+                                <textarea name="answer_en" id="faq-answer-en" rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;" placeholder="English translation"></textarea>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Ответ *</label>
-                        <textarea name="answer" required id="faq-answer" rows="5" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Категория</label>
-                        <input type="text" name="category" id="faq-category" placeholder="Например: Услуги, Цены">
-                    </div>
-                    <div class="form-group">
-                        <label>Порядок</label>
-                        <input type="number" name="order_num" value="0" id="faq-order">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" name="visible" checked id="faq-visible"> Видимый
-                        </label>
+                    <div style="margin-top: 20px;">
+                        <div class="form-group">
+                            <label>Категория</label>
+                            <input type="text" name="category" id="faq-category" placeholder="Например: Услуги, Цены">
+                        </div>
+                        <div class="form-group">
+                            <label>Порядок</label>
+                            <input type="number" name="order_num" value="0" id="faq-order">
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" name="visible" checked id="faq-visible"> Видимый
+                            </label>
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
                     <button type="button" class="btn btn-secondary" onclick="closeModal('faq-modal')">Отмена</button>
@@ -1427,6 +1448,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(item => {
                     document.getElementById('faq-question').value = item.question;
                     document.getElementById('faq-answer').value = item.answer;
+                    document.getElementById('faq-question-en').value = item.question_en || '';
+                    document.getElementById('faq-answer-en').value = item.answer_en || '';
                     document.getElementById('faq-category').value = item.category || '';
                     document.getElementById('faq-order').value = item.order_num;
                     document.getElementById('faq-visible').checked = item.visible === 1;
@@ -1440,6 +1463,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const data = {
             question: formData.get('question'),
             answer: formData.get('answer'),
+            question_en: formData.get('question_en') || '',
+            answer_en: formData.get('answer_en') || '',
             category: formData.get('category'),
             order_num: parseInt(formData.get('order_num')),
             visible: formData.get('visible') ? 1 : 0
