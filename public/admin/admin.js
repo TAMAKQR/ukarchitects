@@ -206,13 +206,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <form onsubmit="saveService(event, ${id})">
                     <div class="form-group">
-                        <label>Название *</label>
+                        <label>Название (RU) *</label>
                         <input type="text" name="title" required id="service-title">
                     </div>
                     <div class="form-group">
-                        <label>Описание</label>
+                        <label>Название (EN)</label>
+                        <input type="text" name="title_en" id="service-title-en">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание (RU)</label>
                         <div id="service-description-editor" style="height: 300px; background: white;"></div>
                         <input type="hidden" name="description" id="service-description-hidden">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание (EN)</label>
+                        <div id="service-description-en-editor" style="height: 300px; background: white;"></div>
+                        <input type="hidden" name="description_en" id="service-description-en-hidden">
                     </div>
                     <div class="form-group">
                         <label>Иконка (SVG или URL)</label>
@@ -242,7 +251,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         document.getElementById('modal-container').innerHTML = modalHtml;
 
-        // Инициализируем Quill редактор
+        // Инициализируем Quill редактор для RU
         const serviceEditor = new Quill('#service-description-editor', {
             theme: 'snow',
             modules: {
@@ -259,13 +268,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         window.serviceEditor = serviceEditor;
 
+        // Инициализируем Quill редактор для EN
+        const serviceEditorEn = new Quill('#service-description-en-editor', {
+            theme: 'snow',
+            modules: {
+                toolbar: [
+                    [{ 'header': [1, 2, 3, false] }],
+                    ['bold', 'italic', 'underline', 'strike'],
+                    [{ 'color': [] }, { 'background': [] }],
+                    [{ 'align': [] }],
+                    [{ 'list': 'ordered' }, { 'list': 'bullet' }],
+                    ['link', 'image'],
+                    ['clean']
+                ]
+            }
+        });
+        window.serviceEditorEn = serviceEditorEn;
+
         if (id) {
             authFetch(`${API_URL}/services/${id}`)
                 .then(r => r.json())
                 .then(service => {
                     document.getElementById('service-title').value = service.title;
+                    document.getElementById('service-title-en').value = service.title_en || '';
                     if (window.serviceEditor) {
                         window.serviceEditor.root.innerHTML = service.description || '';
+                    }
+                    if (window.serviceEditorEn) {
+                        window.serviceEditorEn.root.innerHTML = service.description_en || '';
                     }
                     document.getElementById('service-icon').value = service.icon || '';
                     document.getElementById('service-order').value = service.order_num;
@@ -285,11 +315,17 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveService(event, id) {
         event.preventDefault();
 
-        // Сохраняем содержимое Quill в скрытое поле ПЕРЕД созданием FormData
+        // Сохраняем содержимое Quill в скрытые поля ПЕРЕД созданием FormData
         if (window.serviceEditor) {
             const hiddenField = document.getElementById('service-description-hidden');
             if (hiddenField) {
                 hiddenField.value = window.serviceEditor.root.innerHTML;
+            }
+        }
+        if (window.serviceEditorEn) {
+            const hiddenFieldEn = document.getElementById('service-description-en-hidden');
+            if (hiddenFieldEn) {
+                hiddenFieldEn.value = window.serviceEditorEn.root.innerHTML;
             }
         }
 
