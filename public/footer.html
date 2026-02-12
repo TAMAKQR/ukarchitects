@@ -226,8 +226,10 @@
 
     async function loadFooterSettings() {
         try {
+            console.log('Loading footer settings...');
             const response = await fetch(`${getApiBase()}/settings`);
             const settings = response.ok ? await response.json() : {};
+            console.log('Settings loaded:', settings);
 
             const footerElements = {
                 site_description: document.querySelector('footer [data-setting="site_description"]'),
@@ -237,12 +239,15 @@
                 site_email: document.querySelector('footer [data-setting="site_email"]')
             };
 
+            console.log('Footer elements found:', footerElements);
+
             Object.keys(footerElements).forEach(key => {
                 if (footerElements[key] && settings[key]) {
+                    console.log(`Updating ${key}:`, settings[key]);
                     if (key === 'site_phone' || key === 'site_email') {
                         footerElements[key].textContent = settings[key];
                         if (key === 'site_phone') {
-                            footerElements[key].href = `tel:${settings[key]}`;
+                            footerElements[key].href = `tel:${settings[key].replace(/[^0-9+]/g, '')}`;
                         } else if (key === 'site_email') {
                             footerElements[key].href = `mailto:${settings[key]}`;
                         }
@@ -263,16 +268,6 @@
         } catch (error) {
             console.error('Error loading footer settings:', error);
         }
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => {
-            loadFooterSettings();
-            translateFooter();
-        });
-    } else {
-        loadFooterSettings();
-        translateFooter();
     }
 
     function translateFooter() {
@@ -303,4 +298,8 @@
             }
         });
     }
+
+    // Вызываем функции сразу (footer уже в DOM)
+    loadFooterSettings();
+    translateFooter();
 </script>
