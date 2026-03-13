@@ -304,6 +304,7 @@ const initializeDatabase = async () => {
             CREATE TABLE IF NOT EXISTS contact_requests (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT NOT NULL,
+                question TEXT,
                 phone TEXT NOT NULL,
                 email TEXT,
                 message TEXT,
@@ -382,6 +383,13 @@ const initializeDatabase = async () => {
                     }
                 });
             });
+
+            const contactRequestsColumns = db.prepare("PRAGMA table_info(contact_requests)").all();
+            const hasQuestionInContactRequests = contactRequestsColumns.some(col => col.name === 'question');
+            if (!hasQuestionInContactRequests) {
+                db.prepare('ALTER TABLE contact_requests ADD COLUMN question TEXT').run();
+                console.log('✅ Добавлен столбец question в таблицу contact_requests');
+            }
         } catch (error) {
             console.log('ℹ️ Миграция столбцов: пропущено (возможно, уже выполнено)');
         }
@@ -1543,13 +1551,21 @@ app.delete('/api/reviews/:id', requireAuth, (req, res) => {
 
 app.get('/api/sections', (req, res) => {
     try {
+        const includeReserved = req.query.includeReserved === '1';
+
         // Исключаем служебные страницы из основных разделов сайта
-        const sections = db.prepare(`
-            SELECT * FROM sections 
-            WHERE visible = 1 
-            AND slug NOT IN ('user-agreement', 'privacy-policy', 'about') 
-            ORDER BY order_num
-        `).all();
+        const query = includeReserved
+            ? `
+                SELECT * FROM sections
+                ORDER BY order_num
+            `
+            : `
+                SELECT * FROM sections 
+                WHERE visible = 1 
+                AND slug NOT IN ('user-agreement', 'privacy-policy', 'about') 
+                ORDER BY order_num
+            `;
+        const sections = db.prepare(query).all();
         res.json(sections);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1965,9 +1981,9 @@ app.put('/api/settings/:key', requireAuth, (req, res) => {
 
 app.post('/api/contact', (req, res) => {
     try {
-        const { name, phone, email, message } = req.body;
-        const stmt = db.prepare('INSERT INTO contact_requests (name, phone, email, message) VALUES (?, ?, ?, ?)');
-        const info = stmt.run(name, phone, email || '', message || '');
+        const { name, question, phone, email, message } = req.body;
+        const stmt = db.prepare('INSERT INTO contact_requests (name, question, phone, email, message) VALUES (?, ?, ?, ?, ?)');
+        const info = stmt.run(name, question || '', phone, email || '', message || '');
         res.json({ id: info.lastInsertRowid, message: 'Заявка отправлена' });
     } catch (error) {
         res.status(500).json({ error: error.message });

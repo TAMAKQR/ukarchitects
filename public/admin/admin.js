@@ -1122,15 +1122,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // ========== РАЗДЕЛЫ ==========
     async function loadSections() {
         try {
-            const response = await authFetch(`${API_URL}/sections`);
+            const response = await authFetch(`${API_URL}/sections?includeReserved=1`);
             const sections = await response.json();
 
             const tbody = document.querySelector('#sections tbody');
             tbody.innerHTML = sections.map(section => `
             <tr>
                 <td>${section.id}</td>
-                <td>${section.title}</td>
                 <td>${section.slug}</td>
+                <td>${section.title}</td>
                 <td>${section.order_num}</td>
                 <td class="actions">
                     <button class="btn btn-secondary" onclick="editSection(${section.id})">Редактировать</button>
@@ -1549,6 +1549,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <tr>
                 <td>${request.id}</td>
                 <td>${request.name}</td>
+                <td>${request.question || '-'}</td>
                 <td>${request.phone}</td>
                 <td>${request.email || '-'}</td>
                 <td>${new Date(request.created_at).toLocaleString('ru-RU')}</td>
@@ -1583,6 +1584,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         <h3>Заявка #${request.id}</h3>
                         <div style="margin-top: 20px;">
                             <p><strong>Имя:</strong> ${request.name}</p>
+                            ${request.question ? `<p><strong>Тема вопроса:</strong> ${request.question}</p>` : ''}
                             <p><strong>Телефон:</strong> <a href="tel:${request.phone}">${request.phone}</a></p>
                             ${request.email ? `<p><strong>Email:</strong> <a href="mailto:${request.email}">${request.email}</a></p>` : ''}
                             ${request.message ? `<p><strong>Сообщение:</strong><br>${request.message}</p>` : ''}

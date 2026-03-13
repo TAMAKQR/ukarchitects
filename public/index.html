@@ -1235,14 +1235,14 @@
         </div>
     </section>
 
-    <!-- Masterplan Section -->
+    <!-- Question Section -->
     <section style="padding: 60px 0; background: #1a1a1a;">
         <div style="padding: 0 60px;">
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center;">
                 <!-- Left Column - Image -->
                 <div
                     style="position: relative; width: 100%; height: 500px; background: #2a2a2a; border-radius: 15px; overflow: hidden;">
-                    <img src="images/masterplan.jpg" alt="Мастерплан"
+                    <img src="images/masterplan.jpg" alt="Задать вопрос"
                         style="width: 100%; height: 100%; object-fit: cover;">
                 </div>
 
@@ -1250,17 +1250,13 @@
                 <div>
                     <h2
                         style="font-family: 'Ubuntu', sans-serif; font-weight: 400; font-size: 48px; color: #ffffff; margin: 0 0 30px 0; line-height: 1.2;">
-                        Мастерплан</h2>
-                    <p
-                        style="font-family: 'Noto Sans', sans-serif; font-size: 18px; color: rgba(255,255,255,0.8); line-height: 1.6; margin: 0 0 40px 0;">
-                        Это стратегия пространственного развития территории. Цель разработки мастерплана — формирование
-                        ясной модели реализации проекта с учетом основных KPI. Готовый мастерплан – продукт,
-                        объединяющий в себе видение и практическую реализацию.
-                    </p>
+                        Задать вопрос</h2>
 
                     <!-- Contact Form -->
-                    <form id="masterplanContactForm" style="width: 100%;">
+                    <form id="masterplanContactForm" onsubmit="submitForm(event)" style="width: 100%;">
                         <input type="text" name="name" placeholder="Ваше имя" required
+                            style="width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.5); border: none; border-radius: 8px; font-family: 'Noto Sans', sans-serif; font-size: 16px; color: #ffffff; box-sizing: border-box;">
+                        <input type="text" name="question" placeholder="Тема вопроса" required
                             style="width: 100%; padding: 15px; margin-bottom: 15px; background: rgba(255, 255, 255, 0.5); border: none; border-radius: 8px; font-family: 'Noto Sans', sans-serif; font-size: 16px; color: #ffffff; box-sizing: border-box;">
                         <input type="tel" name="phone" placeholder="Телефон" required
                             style="width: 100%; padding: 15px; margin-bottom: 20px; background: rgba(255, 255, 255, 0.5); border: none; border-radius: 8px; font-family: 'Noto Sans', sans-serif; font-size: 16px; color: #ffffff; box-sizing: border-box;">
@@ -2649,6 +2645,7 @@
             const formData = new FormData(event.target);
             const data = {
                 name: formData.get('name'),
+                question: formData.get('question'),
                 phone: formData.get('phone'),
                 email: formData.get('email'),
                 message: formData.get('message')
@@ -2681,6 +2678,7 @@
             const formData = new FormData(event.target);
             const data = {
                 name: formData.get('name'),
+                question: serviceTitle,
                 phone: formData.get('phone'),
                 service_id: serviceId,
                 service_title: serviceTitle,
