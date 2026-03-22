@@ -1084,7 +1084,7 @@
                 <!-- Column 1 -->
                 <a href="/about.html" class="column-hover"
                     style="position: relative; width: 100%; height: 350px; background: #2a2a2a; border-radius: 15px; overflow: hidden; text-decoration: none; display: block;">
-                    <img src="images/OKompanii.jpeg" alt="О компании"
+                    <img id="about-section-image" src="images/OKompanii.jpeg" alt="О компании"
                         style="width: 100%; height: 100%; object-fit: cover;">
                     <div
                         style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.8) 100%);">
@@ -2313,7 +2313,27 @@
         }
 
         loadServicesSlider();
+        loadAboutSectionImage();
         loadReviews();
+
+        // ========== ABOUT SECTION IMAGE ==========
+        async function loadAboutSectionImage() {
+            try {
+                const response = await fetch(`${API_URL}/sections/about`);
+                if (!response.ok) throw new Error('Section not found');
+
+                const section = await response.json();
+                const imageElement = document.getElementById('about-section-image');
+
+                if (imageElement && section.background_image) {
+                    imageElement.src = section.background_image;
+                    imageElement.alt = section.title || 'О компании';
+                }
+            } catch (error) {
+                console.log('Используется фото по умолчанию для "О компании"');
+                // Используем фото по умолчанию если ошибка
+            }
+        }
 
         // ========== REVIEWS ==========
         async function loadReviews() {

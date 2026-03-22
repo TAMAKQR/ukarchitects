@@ -180,7 +180,7 @@
             <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.</p>
         </div>
         <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Международная команда">
+            <img id="about-main-image" src="images/OKompanii.jpeg" alt="Международная команда">
         </div>
     </section>
 
@@ -211,6 +211,32 @@
     </section>
 
     <script>
+        const API_URL = '/api';
+
+        // Load about section image from API
+        async function loadAboutSectionImage() {
+            try {
+                const response = await fetch(`${API_URL}/sections/about`);
+                if (!response.ok) throw new Error('Section not found');
+
+                const section = await response.json();
+                const imageElement = document.getElementById('about-main-image');
+
+                if (imageElement && section.background_image) {
+                    imageElement.src = section.background_image;
+                }
+            } catch (error) {
+                console.log('Using default about section image');
+            }
+        }
+
+        // Load image on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadAboutSectionImage);
+        } else {
+            loadAboutSectionImage();
+        }
+
         // Load shared header
         fetch('/header.html')
             .then(response => response.text())
