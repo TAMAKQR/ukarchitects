@@ -1171,8 +1171,11 @@ document.addEventListener('DOMContentLoaded', () => {
                         <textarea name="content" id="section-content" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Фоновое изображение (URL)</label>
-                        <input type="text" name="background_image" id="section-background">
+                        <label>Фоновое изображение</label>
+                        <input type="file" name="background_image" id="section-background-file" accept="image/*">
+                        <button type="button" onclick="deleteSectionImage()" style="margin-top: 5px; padding: 6px 12px; background: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer;">Удалить изображение</button>
+                        <small style="color: #666; display: block; margin-top: 5px;">Загрузите новое изображение или оставьте пустым для сохранения текущего</small>
+                        <div id="section-image-preview" style="margin-top: 10px;"></div>
                     </div>
                     <div class="form-group">
                         <label>Порядок</label>
@@ -1200,9 +1203,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     document.getElementById('section-slug').value = section.slug;
                     document.getElementById('section-subtitle').value = section.subtitle || '';
                     document.getElementById('section-content').value = section.content || '';
-                    document.getElementById('section-background').value = section.background_image || '';
                     document.getElementById('section-order').value = section.order_num;
                     document.getElementById('section-visible').checked = section.visible === 1;
+
+                    // Показываем текущее изображение, если есть
+                    if (section.background_image) {
+                        document.getElementById('section-image-preview').innerHTML = `
+                        <img src="${section.background_image}" style="max-width: 200px; max-height: 150px; border-radius: 8px; margin-top: 5px;">
+                        <p style="font-size: 12px; color: #666; margin-top: 5px;">Текущее изображение</p>
+                    `;
+                    }
                 });
         }
     }
@@ -1210,31 +1220,48 @@ document.addEventListener('DOMContentLoaded', () => {
     async function saveSection(event, id) {
         event.preventDefault();
         const formData = new FormData(event.target);
-        const data = {
-            title: formData.get('title'),
-            slug: formData.get('slug'),
-            subtitle: formData.get('subtitle'),
-            content: formData.get('content'),
-            background_image: formData.get('background_image'),
-            order_num: parseInt(formData.get('order_num')),
-            visible: formData.get('visible') ? 1 : 0
-        };
+
+        // Если файл не выбран, удаляем его из FormData
+        const imageFile = formData.get('background_image');
+        if (!imageFile || imageFile.size === 0) {
+            formData.delete('background_image');
+        }
 
         try {
             const response = await authFetch(`${API_URL}/sections${id ? `/${id}` : ''}`, {
                 method: id ? 'PUT' : 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
+                body: formData  // Отправляем FormData напрямую для поддержки файлов
             });
 
             if (response.ok) {
                 showAlert(id ? 'Раздел обновлен' : 'Раздел добавлен');
                 closeModal('section-modal');
                 loadSections();
+            } else {
+                const errorText = await response.text();
+                console.error('Ошибка сервера:', errorText);
+                showAlert('Ошибка сохранения', 'error');
             }
         } catch (error) {
-            showAlert('Ошибка сохранения', 'error');
+            console.error('Ошибка:', error);
+            showAlert('Ошибка сохранения: ' + error.message, 'error');
         }
+    }
+
+    function deleteSectionImage() {
+        document.getElementById('section-background-file').value = '';
+        document.getElementById('section-image-preview').innerHTML = '';
+        // Добавляем скрытое поле для отметки удаления
+        let deleteFlag = document.getElementById('delete-section-image-flag');
+        if (!deleteFlag) {
+            deleteFlag = document.createElement('input');
+            deleteFlag.type = 'hidden';
+            deleteFlag.name = 'delete_image';
+            deleteFlag.id = 'delete-section-image-flag';
+            deleteFlag.value = '1';
+            document.querySelector('#section-modal form').appendChild(deleteFlag);
+        }
+        showAlert('Изображение будет удалено при сохранении', 'info');
     }
 
     async function deleteSection(id) {

@@ -1589,24 +1589,45 @@ app.get('/api/sections/:slug', (req, res) => {
     }
 });
 
-app.post('/api/sections', (req, res) => {
+app.post('/api/sections', requireAuth, upload.single('background_image'), async (req, res) => {
     try {
-        const { slug, title, subtitle, content, background_image, order_num } = req.body;
-        const stmt = db.prepare('INSERT INTO sections (slug, title, subtitle, content, background_image, order_num) VALUES (?, ?, ?, ?, ?, ?)');
-        const result = stmt.run(slug, title, subtitle, content, background_image, order_num || 0);
+        const { slug, title, subtitle, content, order_num, visible } = req.body;
+        let background_image = null;
+
+        if (req.file) {
+            const uploadResult = await uploadImageBuffer(req.file.buffer);
+            background_image = uploadResult.secure_url;
+        }
+
+        const stmt = db.prepare('INSERT INTO sections (slug, title, subtitle, content, background_image, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(slug, title, subtitle, content, background_image, order_num || 0, visible ? 1 : 0);
         res.status(201).json({ id: result.lastInsertRowid, message: 'Раздел создан' });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
 
-app.put('/api/sections/:id', (req, res) => {
+app.put('/api/sections/:id', requireAuth, upload.single('background_image'), async (req, res) => {
     try {
-        const { slug, title, subtitle, content, background_image, order_num, visible } = req.body;
-        const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, background_image = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-        stmt.run(slug, title, subtitle, content, background_image, order_num, visible, req.params.id);
+        const { slug, title, subtitle, content, order_num, visible, delete_image } = req.body;
+        const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
+
+        if (req.file) {
+            const uploadResult = await uploadImageBuffer(req.file.buffer);
+            const background_image = uploadResult.secure_url;
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, background_image = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(slug, title, subtitle, content, background_image, order_num || 0, visibleValue, req.params.id);
+        } else if (delete_image === '1') {
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, background_image = NULL, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(slug, title, subtitle, content, order_num || 0, visibleValue, req.params.id);
+        } else {
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(slug, title, subtitle, content, order_num || 0, visibleValue, req.params.id);
+        }
+
         res.json({ message: 'Раздел обновлен' });
     } catch (error) {
+        console.error('Error updating section:', error);
         res.status(500).json({ error: error.message });
     }
 });
