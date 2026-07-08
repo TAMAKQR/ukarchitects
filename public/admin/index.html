@@ -31,9 +31,11 @@
             padding: 20px;
         }
 
-        .sidebar h2 {
+        .sidebar-title {
             margin-bottom: 30px;
-            font-size: 20px;
+            font-size: 18px;
+            color: #ffffff;
+            font-weight: 600;
         }
 
         .sidebar nav a {
@@ -65,8 +67,24 @@
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .header h1 {
+        .header-title {
             color: #212529;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .stat-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #042164;
+            margin-bottom: 20px;
         }
 
         .section {
@@ -546,7 +564,7 @@
 <body>
     <div class="container">
         <aside class="sidebar">
-            <h2>UK Architects</h2>
+            <div class="sidebar-title">UK Architects</div>
             <nav>
                 <a href="#" data-section="dashboard" class="active">📊 Панель управления</a>
                 <a href="#" data-section="hero-slides">🎬 Hero Слайды</a>
@@ -569,7 +587,7 @@
 
         <main class="main-content">
             <div class="header">
-                <h1>Админ-панель</h1>
+                <div class="header-title">Админ-панель</div>
             </div>
 
             <div id="alert-container"></div>
@@ -578,19 +596,19 @@
             <section id="dashboard" class="section active">
                 <div class="stats">
                     <div class="stat-card">
-                        <h4>Всего услуг</h4>
+                        <div class="stat-title">Всего услуг</div>
                         <div class="number" id="stat-services">0</div>
                     </div>
                     <div class="stat-card">
-                        <h4>Всего проектов</h4>
+                        <div class="stat-title">Всего проектов</div>
                         <div class="number" id="stat-projects">0</div>
                     </div>
                     <div class="stat-card">
-                        <h4>Всего отзывов</h4>
+                        <div class="stat-title">Всего отзывов</div>
                         <div class="number" id="stat-reviews">0</div>
                     </div>
                     <div class="stat-card">
-                        <h4>Разделов сайта</h4>
+                        <div class="stat-title">Разделов сайта</div>
                         <div class="number" id="stat-sections">0</div>
                     </div>
                 </div>
@@ -599,7 +617,7 @@
             <!-- Услуги -->
             <section id="services" class="section">
                 <div class="card">
-                    <h3>Управление услугами</h3>
+                    <div class="card-title">Управление услугами</div>
                     <button class="btn btn-primary" onclick="openServiceModal()">+ Добавить услугу</button>
                     <table style="margin-top: 20px;">
                         <thead>
@@ -618,7 +636,7 @@
             <!-- Hero Слайды -->
             <section id="hero-slides" class="section">
                 <div class="card">
-                    <h3>Управление Hero слайдами главной страницы</h3>
+                    <div class="card-title">Управление Hero слайдами главной страницы</div>
                     <button class="btn btn-primary" onclick="openHeroSlideModal()">+ Добавить слайд</button>
                     <table style="margin-top: 20px;">
                         <thead>
@@ -639,7 +657,7 @@
             <!-- Проекты -->
             <section id="projects" class="section">
                 <div class="card">
-                    <h3>Управление проектами</h3>
+                    <div class="card-title">Управление проектами</div>
                     <button class="btn btn-primary" onclick="openProjectModal()">+ Добавить проект</button>
                     <table style="margin-top: 20px;">
                         <thead>
@@ -659,7 +677,7 @@
             <!-- Категории проектов -->
             <section id="categories" class="section">
                 <div class="card">
-                    <h3>Управление категориями проектов</h3>
+                    <div class="card-title">Управление категориями проектов</div>
                     <button class="btn btn-primary" onclick="addCategory()">+ Добавить категорию</button>
                     <div id="categories-list" style="margin-top: 20px;"></div>
                 </div>
@@ -668,7 +686,7 @@
             <!-- Стадии проектов -->
             <section id="stages" class="section">
                 <div class="card">
-                    <h3>Управление стадиями проектов</h3>
+                    <div class="card-title">Управление стадиями проектов</div>
                     <button class="btn btn-primary" onclick="addStage()">+ Добавить стадию</button>
                     <div id="stages-list" style="margin-top: 20px;"></div>
                 </div>
@@ -677,7 +695,7 @@
             <!-- Разделы -->
             <section id="sections" class="section">
                 <div class="card">
-                    <h3>Управление разделами</h3>
+                    <div class="card-title">Управление разделами</div>
                     <p style="color: #666; margin-bottom: 15px;">Здесь также доступен раздел «О компании» со slug
                         `about`.</p>
                     <button class="btn btn-primary" onclick="openSectionModal()">+ Добавить раздел</button>
@@ -699,7 +717,7 @@
             <!-- Команда -->
             <section id="team" class="section">
                 <div class="card">
-                    <h3>Управление командой</h3>
+                    <div class="card-title">Управление командой</div>
                     <button class="btn btn-primary" onclick="openTeamModal()">+ Добавить сотрудника</button>
                     <table style="margin-top: 20px;">
                         <thead>
@@ -719,7 +737,7 @@
             <!-- FAQ -->
             <section id="faq" class="section">
                 <div class="card">
-                    <h3>Управление FAQ</h3>
+                    <div class="card-title">Управление FAQ</div>
                     <button class="btn btn-primary" onclick="openFaqModal()">+ Добавить вопрос</button>
                     <table style="margin-top: 20px;">
                         <thead>
@@ -739,7 +757,7 @@
             <!-- Заявки -->
             <section id="contact-requests" class="section">
                 <div class="card">
-                    <h3>Заявки с сайта</h3>
+                    <div class="card-title">Заявки с сайта</div>
                     <table style="margin-top: 20px;">
                         <thead>
                             <tr>
@@ -761,7 +779,7 @@
             <!-- Настройки -->
             <section id="settings" class="section">
                 <div class="card">
-                    <h3>Настройки сайта</h3>
+                    <div class="card-title">Настройки сайта</div>
                     <div id="settings-form"></div>
                 </div>
             </section>
@@ -769,7 +787,7 @@
             <!-- Безопасность -->
             <section id="security" class="section">
                 <div class="card">
-                    <h3>Профиль пользователя</h3>
+                    <div class="card-title">Профиль пользователя</div>
                     <form id="change-profile-form">
                         <div class="form-group">
                             <label>Имя пользователя</label>
@@ -784,7 +802,7 @@
                 </div>
 
                 <div class="card" style="margin-top: 20px;">
-                    <h3>Смена пароля</h3>
+                    <div class="card-title">Смена пароля</div>
                     <form id="change-password-form">
                         <div class="form-group">
                             <label>Текущий пароль</label>

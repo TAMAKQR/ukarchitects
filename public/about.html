@@ -169,72 +169,109 @@
     <div id="header-placeholder"></div>
 
     <section class="hero-section">
-        <h1>О компании</h1>
+        <h1 id="about-page-heading">О компании</h1>
+        <p id="about-page-hero-subtitle"
+            style="margin-top: 18px; max-width: 900px; color: #cccccc; font-size: 18px; line-height: 1.8;"></p>
     </section>
 
-    <section class="content-section">
+    <section id="about-section" class="content-section">
         <div class="text-content">
-            <h2>Международная команда архитекторов</h2>
-            <p>Мы — UK-Architects, международное бюро с английским менеджментом.</p>
-            <p>Создаём города и пространства для жизни, работы и развития, учитывая урбанизацию и устойчивый рост.</p>
-            <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.</p>
+            <h2 id="about-title">Международная команда архитекторов</h2>
+            <div id="about-content">
+                <p>Мы — UK-Architects, международное бюро с английским менеджментом.</p>
+                <p>Создаём города и пространства для жизни, работы и развития, учитывая урбанизацию и устойчивый рост.
+                </p>
+                <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.
+                </p>
+            </div>
         </div>
         <div class="image-content">
             <img id="about-main-image" src="images/OKompanii.jpeg" alt="Международная команда">
         </div>
     </section>
 
-    <section class="content-section reverse">
-        <div class="text-content">
-            <h2>Проекты и городское планирование</h2>
-            <p>Работаем с жилыми, коммерческими и общественными пространствами, включая интерьеры и городское
-                планирование.</p>
-            <p>Применяем международные стандарты, BIM и контроль на всех этапах — от идеи до реализации.</p>
-            <p>Сотрудничаем с ведущими мировыми бюро, такими как Zaha Hadid Architects и Nikken Sekkei.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/proekti.jpg" alt="Проекты и городское планирование">
-        </div>
-    </section>
-
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Обучение и обмен опытом</h2>
-            <p>Организуем архитектурные туры и воркшопы для профессионалов: изучение лучших городских кейсов, посещение
-                ведущих бюро и нетворкинг.</p>
-            <p>Наша миссия — внедрять глобальные стандарты на локальном уровне и создавать устойчивые пространства для
-                будущих поколений.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Обучение и обмен опытом">
-        </div>
-    </section>
+    <div id="additional-sections"></div>
 
     <script>
         const API_URL = '/api';
 
-        // Load about section image from API
-        async function loadAboutSectionImage() {
+        async function loadAboutSection() {
             try {
                 const response = await fetch(`${API_URL}/sections/about`);
                 if (!response.ok) throw new Error('Section not found');
 
                 const section = await response.json();
-                const imageElement = document.getElementById('about-main-image');
 
-                if (imageElement && section.background_image) {
-                    imageElement.src = section.background_image;
+                const titleEl = document.getElementById('about-title');
+                const contentEl = document.getElementById('about-content');
+                const imageEl = document.getElementById('about-main-image');
+                const heroSubtitleEl = document.getElementById('about-page-hero-subtitle');
+
+                if (section.title) {
+                    titleEl.textContent = section.title;
+                }
+
+                if (section.subtitle) {
+                    heroSubtitleEl.textContent = section.subtitle;
+                }
+
+                if (section.content) {
+                    contentEl.innerHTML = section.content;
+                }
+
+                if (section.background_image) {
+                    imageEl.src = section.background_image;
+                    imageEl.alt = section.title || 'О компании';
                 }
             } catch (error) {
-                console.log('Using default about section image');
+                console.log('Using default about section content and image');
             }
         }
 
-        // Load image on page load
+        async function loadAdditionalSections() {
+            try {
+                const response = await fetch(`${API_URL}/sections`);
+                if (!response.ok) throw new Error('Sections not found');
+
+                const sections = await response.json();
+                const container = document.getElementById('additional-sections');
+
+                if (!sections || sections.length === 0) {
+                    return;
+                }
+
+                container.innerHTML = sections.map((section, index) => {
+                    const imageUrl = section.background_image || 'images/OKompanii.jpeg';
+                    const contentHtml = section.content || '';
+                    const reverseClass = index % 2 === 1 ? 'reverse' : '';
+
+                    return `
+                        <section class="content-section ${reverseClass}">
+                            <div class="text-content">
+                                ${section.title ? `<h2>${section.title}</h2>` : ''}
+                                ${section.subtitle ? `<p style="margin-bottom: 20px; color: #d4d4d4;">${section.subtitle}</p>` : ''}
+                                <div>${contentHtml}</div>
+                            </div>
+                            <div class="image-content">
+                                <img src="${imageUrl}" alt="${section.title || 'Раздел'}">
+                            </div>
+                        </section>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Ошибка загрузки дополнительных разделов:', error);
+            }
+        }
+
+        function initPage() {
+            loadAboutSection();
+            loadAdditionalSections();
+        }
+
         if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', loadAboutSectionImage);
+            document.addEventListener('DOMContentLoaded', initPage);
         } else {
-            loadAboutSectionImage();
+            initPage();
         }
 
         // Load shared header
