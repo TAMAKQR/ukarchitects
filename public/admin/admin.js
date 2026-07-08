@@ -1182,6 +1182,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </label>
                     </div>
                     <button type="submit" class="btn btn-primary">Сохранить</button>
+                    ${!id ? '<button type="submit" class="btn btn-secondary" name="after_save" value="add-another">+ Сохранить и добавить еще</button>' : ''}
                     <button type="button" class="btn btn-secondary" onclick="closeModal('section-modal')">Отмена</button>
                 </form>
             </div>
@@ -1214,6 +1215,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function saveSection(event, id) {
         event.preventDefault();
+        const shouldAddAnother = !id && event.submitter?.value === 'add-another';
         const formData = new FormData(event.target);
 
         // Если файл не выбран, удаляем его из FormData
@@ -1230,8 +1232,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 showAlert(id ? 'Блок обновлен' : 'Блок добавлен');
-                closeModal('section-modal');
                 loadSections();
+                if (shouldAddAnother) {
+                    resetSectionModalForNext(event.target);
+                    return;
+                }
+                closeModal('section-modal');
             } else {
                 const errorText = await response.text();
                 let errorMessage = 'Ошибка сохранения';
@@ -1252,6 +1258,27 @@ document.addEventListener('DOMContentLoaded', () => {
             console.error('Ошибка:', error);
             showAlert('Ошибка сохранения: ' + error.message, 'error');
         }
+    }
+
+    function resetSectionModalForNext(form) {
+        const orderInput = document.getElementById('section-order');
+        const currentOrder = Number(orderInput?.value || 0);
+
+        form.reset();
+        document.getElementById('section-slug').value = '';
+        document.getElementById('section-image-preview').innerHTML = '';
+        document.getElementById('section-visible').checked = true;
+
+        if (orderInput) {
+            orderInput.value = Number.isFinite(currentOrder) ? currentOrder + 1 : 0;
+        }
+
+        const deleteFlag = document.getElementById('delete-section-image-flag');
+        if (deleteFlag) {
+            deleteFlag.remove();
+        }
+
+        document.getElementById('section-title').focus();
     }
 
     function deleteSectionImage() {
