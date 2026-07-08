@@ -1143,7 +1143,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function openSectionModal(id = null) {
+    function openSectionModal(id = null, defaults = {}) {
         const modalHtml = `
         <div class="modal active" id="section-modal">
             <div class="modal-content">
@@ -1181,9 +1181,11 @@ document.addEventListener('DOMContentLoaded', () => {
                             <input type="checkbox" name="visible" checked id="section-visible"> Видимый
                         </label>
                     </div>
-                    <button type="submit" class="btn btn-primary">Сохранить</button>
-                    ${!id ? '<button type="submit" class="btn btn-secondary" name="after_save" value="add-another">+ Сохранить и добавить еще</button>' : ''}
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('section-modal')">Отмена</button>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                        <button type="submit" class="btn btn-secondary" name="after_save" value="add-another">${id ? '+ Сохранить и создать новый блок' : '+ Сохранить и добавить еще'}</button>
+                        <button type="button" class="btn btn-secondary" onclick="closeModal('section-modal')">Отмена</button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -1210,12 +1212,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                     }
                 });
+        } else {
+            if (defaults.order_num !== undefined) {
+                document.getElementById('section-order').value = defaults.order_num;
+            }
+            document.getElementById('section-title').focus();
         }
     }
 
     async function saveSection(event, id) {
         event.preventDefault();
-        const shouldAddAnother = !id && event.submitter?.value === 'add-another';
+        const shouldAddAnother = event.submitter?.value === 'add-another';
+        const currentOrder = Number(document.getElementById('section-order')?.value || 0);
         const formData = new FormData(event.target);
 
         // Если файл не выбран, удаляем его из FormData
@@ -1234,7 +1242,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 showAlert(id ? 'Блок обновлен' : 'Блок добавлен');
                 loadSections();
                 if (shouldAddAnother) {
-                    resetSectionModalForNext(event.target);
+                    if (id) {
+                        openSectionModal(null, {
+                            order_num: Number.isFinite(currentOrder) ? currentOrder + 1 : 0
+                        });
+                    } else {
+                        resetSectionModalForNext(event.target);
+                    }
                     return;
                 }
                 closeModal('section-modal');
