@@ -1158,9 +1158,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="text" name="title" required id="section-title">
                     </div>
                     <div class="form-group">
-                        <label>Slug (URL) *</label>
-                        <input type="text" name="slug" required id="section-slug" placeholder="about-us">
-                        <small style="color: #666; display: block; margin-top: 5px;">Уникальный идентификатор раздела для URL</small>
+                        <label>Slug (внутренний ID)</label>
+                        <input type="text" name="slug" id="section-slug" placeholder="about-block">
+                        <small style="color: #666; display: block; margin-top: 5px;">Можно оставить пустым. Если такой slug уже есть, система подберет свободный автоматически.</small>
                     </div>
                     <div class="form-group">
                         <label>Подзаголовок</label>
@@ -1239,8 +1239,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 loadSections();
             } else {
                 const errorText = await response.text();
+                let errorMessage = 'Ошибка сохранения';
+                try {
+                    const errorData = JSON.parse(errorText);
+                    if (errorData.error) {
+                        errorMessage = errorData.error;
+                    }
+                } catch (parseError) {
+                    if (errorText) {
+                        errorMessage = errorText;
+                    }
+                }
                 console.error('Ошибка сервера:', errorText);
-                showAlert('Ошибка сохранения', 'error');
+                showAlert(errorMessage, 'error');
             }
         } catch (error) {
             console.error('Ошибка:', error);
