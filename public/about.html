@@ -174,73 +174,38 @@
             style="margin-top: 18px; max-width: 900px; color: #cccccc; font-size: 18px; line-height: 1.8;"></p>
     </section>
 
-    <section id="about-section" class="content-section">
-        <div class="text-content">
-            <h2 id="about-title">Международная команда архитекторов</h2>
-            <div id="about-content">
-                <p>Мы — UK-Architects, международное бюро с английским менеджментом.</p>
-                <p>Создаём города и пространства для жизни, работы и развития, учитывая урбанизацию и устойчивый рост.
-                </p>
-                <p>Каждый проект поддерживается сильной командой с профессиональной экспертизой и международным опытом.
-                </p>
-            </div>
-        </div>
-        <div class="image-content">
-            <img id="about-main-image" src="images/OKompanii.jpeg" alt="Международная команда">
-        </div>
-    </section>
-
-    <div id="additional-sections"></div>
+    <div id="dynamic-sections"></div>
 
     <script>
         const API_URL = '/api';
 
-        async function loadAboutSection() {
+        async function loadSections() {
             try {
-                const response = await fetch(`${API_URL}/sections/about`);
-                if (!response.ok) throw new Error('Section not found');
+                const [aboutResponse, sectionsResponse] = await Promise.all([
+                    fetch(`${API_URL}/sections/about`),
+                    fetch(`${API_URL}/sections`)
+                ]);
 
-                const section = await response.json();
+                if (!aboutResponse.ok) throw new Error('About section not found');
+                if (!sectionsResponse.ok) throw new Error('Sections not found');
 
-                const titleEl = document.getElementById('about-title');
-                const contentEl = document.getElementById('about-content');
-                const imageEl = document.getElementById('about-main-image');
+                const aboutSection = await aboutResponse.json();
+                const sections = await sectionsResponse.json();
+                const allSections = [aboutSection].concat(Array.isArray(sections) ? sections.filter(section => section.slug !== 'about') : []);
+
+                const headingEl = document.getElementById('about-page-heading');
                 const heroSubtitleEl = document.getElementById('about-page-hero-subtitle');
 
-                if (section.title) {
-                    titleEl.textContent = section.title;
+                if (aboutSection.title) {
+                    headingEl.textContent = aboutSection.title;
                 }
 
-                if (section.subtitle) {
-                    heroSubtitleEl.textContent = section.subtitle;
+                if (aboutSection.subtitle) {
+                    heroSubtitleEl.textContent = aboutSection.subtitle;
                 }
 
-                if (section.content) {
-                    contentEl.innerHTML = section.content;
-                }
-
-                if (section.background_image) {
-                    imageEl.src = section.background_image;
-                    imageEl.alt = section.title || 'О компании';
-                }
-            } catch (error) {
-                console.log('Using default about section content and image');
-            }
-        }
-
-        async function loadAdditionalSections() {
-            try {
-                const response = await fetch(`${API_URL}/sections`);
-                if (!response.ok) throw new Error('Sections not found');
-
-                const sections = await response.json();
-                const container = document.getElementById('additional-sections');
-
-                if (!sections || sections.length === 0) {
-                    return;
-                }
-
-                container.innerHTML = sections.map((section, index) => {
+                const container = document.getElementById('dynamic-sections');
+                container.innerHTML = allSections.map((section, index) => {
                     const imageUrl = section.background_image || 'images/OKompanii.jpeg';
                     const contentHtml = section.content || '';
                     const reverseClass = index % 2 === 1 ? 'reverse' : '';
@@ -259,13 +224,12 @@
                     `;
                 }).join('');
             } catch (error) {
-                console.error('Ошибка загрузки дополнительных разделов:', error);
+                console.error('Ошибка загрузки разделов:', error);
             }
         }
 
         function initPage() {
-            loadAboutSection();
-            loadAdditionalSections();
+            loadSections();
         }
 
         if (document.readyState === 'loading') {
