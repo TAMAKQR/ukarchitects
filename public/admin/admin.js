@@ -1124,9 +1124,29 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const response = await authFetch(`${API_URL}/sections?includeReserved=1`);
             const sections = await response.json();
+            const reservedSlugs = ['about', 'privacy-policy', 'user-agreement'];
+            const aboutSection = sections.find(section => section.slug === 'about');
+            const pageBlocks = sections.filter(section => !reservedSlugs.includes(section.slug));
+
+            const summary = document.getElementById('about-section-summary');
+            if (summary) {
+                summary.innerHTML = aboutSection ? `
+                    <div style="padding: 15px; background: #f8f9fa; border-radius: 8px; display: flex; justify-content: space-between; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div>
+                            <div style="font-weight: 700; color: #212529; margin-bottom: 5px;">${aboutSection.title || 'О компании'}</div>
+                            <div style="color: #666; font-size: 14px;">${aboutSection.subtitle || 'Основные настройки страницы'}</div>
+                        </div>
+                        <button class="btn btn-secondary" onclick="editSection(${aboutSection.id})">Редактировать страницу</button>
+                    </div>
+                ` : `
+                    <div style="padding: 15px; background: #fff3cd; border-radius: 8px; color: #856404;">
+                        Основная запись страницы «О компании» не найдена.
+                    </div>
+                `;
+            }
 
             const tbody = document.querySelector('#sections tbody');
-            tbody.innerHTML = sections.map(section => `
+            tbody.innerHTML = pageBlocks.length ? pageBlocks.map(section => `
             <tr>
                 <td>${section.id}</td>
                 <td>${section.title}</td>
@@ -1136,7 +1156,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     <button class="btn btn-danger" onclick="deleteSection(${section.id})">Удалить</button>
                 </td>
             </tr>
-        `).join('');
+        `).join('') : `
+            <tr>
+                <td colspan="4" style="text-align: center; color: #666; padding: 30px;">
+                    Дополнительных блоков пока нет. Нажмите «+ Добавить блок на страницу».
+                </td>
+            </tr>
+        `;
         } catch (error) {
             console.error('Ошибка загрузки разделов:', error);
             showAlert('Ошибка загрузки разделов', 'error');
