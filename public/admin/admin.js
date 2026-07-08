@@ -1129,7 +1129,6 @@ document.addEventListener('DOMContentLoaded', () => {
             tbody.innerHTML = sections.map(section => `
             <tr>
                 <td>${section.id}</td>
-                <td>${section.slug}</td>
                 <td>${section.title}</td>
                 <td>${section.order_num}</td>
                 <td class="actions">
@@ -1149,18 +1148,14 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="modal active" id="section-modal">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>${id ? 'Редактировать раздел' : 'Добавить раздел'}</h3>
+                    <h3>${id ? 'Редактировать блок' : 'Добавить блок'}</h3>
                     <span class="close" onclick="closeModal('section-modal')">&times;</span>
                 </div>
                 <form onsubmit="saveSection(event, ${id})">
+                    <input type="hidden" name="slug" id="section-slug">
                     <div class="form-group">
                         <label>Название *</label>
                         <input type="text" name="title" required id="section-title">
-                    </div>
-                    <div class="form-group">
-                        <label>Slug (внутренний ID)</label>
-                        <input type="text" name="slug" id="section-slug" placeholder="about-block">
-                        <small style="color: #666; display: block; margin-top: 5px;">Можно оставить пустым. Если такой slug уже есть, система подберет свободный автоматически.</small>
                     </div>
                     <div class="form-group">
                         <label>Подзаголовок</label>
@@ -1234,7 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                showAlert(id ? 'Раздел обновлен' : 'Раздел добавлен');
+                showAlert(id ? 'Блок обновлен' : 'Блок добавлен');
                 closeModal('section-modal');
                 loadSections();
             } else {
@@ -1276,10 +1271,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deleteSection(id) {
-        if (!confirm('Удалить раздел?')) return;
+        if (!confirm('Удалить блок?')) return;
         try {
             await authFetch(`${API_URL}/sections/${id}`, { method: 'DELETE' });
-            showAlert('Раздел удален');
+            showAlert('Блок удален');
             loadSections();
         } catch (error) {
             showAlert('Ошибка удаления', 'error');
