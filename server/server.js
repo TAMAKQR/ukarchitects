@@ -1592,7 +1592,7 @@ app.get('/api/sections', (req, res) => {
                 ORDER BY order_num
             `;
         const sections = db.prepare(query).all();
-        res.json(sections);
+        res.json(sections.map(section => localizeItem(section, ['title', 'subtitle', 'content'], req.query.lang)));
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -1606,7 +1606,7 @@ app.get('/api/sections/:slug', (req, res) => {
             section = db.prepare('SELECT * FROM sections WHERE id = ?').get(req.params.slug);
         }
         if (section) {
-            res.json(section);
+            res.json(localizeItem(section, ['title', 'subtitle', 'content'], req.query.lang));
         } else {
             res.status(404).json({ error: 'Раздел не найден' });
         }
@@ -1617,7 +1617,7 @@ app.get('/api/sections/:slug', (req, res) => {
 
 app.post('/api/sections', requireAuth, upload.single('background_image'), async (req, res) => {
     try {
-        const { slug, title, subtitle, content, order_num, visible } = req.body;
+        const { slug, title, title_en, subtitle, subtitle_en, content, content_en, order_num, visible } = req.body;
         const uniqueSlug = getUniqueSectionSlug(slug || title || 'about-block');
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
         let background_image = null;
@@ -1627,8 +1627,8 @@ app.post('/api/sections', requireAuth, upload.single('background_image'), async 
             background_image = uploadResult.secure_url;
         }
 
-        const stmt = db.prepare('INSERT INTO sections (slug, title, subtitle, content, background_image, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?)');
-        const result = stmt.run(uniqueSlug, title, subtitle, content, background_image, order_num || 0, visibleValue);
+        const stmt = db.prepare('INSERT INTO sections (slug, title, title_en, subtitle, subtitle_en, content, content_en, background_image, order_num, visible) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
+        const result = stmt.run(uniqueSlug, title, title_en || null, subtitle, subtitle_en || null, content, content_en || null, background_image, order_num || 0, visibleValue);
         res.status(201).json({ id: result.lastInsertRowid, slug: uniqueSlug, message: 'Раздел создан' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -1637,21 +1637,21 @@ app.post('/api/sections', requireAuth, upload.single('background_image'), async 
 
 app.put('/api/sections/:id', requireAuth, upload.single('background_image'), async (req, res) => {
     try {
-        const { slug, title, subtitle, content, order_num, visible, delete_image } = req.body;
+        const { slug, title, title_en, subtitle, subtitle_en, content, content_en, order_num, visible, delete_image } = req.body;
         const uniqueSlug = getUniqueSectionSlug(slug || title || 'about-block', req.params.id);
         const visibleValue = visible === 'on' || visible === '1' || visible === 1 || visible === true ? 1 : 0;
 
         if (req.file) {
             const uploadResult = await uploadImageBuffer(req.file.buffer);
             const background_image = uploadResult.secure_url;
-            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, background_image = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            stmt.run(uniqueSlug, title, subtitle, content, background_image, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, title_en = ?, subtitle = ?, subtitle_en = ?, content = ?, content_en = ?, background_image = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(uniqueSlug, title, title_en || null, subtitle, subtitle_en || null, content, content_en || null, background_image, order_num || 0, visibleValue, req.params.id);
         } else if (delete_image === '1') {
-            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, background_image = NULL, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            stmt.run(uniqueSlug, title, subtitle, content, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, title_en = ?, subtitle = ?, subtitle_en = ?, content = ?, content_en = ?, background_image = NULL, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(uniqueSlug, title, title_en || null, subtitle, subtitle_en || null, content, content_en || null, order_num || 0, visibleValue, req.params.id);
         } else {
-            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, subtitle = ?, content = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
-            stmt.run(uniqueSlug, title, subtitle, content, order_num || 0, visibleValue, req.params.id);
+            const stmt = db.prepare('UPDATE sections SET slug = ?, title = ?, title_en = ?, subtitle = ?, subtitle_en = ?, content = ?, content_en = ?, order_num = ?, visible = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?');
+            stmt.run(uniqueSlug, title, title_en || null, subtitle, subtitle_en || null, content, content_en || null, order_num || 0, visibleValue, req.params.id);
         }
 
         res.json({ slug: uniqueSlug, message: 'Раздел обновлен' });

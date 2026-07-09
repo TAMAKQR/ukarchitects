@@ -1184,12 +1184,24 @@ document.addEventListener('DOMContentLoaded', () => {
                         <input type="text" name="title" required id="section-title">
                     </div>
                     <div class="form-group">
+                        <label>Название EN</label>
+                        <input type="text" name="title_en" id="section-title-en">
+                    </div>
+                    <div class="form-group">
                         <label>Подзаголовок</label>
                         <input type="text" name="subtitle" id="section-subtitle">
                     </div>
                     <div class="form-group">
+                        <label>Подзаголовок EN</label>
+                        <input type="text" name="subtitle_en" id="section-subtitle-en">
+                    </div>
+                    <div class="form-group">
                         <label>Содержимое</label>
                         <textarea name="content" id="section-content" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Содержимое EN</label>
+                        <textarea name="content_en" id="section-content-en" rows="8" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
                     </div>
                     <div class="form-group">
                         <label>Фоновое изображение</label>
@@ -1224,9 +1236,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(r => r.json())
                 .then(section => {
                     document.getElementById('section-title').value = section.title;
+                    document.getElementById('section-title-en').value = section.title_en || '';
                     document.getElementById('section-slug').value = section.slug;
                     document.getElementById('section-subtitle').value = section.subtitle || '';
+                    document.getElementById('section-subtitle-en').value = section.subtitle_en || '';
                     document.getElementById('section-content').value = section.content || '';
+                    document.getElementById('section-content-en').value = section.content_en || '';
                     document.getElementById('section-order').value = section.order_num;
                     document.getElementById('section-visible').checked = section.visible === 1;
 

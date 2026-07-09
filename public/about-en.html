@@ -169,46 +169,124 @@
     <div id="header-placeholder"></div>
 
     <section class="hero-section">
-        <h1>About Us</h1>
+        <h1 id="about-page-heading">About Us</h1>
+        <p id="about-page-hero-subtitle"
+            style="margin-top: 18px; max-width: 900px; color: #cccccc; font-size: 18px; line-height: 1.8;"></p>
     </section>
 
-    <section class="content-section">
-        <div class="text-content">
-            <h2>International Team of Architects</h2>
-            <p>We are UK-Architects, an international bureau with English management.</p>
-            <p>We create cities and spaces for living, working, and development, taking into account urbanization and
-                sustainable growth.</p>
-            <p>Each project is supported by a strong team with professional expertise and international experience.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="International Team">
-        </div>
-    </section>
+    <div id="dynamic-sections"></div>
 
-    <section class="content-section reverse">
-        <div class="text-content">
-            <h2>Projects and Urban Planning</h2>
-            <p>We work with residential, commercial, and public spaces, including interiors and urban planning.</p>
-            <p>We apply international standards, BIM, and control at all stages — from concept to implementation.</p>
-            <p>We collaborate with leading global firms such as Zaha Hadid Architects and Nikken Sekkei.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/proekti.jpg" alt="Projects and Urban Planning">
-        </div>
-    </section>
+    <script>
+        const API_URL = '/api';
 
-    <section class="content-section">
-        <div class="text-content">
-            <h2>Education and Knowledge Exchange</h2>
-            <p>We organize architectural tours and workshops for professionals: exploring best urban cases, visiting
-                leading bureaus, and networking.</p>
-            <p>Our mission is to implement global standards locally and create sustainable spaces for future
-                generations.</p>
-        </div>
-        <div class="image-content">
-            <img src="images/OKompanii.jpeg" alt="Education and Knowledge Exchange">
-        </div>
-    </section>
+        function escapeHtml(text) {
+            return text
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function formatInline(text) {
+            return escapeHtml(text)
+                .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.+?)\*/g, '<em>$1</em>')
+                .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>');
+        }
+
+        function parseMarkdown(text) {
+            const lines = text.replace(/\r/g, '').split('\n');
+            const blocks = [];
+            let paragraphLines = [];
+
+            const flushParagraph = () => {
+                if (paragraphLines.length) {
+                    blocks.push(`<p>${paragraphLines.join(' ')}</p>`);
+                    paragraphLines = [];
+                }
+            };
+
+            lines.forEach(line => {
+                const trimmed = line.trim();
+                if (!trimmed) {
+                    flushParagraph();
+                    return;
+                }
+
+                const headingMatch = trimmed.match(/^(#{1,6})\s+(.+)$/);
+                if (headingMatch) {
+                    flushParagraph();
+                    const level = Math.min(6, headingMatch[1].length);
+                    blocks.push(`<h${level}>${formatInline(headingMatch[2])}</h${level}>`);
+                } else {
+                    paragraphLines.push(formatInline(trimmed));
+                }
+            });
+
+            flushParagraph();
+            return blocks.join('');
+        }
+
+        function renderSectionContent(content) {
+            if (!content) return '';
+            const looksLikeHtml = /<[^>]+>/.test(content);
+            return looksLikeHtml ? content : parseMarkdown(content);
+        }
+
+        async function loadSections() {
+            try {
+                const [aboutResponse, sectionsResponse] = await Promise.all([
+                    fetch(`${API_URL}/sections/about?lang=en`),
+                    fetch(`${API_URL}/sections?lang=en`)
+                ]);
+
+                if (!aboutResponse.ok) throw new Error('About section not found');
+                if (!sectionsResponse.ok) throw new Error('Sections not found');
+
+                const aboutSection = await aboutResponse.json();
+                const sections = await sectionsResponse.json();
+                const allSections = [aboutSection].concat(Array.isArray(sections) ? sections.filter(section => section.slug !== 'about') : []);
+
+                const headingEl = document.getElementById('about-page-heading');
+                const heroSubtitleEl = document.getElementById('about-page-hero-subtitle');
+
+                if (aboutSection.title) {
+                    headingEl.textContent = aboutSection.title;
+                }
+
+                if (aboutSection.subtitle) {
+                    heroSubtitleEl.textContent = aboutSection.subtitle;
+                }
+
+                const container = document.getElementById('dynamic-sections');
+                container.innerHTML = allSections.map((section, index) => {
+                    const imageUrl = section.background_image || 'images/OKompanii.jpeg';
+                    const contentHtml = renderSectionContent(section.content || '');
+                    const reverseClass = index % 2 === 1 ? 'reverse' : '';
+
+                    return `
+                        <section class="content-section ${reverseClass}">
+                            <div class="text-content">
+                                ${section.title ? `<h2>${section.title}</h2>` : ''}
+                                ${section.subtitle ? `<p style="margin-bottom: 20px; color: #d4d4d4;">${section.subtitle}</p>` : ''}
+                                <div>${contentHtml}</div>
+                            </div>
+                            <div class="image-content">
+                                <img src="${imageUrl}" alt="${section.title || 'About section'}">
+                            </div>
+                        </section>
+                    `;
+                }).join('');
+            } catch (error) {
+                console.error('Error loading sections:', error);
+            }
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', loadSections);
+        } else {
+            loadSections();
+        }
+    </script>
 
     <script>
         // Load shared header
